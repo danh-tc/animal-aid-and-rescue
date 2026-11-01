@@ -30,13 +30,9 @@
   select.form-field__control {
     appearance: none;
     padding-right: $space-8;
-    background-image:
-      linear-gradient(45deg, transparent 50%, currentColor 50%),
-      linear-gradient(135deg, currentColor 50%, transparent 50%);
-    background-position:
-      calc(100% - 18px) 50%,
-      calc(100% - 13px) 50%;
-    background-size: 5px 5px;
+    background-image: $select-arrow;
+    background-position: right $space-3 center;
+    background-size: 16px 16px;
     background-repeat: no-repeat;
   }
 

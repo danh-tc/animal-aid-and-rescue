@@ -101,9 +101,10 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
 
         // Chưa phân công thì chưa ghi kết quả được
         postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, succeedBody("URGENT"), 409);
-        // Chỉ phân công cho nhân viên
-        postJson("/api/staff/rescue-cases/" + caseId + "/assign", STAFF, map("staffId", 4), 400);
-        JsonNode assigned = postJson("/api/staff/rescue-cases/" + caseId + "/assign", STAFF, map("staffId", 3), 200);
+        // Chỉ Quản lý được phân công, và chỉ phân công cho nhân viên
+        postJson("/api/staff/rescue-cases/" + caseId + "/assign", STAFF, map("staffId", 3), 403);
+        postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", 4), 400);
+        JsonNode assigned = postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", 3), 200);
         assertThat(assigned.get("status").asText()).isEqualTo("IN_PROGRESS");
 
         JsonNode result = postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, succeedBody("URGENT"), 200);
@@ -133,7 +134,7 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void failedCaseRequiresReasonAndCreatesNoPet() throws Exception {
         long reportId = reportId(submitReport());
-        long caseId = postJson("/api/staff/rescue-reports/" + reportId + "/cases", STAFF,
+        long caseId = postJson("/api/staff/rescue-reports/" + reportId + "/cases", MANAGER,
             map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
         postJson("/api/staff/rescue-cases/" + caseId + "/fail", STAFF, map("reason", " "), 400);
         JsonNode failed = postJson("/api/staff/rescue-cases/" + caseId + "/fail", STAFF,
@@ -160,5 +161,27 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
     private static Object succeedBody(String priority) {
         return map("pet", map("name", "Cún", "species", "DOG", "sex", "FEMALE"),
             "intake", map("priority", priority, "initialAssessment", "Chân sau chảy máu"));
+    }
+
+    /** Ma trận phân quyền mục 5.2: chỉ Quản lý phân công. Nhân viên vẫn tạo ca chưa phân công được. */
+    @Test
+    void onlyManagerAssignsWhenCreatingCases() throws Exception {
+        long reportId = reportId(submitReport());
+        JsonNode denied = postJson("/api/staff/rescue-reports/" + reportId + "/cases", STAFF,
+            map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 403);
+        assertThat(denied.get("code").asText()).isEqualTo("ASSIGN_MANAGER_ONLY");
+        assertThat(getJson("/api/staff/rescue-reports/" + reportId, STAFF, 200).get("status").asText()).isEqualTo("NEW");
+
+        JsonNode created = postJson("/api/staff/rescue-reports/" + reportId + "/cases", STAFF,
+            map("numberOfAnimals", 1), 201);
+        long caseId = created.get(0).get("id").asLong();
+        assertThat(created.get(0).get("status").asText()).isEqualTo("NEW");
+        postJson("/api/staff/rescue-cases/" + caseId + "/assign", STAFF, map("staffId", STAFF_ID), 403);
+        JsonNode assigned = postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", STAFF_ID), 200);
+        assertThat(assigned.get("assignedStaffId").asLong()).isEqualTo(STAFF_ID);
+        // Quản lý tự phân công cho mình cũng được
+        long other = postJson("/api/staff/rescue-reports/" + reportId(submitReport()) + "/cases", MANAGER,
+            map("numberOfAnimals", 1, "assignedStaffId", 1), 201).get(0).get("assignedStaffId").asLong();
+        assertThat(other).isEqualTo(1L);
     }
 }

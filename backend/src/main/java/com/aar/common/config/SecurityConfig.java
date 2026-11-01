@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/api/adopter/**").hasRole("ADOPTER")
+                // Chỉ Quản lý phân công ca cứu hộ (UC-07 bước 3)
+                .requestMatchers(HttpMethod.POST, "/api/staff/rescue-cases/*/assign").hasRole("MANAGER")
                 .requestMatchers("/api/staff/**").hasRole("STAFF")
                 .requestMatchers("/api/admin/**").hasRole("MANAGER")
                 .anyRequest().authenticated())

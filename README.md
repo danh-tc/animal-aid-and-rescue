@@ -134,7 +134,7 @@ Toàn bộ phạm vi Đợt 2 ở báo cáo mục 5.1, cùng các chỗ trước
 | Sinh client TypeScript từ springdoc | mục 5.1 | `npm run gen:api` (backend đang chạy) => `src/types/openapi.ts`, `src/types/contract.ts` báo lỗi biên dịch khi API đổi |
 | Sao lưu hằng ngày và khôi phục | NFR-06 | xem bên dưới |
 
-Test backend: 132 test tích hợp (`mvn test`). Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
+Test backend: 139 test (`mvn test`). Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
 
 ### Sao lưu và khôi phục (NFR-06)
 
@@ -143,6 +143,18 @@ docker compose up -d            # gồm cả container backup: sao lưu lúc kh�
 ./scripts/backup.sh             # sao lưu ngay
 ./scripts/restore.sh backups/aar-YYYYMMDD-HHMMSS.dump   # khôi phục, hỏi xác nhận trước khi ghi đè
 ```
+
+### Đăng nhập nhanh bằng Google
+
+1. Google Cloud Console, mục APIs & Services, Credentials: tạo OAuth client ID loại **Web application**.
+2. Authorized JavaScript origins thêm `http://localhost:3000` (và tên miền thật khi triển khai).
+3. Chạy backend với biến môi trường `GOOGLE_CLIENT_ID=<client id>`. Frontend tự đọc qua `GET /api/public/auth/config`, không cần cấu hình thêm.
+
+Chưa đặt biến này thì nút Google ẩn đi, đăng nhập bằng mật khẩu vẫn dùng bình thường. Email Google đã có tài khoản thì đăng nhập vào tài khoản đó (kể cả nhân viên), chưa có thì tạo tài khoản Người nhận nuôi.
+
+### Phân quyền phân công ca cứu hộ
+
+Chỉ Quản lý được phân công người đi cứu (báo cáo mục 5.2, ma trận phân quyền). Nhân viên tạo ca ở trạng thái Chưa phân công. Gọi API phân công bằng tài khoản Nhân viên sẽ nhận lỗi 403 `ASSIGN_MANAGER_ONLY`.
 
 ## Lộ trình
 

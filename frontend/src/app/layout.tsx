@@ -1,17 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Nunito_Sans } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/providers/Providers";
 import "@/styles/main.scss";
 
-// Font theo gợi ý ui-ux-pro-max cho nhóm thú cưng: bo tròn, thân thiện, có bộ chữ tiếng Việt.
-const heading = Nunito({
-  subsets: ["latin", "vietnamese"],
-  weight: ["600", "700", "800"],
-  variable: "--font-heading",
-  display: "swap",
-});
-const body = Nunito_Sans({
+// Be Vietnam Pro: sans-serif hiện đại, thiết kế cho tiếng Việt nên dấu hiển thị chuẩn ở mọi cỡ chữ.
+const sans = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
@@ -34,7 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="vi" className={`${heading.variable} ${body.variable}`}>
+    <html lang="vi" className={sans.variable}>
       <body>
         <a href="#main" className="skip-link">
           Bỏ qua tới nội dung chính

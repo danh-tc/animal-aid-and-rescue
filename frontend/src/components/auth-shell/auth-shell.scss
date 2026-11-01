@@ -1,0 +1,172 @@
+@use "abstracts" as *;
+
+.auth-shell {
+  display: grid;
+  min-height: 100dvh;
+  background: $color-surface;
+
+  @include from-lg {
+    grid-template-columns: minmax(380px, 5fr) 7fr;
+  }
+
+  &__brand {
+    display: none;
+
+    @include from-lg {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: $space-8;
+      padding: $space-10;
+      background: $color-brand-block;
+      color: $color-on-brand-block;
+    }
+  }
+
+  &__logo,
+  &__mobile-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-3;
+    color: inherit;
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+  }
+
+  &__logo-mark {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-md;
+    background: $color-on-brand-block;
+    color: $color-brand-block;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__mobile-logo &__logo-mark {
+    background: $color-primary;
+    color: $color-on-primary;
+  }
+
+  &__headline {
+    max-width: 16ch;
+    margin-bottom: $space-8;
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  &__benefits {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: $font-size-md;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+
+    svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__note {
+    font-size: $font-size-sm;
+    opacity: 0.85;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-6;
+    padding: $space-8 $space-4;
+
+    @include from-md {
+      padding: $space-12 $space-8;
+    }
+  }
+
+  &__mobile-logo {
+    align-self: flex-start;
+    color: $color-text;
+
+    @include from-lg {
+      display: none;
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  &__header {
+    margin-bottom: $space-1;
+  }
+
+  &__title {
+    margin: 0 0 $space-2;
+    font-size: $font-size-xl;
+
+    @include from-md {
+      font-size: 2rem;
+    }
+  }
+
+  &__description {
+    color: $color-muted;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    color: $color-muted;
+    font-size: $font-size-sm;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $color-border;
+    }
+  }
+
+  &__footer {
+    padding-top: $space-5;
+    border-top: 1px solid $color-border;
+    color: $color-muted;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+
+  &__back {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    text-decoration: none;
+
+    &:hover {
+      color: $color-text;
+    }
+  }
+}

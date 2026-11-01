@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/skeleton/Skeleton";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { useStaffMembers } from "@/hooks/useStaffMembers";
+import { useAuth } from "@/lib/auth-context";
 import { formatDateTime } from "@/lib/format";
 import { CASE_STATUS, REPORT_STATUS } from "@/lib/labels";
 import type { CaseSummary, OpenCase, ReportDetail } from "@/types/api";
@@ -31,6 +32,8 @@ export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: r, error, loading, reload } = useApi<ReportDetail>(`/api/staff/rescue-reports/${id}`);
   const { members, nameOf } = useStaffMembers();
+  const { user } = useAuth();
+  const isManager = user?.role === "MANAGER";
   const mutate = useMutation();
   const toast = useToast();
   const [dialog, setDialog] = useState<"cases" | "invalid" | null>(null);
@@ -52,7 +55,7 @@ export default function ReportDetailPage() {
     const n = Number.parseInt(count, 10);
     if (!(n >= 1 && n <= 20)) throw new Error("Số thú từ 1 đến 20");
     const created = await mutate<CaseSummary[]>(`/api/staff/rescue-reports/${id}/cases`, {
-      body: { numberOfAnimals: n, assignedStaffId: assignee ? Number(assignee) : null },
+      body: { numberOfAnimals: n, assignedStaffId: isManager && assignee ? Number(assignee) : null },
     });
     toast.success(`Đã tạo ${created.length} ca cứu hộ.`);
     setDialog(null);
@@ -191,16 +194,20 @@ export default function ReportDetailPage() {
         <Field label="Số con vật" required hint="Từ 1 đến 20.">
           <input type="number" min={1} max={20} inputMode="numeric" value={count} onChange={(e) => setCount(e.target.value)} />
         </Field>
-        <Field label="Phân công cho" hint="Có thể để trống và phân công sau.">
-          <select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
-            <option value="">Chưa phân công</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.fullName}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {isManager ? (
+          <Field label="Phân công cho" hint="Có thể để trống và phân công sau.">
+            <select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+              <option value="">Chưa phân công</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.fullName}
+                </option>
+              ))}
+            </select>
+          </Field>
+        ) : (
+          <Notice tone="info">Ca mới ở trạng thái Chưa phân công. Quản lý sẽ phân công người đi cứu.</Notice>
+        )}
       </Dialog>
 
       <Dialog

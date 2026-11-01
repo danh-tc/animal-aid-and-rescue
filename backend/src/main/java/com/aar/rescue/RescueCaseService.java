@@ -1,5 +1,7 @@
 package com.aar.rescue;
 
+import com.aar.system.Role;
+import com.aar.common.security.AuthUser;
 import com.aar.common.Pages;
 import com.aar.common.PageResponse;
 import com.aar.common.error.BusinessException;
@@ -70,9 +72,17 @@ public class RescueCaseService {
             pet == null ? null : pet.getId(), pet == null ? null : pet.getCode());
     }
 
-    public CaseSummary assign(Long caseId, Long staffId, Long by) {
+    /** Chỉ Quản lý được phân công ca cứu hộ (UC-07 bước 3, ma trận phân quyền mục 5.2). */
+    public static void requireManager(Role role) {
+        if (role != Role.MANAGER) {
+            throw BusinessException.forbidden("ASSIGN_MANAGER_ONLY", "Chỉ Quản lý được phân công ca cứu hộ");
+        }
+    }
+
+    public CaseSummary assign(Long caseId, Long staffId, AuthUser by) {
+        requireManager(by.role());
         RescueCase rescueCase = find(caseId);
-        assign(rescueCase, staffId, by);
+        assign(rescueCase, staffId, by.id());
         return CaseSummary.of(rescueCase);
     }
 

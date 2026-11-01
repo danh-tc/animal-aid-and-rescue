@@ -34,7 +34,10 @@ export default function CasesPage() {
 
   return (
     <>
-      <PageHeader title="Ca cứu hộ" description="Phân công, ghi kết quả và tạo hồ sơ thú khi cứu thành công." />
+      <PageHeader
+        title="Ca cứu hộ"
+        description="Quản lý phân công người đi cứu. Nhân viên phụ trách ghi kết quả và tạo hồ sơ thú khi cứu thành công."
+      />
       <Toolbar>
         <Segmented label="Lọc theo trạng thái" options={OPTIONS} value={status} onChange={setStatus} />
       </Toolbar>

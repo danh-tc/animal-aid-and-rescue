@@ -153,7 +153,7 @@ public abstract class IntegrationTestBase {
     /** Báo cáo => 1 ca đã phân công => ca thành công. Trả về id thú mới (IN_CARE, khu cách ly). */
     protected long rescuedPet(String species, LocalDate birth) throws Exception {
         long reportId = reportId(submitReport());
-        JsonNode cases = postJson("/api/staff/rescue-reports/" + reportId + "/cases", STAFF,
+        JsonNode cases = postJson("/api/staff/rescue-reports/" + reportId + "/cases", MANAGER,
             map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201);
         long caseId = cases.get(0).get("id").asLong();
         JsonNode result = postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, map(

@@ -1,12 +1,12 @@
 "use client";
 
-import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { Field } from "@/components/form-field/Field";
-import { FormCard } from "@/components/form-card/FormCard";
+import { AuthDivider, AuthShell } from "@/components/auth-shell/AuthShell";
+import { GoogleSignIn } from "@/components/google-sign-in/GoogleSignIn";
 import { Notice } from "@/components/notice/Notice";
 import { PasswordInput } from "@/components/password-input/PasswordInput";
 import { ApiRequestError, apiFetch, errorMessage } from "@/lib/api";
@@ -85,9 +85,8 @@ function RegisterForm() {
   }
 
   return (
-    <FormCard
+    <AuthShell
       title="Tạo tài khoản"
-      icon={UserPlus}
       description="Tài khoản người nhận nuôi dùng để nộp đơn và theo dõi lịch hậu kiểm."
       footer={
         <>
@@ -95,8 +94,10 @@ function RegisterForm() {
         </>
       }
     >
+      {error && <Notice tone="error">{error}</Notice>}
+      <GoogleSignIn mode="signup" onError={setError} />
+      <AuthDivider label="hoặc đăng ký bằng email" />
       <form className="stack" onSubmit={handleSubmit} noValidate>
-        {error && <Notice tone="error">{error}</Notice>}
         <Field label="Họ và tên" required error={errors.fullName}>
           <input
             id="reg-fullName"
@@ -137,16 +138,14 @@ function RegisterForm() {
           Tạo tài khoản
         </Button>
       </form>
-    </FormCard>
+    </AuthShell>
   );
 }
 
 export default function RegisterPage() {
   return (
-    <div className="container">
-      <Suspense>
-        <RegisterForm />
-      </Suspense>
-    </div>
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

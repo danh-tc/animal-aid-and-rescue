@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/skeleton/Skeleton";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { useStaffMembers } from "@/hooks/useStaffMembers";
+import { useAuth } from "@/lib/auth-context";
 import { formatDateTime, todayIso } from "@/lib/format";
 import { CASE_STATUS, PRIORITY, REPORT_STATUS } from "@/lib/labels";
 import type { CaseDetail, Priority, Sex, Species, SucceedRequest, SucceedResult } from "@/types/api";
@@ -29,6 +30,8 @@ export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: c, error, loading, reload } = useApi<CaseDetail>(`/api/staff/rescue-cases/${id}`);
   const { members, nameOf } = useStaffMembers();
+  const { user } = useAuth();
+  const isManager = user?.role === "MANAGER";
   const mutate = useMutation();
   const toast = useToast();
   const [dialog, setDialog] = useState<"assign" | "succeed" | "fail" | null>(null);
@@ -92,7 +95,7 @@ export default function CaseDetailPage() {
         }
         actions={
           <>
-            {c.status === "NEW" && (
+            {c.status === "NEW" && isManager && (
               <Button icon={<UserCheck aria-hidden="true" />} onClick={() => setDialog("assign")}>
                 Phân công
               </Button>
@@ -113,6 +116,11 @@ export default function CaseDetailPage() {
 
       <div className="detail-page">
         <div className="detail-page__main">
+          {c.status === "NEW" && !isManager && (
+            <Notice tone="info" title="Chờ Quản lý phân công">
+              Chỉ Quản lý được phân công người đi cứu. Sau khi phân công, nhân viên phụ trách cập nhật kết quả ca.
+            </Notice>
+          )}
           {result?.urgentVetRequestSuggested && (
             <Notice
               tone="warning"

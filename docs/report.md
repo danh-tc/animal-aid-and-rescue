@@ -20,7 +20,7 @@
 - Khách: người dân không đăng nhập (báo cứu hộ, tra cứu báo cáo, xem thú sẵn sàng).
 - Người nhận nuôi: có tài khoản, kế thừa quyền của Khách.
 - Nhân viên trung tâm.
-- Quản lý trung tâm: kế thừa quyền của Nhân viên, thêm báo cáo và quản trị hệ thống.
+- Quản lý trung tâm: kế thừa quyền của Nhân viên, thêm phân công ca cứu hộ, báo cáo và quản trị hệ thống.
 
 # Chương 2. Phân tích yêu cầu hệ thống
 
@@ -80,7 +80,7 @@ stateDiagram-v2
 | Mục tiêu | Biến một báo cáo của người dân thành hồ sơ thú trong trung tâm |
 | Tác nhân | Khách (không cần tài khoản, để lại tên và số điện thoại), Nhân viên |
 | Kích hoạt | Người dân gửi báo cáo (vị trí, mô tả, ảnh) |
-| Bước chính | 1. Nhân viên tiếp nhận báo cáo => 2. Tạo ca cứu hộ, phân công => 3. Đi cứu => 4. Cứu thành công: tạo hồ sơ thú (loài) và lượt tiếp nhận (nguồn cứu hộ, khu cách ly, đánh giá ban đầu), đóng ca |
+| Bước chính | 1. Nhân viên tiếp nhận báo cáo => 2. Tạo ca cứu hộ, Quản lý phân công người đi cứu => 3. Đi cứu => 4. Cứu thành công: tạo hồ sơ thú (loài) và lượt tiếp nhận (nguồn cứu hộ, khu cách ly, đánh giá ban đầu), đóng ca |
 | Ngoại lệ | Báo cáo trùng: gộp vào ca đã có. Báo cáo có nhiều thú: tách thành nhiều ca. Cứu hộ thất bại: đóng ca, ghi lý do, không tạo hồ sơ. Báo cáo sai hoặc spam: đánh dấu Không hợp lệ |
 | Dữ liệu | Báo cáo cứu hộ, Ca cứu hộ, Thú cưng, Lượt tiếp nhận |
 | Trạng thái | Báo cáo: Mới => Đã xử lý / Trùng / Không hợp lệ. Ca: Mới => Đang xử lý => Thành công / Thất bại. Thú: tạo mới ở Đang chăm sóc |
@@ -184,9 +184,9 @@ Ba sự kiện này đưa thú vào trạng thái kết thúc. Hồ sơ và toà
 | FR-01 | Gửi báo cáo cứu hộ (vị trí, mô tả, ảnh, tên, số điện thoại) | Khách |
 | FR-02 | Tra cứu trạng thái báo cáo bằng mã báo cáo và số điện thoại | Khách |
 | FR-03 | Xem danh sách thú đang Sẵn sàng nhận nuôi | Khách |
-| FR-04 | Đăng ký tài khoản, đăng nhập | Khách, Người nhận nuôi |
+| FR-04 | Đăng ký tài khoản, đăng nhập bằng mật khẩu hoặc nhanh bằng Google | Khách, Người nhận nuôi |
 | FR-05 | Xử lý báo cáo: gộp trùng, tách nhiều thú, đánh dấu không hợp lệ | Nhân viên |
-| FR-06 | Quản lý ca cứu hộ: tạo, phân công, đóng thành công hoặc thất bại | Nhân viên |
+| FR-06 | Quản lý ca cứu hộ: tạo, phân công, đóng thành công hoặc thất bại | Nhân viên, Quản lý (phân công) |
 | FR-07 | Tạo hồ sơ thú và lượt tiếp nhận, đánh giá ban đầu | Nhân viên |
 | FR-08 | Ghi nhật ký chăm sóc, cập nhật khu vực và nơi ở hiện tại | Nhân viên |
 | FR-09 | Quản lý yêu cầu thú y: tạo, ghi kết quả, chi phí, hướng dẫn sau điều trị | Nhân viên |
@@ -261,7 +261,7 @@ Nhóm 1 đến 4 là nghiệp vụ (khớp 2.1.2 đến 2.1.6), nhóm 5 và 6 l�
 | Khách | Không đăng nhập | Báo cứu hộ, tra cứu báo cáo, xem thú sẵn sàng, đăng ký tài khoản |
 | Người nhận nuôi | Đăng nhập, kế thừa Khách | Nộp, hủy, theo dõi đơn, xem thú đã nhận và lịch hậu kiểm |
 | Nhân viên | Đăng nhập | Xử lý cứu hộ, chăm sóc, thú y, duyệt đơn, bàn giao, hậu kiểm |
-| Quản lý | Đăng nhập, kế thừa Nhân viên | Mọi việc của Nhân viên, cộng báo cáo, tài khoản, danh mục cơ sở thú y, tham số hệ thống |
+| Quản lý | Đăng nhập, kế thừa Nhân viên | Mọi việc của Nhân viên, cộng phân công ca cứu hộ, báo cáo, tài khoản, danh mục cơ sở thú y, tham số hệ thống |
 
 > Sơ đồ này xem ở bản báo cáo online: https://claude.ai/artifact/UESS64WHDvFkrjWkQciXVM
 
@@ -290,13 +290,13 @@ Cách đánh số luồng ngoại lệ theo slide chương 2: số đầu là b�
 | Bên liên quan | Khách muốn thú được cứu và tra cứu được kết quả. Quản lý cần số liệu cứu hộ chính xác |
 | Mô tả | Nhân viên tiếp nhận báo cáo, tạo và xử lý ca cứu hộ đến khi thành công (tạo hồ sơ thú và lượt tiếp nhận) hoặc thất bại |
 | Kích hoạt | Có báo cáo ở trạng thái Mới |
-| Quan hệ | Association: Nhân viên. Extend: Gộp báo cáo trùng |
+| Quan hệ | Association: Nhân viên, Quản lý (phân công). Extend: Gộp báo cáo trùng |
 
 **Luồng chính**
 
 1. Nhân viên mở danh sách báo cáo Mới và chọn một báo cáo.
 2. Hệ thống hiển thị vị trí, mô tả, ảnh và các ca đang mở ở gần để nhân viên kiểm tra trùng.
-3. Nhân viên tạo ca cứu hộ cho thú trong báo cáo và phân công người đi cứu. Báo cáo chuyển sang Đã xử lý.
+3. Nhân viên tạo ca cứu hộ cho thú trong báo cáo, Quản lý phân công người đi cứu. Báo cáo chuyển sang Đã xử lý.
 4. Sau khi đi cứu, nhân viên cập nhật kết quả ca: thành công thì thực hiện S-1, thất bại thì thực hiện S-2.
 
 **Luồng con**
@@ -466,7 +466,7 @@ Sơ đồ trạng thái của Thú cưng đã có ở 2.1.1. Các bảng dưới
 **Báo cáo và ca cứu hộ**
 
 - Báo cáo: NEW => PROCESSED (đã tạo ca), NEW => DUPLICATE (gộp vào ca có sẵn), NEW => INVALID (sai hoặc spam).
-- Ca: NEW => IN\_PROGRESS (đã phân công) => SUCCEEDED (tạo hồ sơ thú) hoặc FAILED (có lý do).
+- Ca: NEW => IN\_PROGRESS (Quản lý đã phân công) => SUCCEEDED (tạo hồ sơ thú) hoặc FAILED (có lý do).
 
 # Chương 4. Phân tích và thiết kế dữ liệu
 
@@ -635,13 +635,13 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 | P02 | Chi tiết thú | Khách | FR-03 | MVP |
 | P03 | Báo cứu hộ | Khách | FR-01 | MVP |
 | P04 | Tra cứu báo cáo | Khách | FR-02 | Đợt 2 |
-| P05 | Đăng ký, đăng nhập | Khách | FR-04 | MVP |
+| P05 | Đăng ký, đăng nhập (mật khẩu hoặc Google) | Khách | FR-04 | MVP |
 | A01 | Nộp đơn nhận nuôi (mở từ P02) | Người nhận nuôi | FR-11 | MVP |
 | A02 | Đơn của tôi: theo dõi, hủy | Người nhận nuôi | FR-11 | MVP |
 | A03 | Thú đã nhận và lịch hậu kiểm | Người nhận nuôi | FR-17 | MVP |
 | S01 | Bảng công việc: báo cáo mới, đơn chờ, hậu kiểm đến hạn | Nhân viên |  | MVP |
 | S02 | Báo cáo cứu hộ: xem, tạo ca, đánh dấu không hợp lệ, gộp trùng | Nhân viên | FR-05 | MVP (gộp trùng ở đợt 2) |
-| S03 | Ca cứu hộ: phân công, cập nhật kết quả, tạo hồ sơ thú | Nhân viên | FR-06, FR-07 | MVP |
+| S03 | Ca cứu hộ: phân công, cập nhật kết quả, tạo hồ sơ thú | Nhân viên, Quản lý (phân công) | FR-06, FR-07 | MVP |
 | S04 | Danh sách thú, lọc theo trạng thái | Nhân viên | FR-07 | MVP |
 | S05 | Hồ sơ thú, gồm các tab: thông tin, lượt tiếp nhận, nhật ký, thú y, checklist, lịch sử trạng thái | Nhân viên | FR-07, FR-08, FR-10 | MVP |
 | S06 | Yêu cầu thú y: tạo, ghi kết quả, hủy | Nhân viên | FR-09 | MVP |
@@ -662,13 +662,14 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 | Nộp, hủy đơn nhận nuôi | Không | Có | Không | Không |
 | Xem đơn, thú đã nhận và lịch hậu kiểm của mình | Không | Có | Không | Không |
 | Xử lý báo cáo và ca cứu hộ | Không | Không | Có | Có |
+| Phân công ca cứu hộ | Không | Không | Không | Có |
 | Hồ sơ thú, chăm sóc, yêu cầu thú y, checklist | Không | Không | Có | Có |
 | Xét duyệt đơn | Không | Không | Có | Có |
 | Bàn giao, hậu kiểm, trả lại, sự kiện kết thúc | Không | Không | Có | Có |
 | Báo cáo thống kê | Không | Không | Không | Có |
 | Tài khoản, cơ sở thú y, tham số hệ thống | Không | Không | Không | Có |
 
-Quản lý kế thừa toàn bộ quyền của Nhân viên (cài bằng RoleHierarchy MANAGER > STAFF của Spring Security). Trách nhiệm từng thao tác vẫn truy vết được qua người thực hiện ghi trong status\_histories.
+Quản lý kế thừa toàn bộ quyền của Nhân viên (cài bằng RoleHierarchy MANAGER > STAFF của Spring Security). Riêng phân công người đi cứu chỉ Quản lý được làm, Nhân viên tạo ca ở trạng thái Chưa phân công. Trách nhiệm từng thao tác vẫn truy vết được qua người thực hiện ghi trong status\_histories.
 
 **Danh sách API cho MVP**
 
@@ -683,6 +684,8 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/public/rescue-reports/lookup?code=&phone= | P04 | Đợt 2 |
 | POST | /api/public/auth/register | P05 | Luôn tạo tài khoản ADOPTER |
 | POST | /api/public/auth/login | P05 | Trả JWT |
+| POST | /api/public/auth/google | P05 | Đăng nhập, đăng ký nhanh bằng Google: xác thực ID token, email chưa có tài khoản thì tạo tài khoản ADOPTER |
+| GET | /api/public/auth/config | P05 | Có bật đăng nhập Google hay không (cấu hình GOOGLE_CLIENT_ID) |
 | POST | /api/adopter/applications | A01 | Kiểm tra thú AVAILABLE (RB-02, RB-14) |
 | GET | /api/adopter/applications | A02 | Đơn của người đang đăng nhập |
 | POST | /api/adopter/applications/{id}/cancel | A02 | Đơn PENDING hoặc APPROVED |
@@ -690,13 +693,13 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/staff/dashboard | S01 | Số báo cáo mới, đơn chờ, hậu kiểm đến hạn |
 | GET | /api/staff/rescue-reports?status= | S02 |  |
 | GET | /api/staff/rescue-reports/{id} | S02 | Kèm ảnh và các ca đã tạo |
-| POST | /api/staff/rescue-reports/{id}/cases | S02 | `numberOfAnimals` ca, mỗi ca một thú (tách báo cáo nhiều thú). Có `assignedStaffId` thì phân công luôn |
+| POST | /api/staff/rescue-reports/{id}/cases | S02 | Tạo một hoặc nhiều ca (tách báo cáo nhiều thú). Kèm phân công thì chỉ Quản lý |
 | POST | /api/staff/rescue-reports/{id}/invalid | S02 | Bắt buộc lý do |
 | POST | /api/staff/rescue-reports/{id}/merge | S02 | Đợt 2 |
 | GET | /api/staff/rescue-cases?status= | S03 |  |
 | GET | /api/staff/rescue-cases/{id} | S03 | Kèm báo cáo gốc và thú đã tạo |
 | GET | /api/staff/staff-members | S03 | Nhân viên đang hoạt động để phân công |
-| POST | /api/staff/rescue-cases/{id}/assign | S03 | NEW => IN\_PROGRESS |
+| POST | /api/staff/rescue-cases/{id}/assign | S03 | NEW => IN_PROGRESS. Chỉ Quản lý, Nhân viên gọi nhận 403 |
 | POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú và lượt tiếp nhận RESCUE trong một giao dịch. Đánh giá Khẩn cấp thì trả cờ nhắc tạo yêu cầu thú y |
 | POST | /api/staff/rescue-cases/{id}/fail | S03 | Bắt buộc lý do |
 | GET | /api/staff/pets?status=&species=&q= | S04 | q tìm theo mã hoặc tên |

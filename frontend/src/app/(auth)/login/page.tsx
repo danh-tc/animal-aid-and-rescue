@@ -1,12 +1,12 @@
 "use client";
 
-import { LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { Field } from "@/components/form-field/Field";
-import { FormCard } from "@/components/form-card/FormCard";
+import { AuthDivider, AuthShell } from "@/components/auth-shell/AuthShell";
+import { GoogleSignIn } from "@/components/google-sign-in/GoogleSignIn";
 import { Notice } from "@/components/notice/Notice";
 import { PasswordInput } from "@/components/password-input/PasswordInput";
 import { ApiRequestError, apiFetch, errorMessage } from "@/lib/api";
@@ -50,9 +50,8 @@ function LoginForm() {
   }
 
   return (
-    <FormCard
-      title="Đăng nhập"
-      icon={LogIn}
+    <AuthShell
+      title="Chào mừng trở lại"
       description="Đăng nhập để nộp đơn nhận nuôi hoặc vào khu làm việc của nhân viên."
       footer={
         <>
@@ -61,11 +60,13 @@ function LoginForm() {
         </>
       }
     >
+      {params.get("expired") && !error && (
+        <Notice tone="warning">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.</Notice>
+      )}
+      {error && <Notice tone="error">{error}</Notice>}
+      <GoogleSignIn mode="signin" onError={setError} />
+      <AuthDivider label="hoặc đăng nhập bằng email" />
       <form className="stack" onSubmit={handleSubmit}>
-        {params.get("expired") && !error && (
-          <Notice tone="warning">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.</Notice>
-        )}
-        {error && <Notice tone="error">{error}</Notice>}
         <Field label="Email" required>
           <input
             type="email"
@@ -81,18 +82,16 @@ function LoginForm() {
         <Button type="submit" block size="lg" loading={submitting}>
           Đăng nhập
         </Button>
-        <p className="form-card__description">Tài khoản mẫu: staff1@aar.local, mật khẩu Password@123</p>
+        <p className="form-field__hint">Tài khoản mẫu: staff1@aar.local, manager@aar.local, mật khẩu Password@123</p>
       </form>
-    </FormCard>
+    </AuthShell>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="container">
-      <Suspense>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

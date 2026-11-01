@@ -5,8 +5,7 @@
   top: 0;
   z-index: $z-sticky;
   border-bottom: 1px solid $color-border;
-  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px);
+  background: $color-surface;
 
   &__inner {
     display: flex;
@@ -116,7 +115,7 @@
     gap: $space-2;
     min-height: $control-height;
     padding: $space-2 $space-3;
-    border-radius: $radius-pill;
+    border-radius: $radius-md;
     color: $color-muted;
     font-weight: $font-weight-semibold;
     text-decoration: none;
@@ -152,7 +151,7 @@
     gap: $space-2;
     min-height: $control-height;
     padding: $space-2 $space-4;
-    border-radius: $radius-pill;
+    border-radius: $radius-md;
     background: $color-accent;
     color: $color-on-accent;
     font-weight: $font-weight-semibold;
@@ -192,7 +191,7 @@
     min-height: $control-height;
     padding: $space-2 $space-3;
     border: 0;
-    border-radius: $radius-pill;
+    border-radius: $radius-md;
     background: transparent;
     color: $color-muted;
     font-weight: $font-weight-medium;

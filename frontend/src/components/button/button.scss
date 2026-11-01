@@ -8,7 +8,7 @@
   min-height: $control-height;
   padding: $space-2 $space-5;
   border: 1px solid transparent;
-  border-radius: $radius-pill;
+  border-radius: $radius-md;
   font-weight: $font-weight-semibold;
   font-size: $font-size-base;
   line-height: 1.2;
@@ -35,7 +35,6 @@
   &--primary {
     background: $color-primary;
     color: $color-on-primary;
-    box-shadow: $shadow-sm;
 
     &:hover:not(:disabled) {
       background: $color-primary-hover;
@@ -45,7 +44,6 @@
   &--accent {
     background: $color-accent;
     color: $color-on-accent;
-    box-shadow: $shadow-sm;
 
     &:hover:not(:disabled) {
       background: $color-accent-hover;
@@ -97,8 +95,7 @@
   }
 
   &:active:not(:disabled) {
-    box-shadow: none;
-    filter: brightness(0.96);
+    transform: translateY(1px);
   }
 
   &:disabled {

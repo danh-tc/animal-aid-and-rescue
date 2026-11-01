@@ -17,6 +17,18 @@ public final class AuthDtos {
         @Pattern(regexp = "^[0-9+]{9,15}$", message = "Số điện thoại không hợp lệ") String phone) {
     }
 
+    /** credential: ID token nhận từ Google Identity Services ở trình duyệt. */
+    public record GoogleLoginRequest(@NotBlank @Size(max = 4096) String credential) {
+    }
+
+    /** Frontend đọc để biết có hiện nút Google hay không, không cần cấu hình trùng ở hai nơi. */
+    public record AuthConfig(boolean googleEnabled, String googleClientId) {
+    }
+
+    /** newAccount = true khi lần đầu đăng nhập Google và hệ thống vừa tạo tài khoản Người nhận nuôi. */
+    public record GoogleAuthResponse(String accessToken, long expiresInMinutes, UserView user, boolean newAccount) {
+    }
+
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {
     }
 

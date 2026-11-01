@@ -58,7 +58,9 @@
     min-height: $control-height;
     color: $color-text;
     font-family: $font-family-heading;
+    font-size: $font-size-sm;
     font-weight: $font-weight-bold;
+    white-space: nowrap;
     text-decoration: none;
   }
 

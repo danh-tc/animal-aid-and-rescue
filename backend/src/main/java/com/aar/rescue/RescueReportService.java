@@ -1,5 +1,6 @@
 package com.aar.rescue;
 
+import com.aar.common.security.AuthUser;
 import com.aar.rescue.RescueDtos.CaseProgress;
 import com.aar.rescue.RescueDtos.OpenCase;
 import com.aar.rescue.RescueDtos.ReportLookup;
@@ -154,7 +155,11 @@ public class RescueReportService {
     }
 
     /** Bước 3 của UC-07: tạo một hoặc nhiều ca, mỗi ca một thú. Báo cáo chuyển sang Đã xử lý. */
-    public List<CaseSummary> createCases(Long reportId, CreateCasesRequest req, Long by) {
+    public List<CaseSummary> createCases(Long reportId, CreateCasesRequest req, AuthUser user) {
+        if (req.assignedStaffId() != null) {
+            RescueCaseService.requireManager(user.role());
+        }
+        Long by = user.id();
         RescueReport report = find(reportId);
         transition(report, "PROCESSED", by, req.numberOfAnimals() + " ca");
         List<CaseSummary> created = new ArrayList<>();

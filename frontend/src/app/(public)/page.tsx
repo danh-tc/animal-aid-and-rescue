@@ -60,13 +60,11 @@ export default async function HomePage({ searchParams }: HomeProps) {
       <section className="hero">
         <div className="container hero__inner">
           <div className="hero__content">
-            <p className="hero__eyebrow">
-              <ShieldCheck aria-hidden="true" />
-              Đã khám thú y, tiêm phòng và tẩy giun
-            </p>
+            <p className="hero__eyebrow">Trung tâm cứu hộ chó mèo</p>
             <h1 className="hero__title">Mỗi bé được cứu đều xứng đáng có một mái nhà</h1>
             <p className="hero__lead">
-              Trung tâm cứu hộ chó mèo bị bỏ rơi, chăm sóc đến khi khỏe mạnh và tìm cho các bé một gia đình yêu thương.
+              Chúng tôi cứu hộ chó mèo bị bỏ rơi, chăm sóc đến khi khỏe mạnh rồi tìm cho các bé một gia đình yêu
+              thương.
             </p>
             <div className="hero__actions">
               <LinkButton href="#pets" size="lg" icon={<HeartHandshake aria-hidden="true" />}>
@@ -77,32 +75,33 @@ export default async function HomePage({ searchParams }: HomeProps) {
               </LinkButton>
             </div>
           </div>
-          <ul className="hero__facts" aria-label="Quy trình chăm sóc">
-            <li className="hero__fact">
-              <Stethoscope aria-hidden="true" />
-              <span>
-                <strong>Khám thú y</strong> trước khi mở cho nhận nuôi
-              </span>
-            </li>
-            <li className="hero__fact">
-              <ClipboardCheck aria-hidden="true" />
-              <span>
-                <strong>6 tiêu chí</strong> sức khỏe và tính cách được kiểm tra
-              </span>
-            </li>
-            <li className="hero__fact">
-              <HousePlus aria-hidden="true" />
-              <span>
-                <strong>Hậu kiểm</strong> sau bàn giao để bé được an toàn
-              </span>
-            </li>
-          </ul>
+          <aside className="hero__panel" aria-label="Cam kết của trung tâm">
+            <p className="hero__stat">
+              <span className="hero__stat-value">{data ? data.totalItems : "—"}</span>
+              <span className="hero__stat-label">bé đang chờ một mái nhà</span>
+            </p>
+            <ul className="hero__facts">
+              <li className="hero__fact">
+                <Stethoscope aria-hidden="true" />
+                <span>Khám thú y, tiêm phòng và tẩy giun trước khi mở nhận nuôi</span>
+              </li>
+              <li className="hero__fact">
+                <ShieldCheck aria-hidden="true" />
+                <span>Kiểm tra 6 tiêu chí sức khỏe và tính cách</span>
+              </li>
+              <li className="hero__fact">
+                <HousePlus aria-hidden="true" />
+                <span>Hậu kiểm sau bàn giao để bé được an toàn</span>
+              </li>
+            </ul>
+          </aside>
         </div>
       </section>
 
       <section id="pets" className="container pet-list" aria-labelledby="pet-list-title">
         <div className="pet-list__header">
           <div>
+            <p className="pet-list__eyebrow">Nhận nuôi</p>
             <h2 id="pet-list-title" className="pet-list__title">
               Đang chờ nhận nuôi
             </h2>
@@ -157,6 +156,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
       </section>
 
       <section className="container steps" aria-labelledby="steps-title">
+        <p className="steps__eyebrow">4 bước</p>
         <h2 id="steps-title" className="steps__title">
           Quy trình nhận nuôi
         </h2>

@@ -26,7 +26,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         JsonNode wrong = getJson("/api/public/rescue-reports/lookup?code=" + code + "&phone=0900000999", null, 404);
         assertThat(wrong.get("message").asText()).contains("mã và số điện thoại");
 
-        postJson("/api/staff/rescue-reports/" + reportId(code) + "/cases", STAFF,
+        postJson("/api/staff/rescue-reports/" + reportId(code) + "/cases", MANAGER,
             map("numberOfAnimals", 2, "assignedStaffId", STAFF_ID), 201);
         JsonNode processed = getJson("/api/public/rescue-reports/lookup?code=" + code + "&phone=" + phone, null, 200);
         assertThat(processed.get("status").asText()).isEqualTo("PROCESSED");
@@ -80,7 +80,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
 
     private long caseAt(double lat, double lon) throws Exception {
         long id = reportId(reportAt(lat, lon));
-        return postJson("/api/staff/rescue-reports/" + id + "/cases", STAFF,
+        return postJson("/api/staff/rescue-reports/" + id + "/cases", MANAGER,
             map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
     }
 }

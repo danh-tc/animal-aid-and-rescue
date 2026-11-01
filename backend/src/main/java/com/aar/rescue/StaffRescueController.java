@@ -54,7 +54,7 @@ public class StaffRescueController {
     @ResponseStatus(HttpStatus.CREATED)
     public List<CaseSummary> createCases(@PathVariable Long id, @Valid @RequestBody CreateCasesRequest req,
                                          @CurrentUser AuthUser me) {
-        return reports.createCases(id, req, me.id());
+        return reports.createCases(id, req, me);
     }
 
     /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào ca đang mở. */
@@ -81,9 +81,10 @@ public class StaffRescueController {
         return cases.detail(id);
     }
 
+    /** Chỉ Quản lý (kiểm tra ở SecurityConfig và trong service). */
     @PostMapping("/rescue-cases/{id}/assign")
     public CaseSummary assign(@PathVariable Long id, @Valid @RequestBody AssignRequest req, @CurrentUser AuthUser me) {
-        return cases.assign(id, req.staffId(), me.id());
+        return cases.assign(id, req.staffId(), me);
     }
 
     @PostMapping("/rescue-cases/{id}/succeed")

@@ -4,19 +4,22 @@
 :root {
   color-scheme: light;
 
-  --color-bg: #f5f9f8;
+  --color-bg: #f6f7f7;
   --color-surface: #ffffff;
-  --color-surface-2: #eef4f3;
-  --color-text: #10302c;
-  --color-muted: #4a5f5c;
-  --color-border: #dbe6e4;
-  --color-border-strong: #b7c9c6;
+  --color-surface-2: #f0f3f2;
+  --color-text: #111b1a;
+  --color-muted: #566260;
+  --color-border: #e3e8e7;
+  --color-border-strong: #c5cfcd;
 
   --color-primary: #0f766e;
   --color-primary-hover: #115e59;
   --color-on-primary: #ffffff;
-  --color-primary-soft: #d5f2ee;
+  --color-primary-soft: #e0f3f0;
   --color-primary-text: #0f766e;
+  /* Khối màu đặc lớn (hero, cột thương hiệu trang đăng nhập) */
+  --color-brand-block: #0f766e;
+  --color-on-brand-block: #ffffff;
 
   --color-accent: #c2410c;
   --color-accent-hover: #9a3412;
@@ -34,9 +37,11 @@
   --color-danger-soft: #fee2e2;
   --color-info: #1d4ed8;
   --color-info-soft: #dbeafe;
-  --color-neutral-soft: #e9efee;
+  --color-neutral-soft: #edf0ef;
 
   --color-scrim: rgba(8, 24, 22, 0.55);
+  /* Mũi tên của ô chọn, vẽ bằng SVG thay cho gradient */
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23566260' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --color-focus: #c2410c;
 
   /* Màu chuỗi dữ liệu cho biểu đồ (dataviz, đã chạy validator trên nền #ffffff) */
@@ -45,9 +50,9 @@
   --chart-3: #1baf7a;
   --chart-grid: #e4ebea;
 
-  --shadow-sm: 0 1px 2px rgba(16, 48, 44, 0.05), 0 2px 8px rgba(16, 48, 44, 0.05);
-  --shadow-md: 0 2px 4px rgba(16, 48, 44, 0.06), 0 8px 24px rgba(16, 48, 44, 0.08);
-  --shadow-lg: 0 4px 8px rgba(16, 48, 44, 0.08), 0 20px 48px rgba(16, 48, 44, 0.16);
+  --shadow-sm: 0 1px 2px rgba(17, 27, 26, 0.04);
+  --shadow-md: 0 4px 16px rgba(17, 27, 26, 0.08);
+  --shadow-lg: 0 16px 40px rgba(17, 27, 26, 0.16);
 }
 
 @mixin dark-tokens {
@@ -66,6 +71,8 @@
   --color-on-primary: #042f2c;
   --color-primary-soft: #133d38;
   --color-primary-text: #5eead4;
+  --color-brand-block: #123f3a;
+  --color-on-brand-block: #e3f1ee;
 
   --color-accent: #fb923c;
   --color-accent-hover: #fdba74;
@@ -86,6 +93,7 @@
   --color-neutral-soft: #1d302d;
 
   --color-scrim: rgba(0, 0, 0, 0.7);
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239fb7b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --color-focus: #fb923c;
 
   --chart-1: #3987e5;

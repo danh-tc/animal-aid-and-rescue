@@ -2,9 +2,8 @@
 
 .hero {
   padding: $space-10 0 $space-12;
-  background:
-    radial-gradient(circle at 85% 10%, var(--color-accent-soft), transparent 45%),
-    radial-gradient(circle at 10% 90%, var(--color-primary-soft), transparent 50%);
+  border-bottom: 1px solid $color-border;
+  background: $color-surface;
 
   @include from-md {
     padding: $space-16 0;
@@ -16,34 +15,25 @@
     align-items: center;
 
     @include from-lg {
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: $space-12;
     }
   }
 
   &__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: $space-2;
     margin-bottom: $space-4;
-    padding: $space-1 $space-3;
-    border-radius: $radius-pill;
-    background: $color-surface;
     color: $color-primary-text;
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
-    box-shadow: $shadow-sm;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   &__title {
-    max-width: 18ch;
-    margin-bottom: $space-4;
+    max-width: 16ch;
+    margin-bottom: $space-5;
     font-size: $font-size-xxl;
-    line-height: 1.15;
+    line-height: 1.1;
 
     @include from-md {
       font-size: $font-size-display;
@@ -51,7 +41,7 @@
   }
 
   &__lead {
-    max-width: 56ch;
+    max-width: 52ch;
     color: $color-muted;
     font-size: $font-size-md;
   }
@@ -63,35 +53,57 @@
     margin-top: $space-8;
   }
 
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+    padding: $space-8;
+    border-radius: $radius-lg;
+    background: $color-brand-block;
+    color: $color-on-brand-block;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    padding-bottom: $space-6;
+    border-bottom: 1px solid currentColor;
+    border-bottom-color: color-mix(in srgb, currentColor 25%, transparent);
+  }
+
+  &__stat-value {
+    font-size: $font-size-display;
+    font-weight: $font-weight-bold;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__stat-label {
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+  }
+
   &__facts {
     display: flex;
     flex-direction: column;
-    gap: $space-3;
+    gap: $space-4;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
   &__fact {
-    @include surface;
     display: flex;
-    align-items: center;
-    gap: $space-4;
-    padding: $space-4 $space-5;
+    align-items: flex-start;
+    gap: $space-3;
 
     svg {
-      width: 40px;
-      height: 40px;
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
-      padding: $space-2;
-      border-radius: $radius-md;
-      background: $color-primary-soft;
-      color: $color-primary-text;
-    }
-
-    strong {
-      display: block;
-      font-family: $font-family-heading;
+      margin-top: 1px;
     }
   }
 }
@@ -107,6 +119,20 @@
     justify-content: space-between;
     gap: $space-4;
     margin-bottom: $space-6;
+  }
+
+  &__eyebrow,
+  &__count {
+    color: $color-muted;
+  }
+
+  &__eyebrow {
+    margin-bottom: $space-1;
+    color: $color-primary-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   &__title {
@@ -129,7 +155,7 @@
     min-height: $control-height;
     padding: $space-2 $space-5;
     border: 1px solid $color-border-strong;
-    border-radius: $radius-pill;
+    border-radius: $radius-md;
     background: $color-surface;
     color: $color-text;
     font-weight: $font-weight-semibold;
@@ -179,6 +205,15 @@
 
 .steps {
   padding-top: $space-16;
+
+  &__eyebrow {
+    margin-bottom: $space-1;
+    color: $color-primary-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 
   &__title {
     margin-bottom: $space-6;

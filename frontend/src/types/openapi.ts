@@ -436,6 +436,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["google"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/adopter/applications": {
         parameters: {
             query?: never;
@@ -876,6 +892,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["detail_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/auth/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["config"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1373,6 +1405,16 @@ export interface components {
             email: string;
             password: string;
         };
+        GoogleLoginRequest: {
+            credential: string;
+        };
+        GoogleAuthResponse: {
+            accessToken?: string;
+            /** Format: int64 */
+            expiresInMinutes?: number;
+            user?: components["schemas"]["UserView"];
+            newAccount?: boolean;
+        };
         SubmitRequest: {
             /** Format: int64 */
             petId: number;
@@ -1716,6 +1758,10 @@ export interface components {
             description?: string;
             sterilized?: boolean;
             photoIds?: number[];
+        };
+        AuthConfig: {
+            googleEnabled?: boolean;
+            googleClientId?: string;
         };
         PageResponseUserAdminView: {
             items?: components["schemas"]["UserAdminView"][];
@@ -2677,6 +2723,30 @@ export interface operations {
             };
         };
     };
+    google: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoogleAuthResponse"];
+                };
+            };
+        };
+    };
     mine: {
         parameters: {
             query?: never;
@@ -3408,6 +3478,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicPet"];
+                };
+            };
+        };
+    };
+    config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthConfig"];
                 };
             };
         };

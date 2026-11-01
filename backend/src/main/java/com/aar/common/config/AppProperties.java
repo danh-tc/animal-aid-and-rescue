@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(Jwt jwt, Cors cors, Storage storage, RateLimit rateLimit) {
+public record AppProperties(Jwt jwt, Cors cors, Storage storage, RateLimit rateLimit, Google google) {
 
     public record Jwt(String secret, long expirationMinutes) {
     }
@@ -21,5 +21,13 @@ public record AppProperties(Jwt jwt, Cors cors, Storage storage, RateLimit rateL
      * Báo cứu hộ còn có giới hạn riêng theo số điện thoại (REPORT_RATE_LIMIT_PER_HOUR).
      */
     public record RateLimit(int authPerMinute, int lookupPerMinute, int reportPerMinute, int otherPerMinute) {
+    }
+
+    /** Đăng nhập nhanh bằng Google. clientId trống thì tắt tính năng, nút Google không hiện. */
+    public record Google(String clientId) {
+
+        public boolean enabled() {
+            return clientId != null && !clientId.isBlank();
+        }
     }
 }
