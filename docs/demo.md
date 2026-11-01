@@ -31,7 +31,7 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 | Email | Họ tên | Vai trò | Dùng ở bước |
 | --- | --- | --- | --- |
 | *(không cần)* | Khách | Khách | 1 |
-| `manager@aar.local` | Nguyễn Văn Quân | Quản lý | 2, 5, 11 |
+| `manager@aar.local` | Nguyễn Văn Quân | Quản lý | 2, 5, 11. Vận hành: luôn cần ít nhất một Quản lý để phân công ca |
 | `staff1@aar.local` | Trần Thị Lan | Nhân viên | 2, 4, 5, 6, 7, 9, 10 |
 | `staff2@aar.local` | Lê Minh Tuấn | Nhân viên | 3, 5 |
 | `adopter1@aar.local` | Phạm Thu Hà | Người nhận nuôi | 5, 8 |
@@ -46,9 +46,9 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 | Bông (mèo trắng xám) | Đang điều trị, lưu trú phòng khám | Ghi kết quả thú y (bước 4) |
 | Vàng (shiba) | Sẵn sàng, 2 đơn đang chờ của Thu Hà và Quốc Bảo | Duyệt đơn đồng thời (bước 5) |
 | Mướp (mèo vằn) | Sẵn sàng | Nộp đơn, không đủ điều kiện (bước 8, 10) |
-| Đốm (dalmatian) | Chờ bàn giao, đơn của Ngọc Mai đã duyệt | Bàn giao, 3 con số chi phí (bước 6) |
+| Đốm (dalmatian) | Chờ bàn giao, đơn của Ngọc Mai đã duyệt, hẹn bàn giao sau 2 ngày | Bàn giao, 3 con số chi phí (bước 6) |
 | Miu (mèo trắng) | Đã nhận nuôi (Quốc Bảo), lần hậu kiểm 2 đã lên lịch | Hậu kiểm (bước 7) |
-| Lu (chó nâu) | Đang chăm sóc sau khi bị trả lại | Lịch sử bàn giao, lượt tiếp nhận RETURN |
+| Lu (chó nâu) | Đang chăm sóc sau khi Thu Hà trả lại | Lịch sử bàn giao, lượt tiếp nhận RETURN, cảnh báo ở đơn của Thu Hà (bước 5) |
 | Tí (mèo tam thể) | Đã mất | Trạng thái kết thúc, hồ sơ vẫn giữ |
 
 Báo cáo mới: `BC-7K2M9Q` (chợ Bến Thành) và `BC-H4T8WX` (công viên Gia Định). Ca đang xử lý: ca #4 ở cầu Ánh Sao, giao cho Lê Minh Tuấn.
@@ -82,20 +82,20 @@ Không đăng nhập.
 ### 4. Chăm sóc và thú y (S05, S06, QĐ-05, QĐ-06, QĐ-07)
 
 1. Đăng nhập `staff1@aar.local`. Mở hồ sơ **Bông**: trạng thái Đang điều trị, vị trí là phòng khám (lưu trú).
-2. Tab **Thú y** → yêu cầu đang mở → **Ghi kết quả**: chẩn đoán, chi phí (bắt buộc), chọn ảnh hoặc PDF phiếu khám. Bông tự về Đang chăm sóc, vị trí về Trung tâm (QĐ-06).
-3. Tab **Nhật ký**: ghi cân nặng. Tab **Checklist**: các mục còn thiếu kèm lý do (chưa hết cách ly, chưa đủ tuổi…). Đủ 6 mục mới chuyển sang Sẵn sàng (QĐ-07).
+2. Tab **Thú y** → yêu cầu đang mở → **Ghi kết quả**: chẩn đoán, **Kết luận sức khỏe** ổn hoặc chưa ổn (bắt buộc), chi phí (bắt buộc), chọn ảnh hoặc PDF phiếu khám. Bông tự về Đang chăm sóc, vị trí về Trung tâm (QĐ-06).
+3. Tab **Nhật ký**: ghi cân nặng. Tab **Checklist**: các mục còn thiếu kèm lý do (chưa hết cách ly, chưa đủ tuổi…). Mục Sức khỏe dựa trên kết luận của lần khám gần nhất: chọn "chưa ổn" thì mục này không đạt. Đủ 6 mục mới chuyển sang Sẵn sàng (QĐ-07).
 4. Tab **Lịch sử**: mọi lần đổi trạng thái kèm người thực hiện (NFR-03).
 
 ### 5. Duyệt đơn đồng thời (S07, QĐ-09, RB-01)
 
 1. Cửa sổ thường đăng nhập `staff1@aar.local`, cửa sổ ẩn danh đăng nhập `manager@aar.local`.
-2. Cả hai mở **Đơn nhận nuôi** → hai đơn của **Vàng** (mỗi cửa sổ một đơn), xem khung "Các đơn khác cho bé này".
-3. Bấm **Duyệt đơn** gần như cùng lúc: một bên thành công, bên kia báo "Bé đã có đơn khác được duyệt". Đơn còn lại tự đóng.
-4. Đăng nhập người có đơn bị đóng (`adopter1` hoặc `adopter2`), vào **Đơn của tôi**: đơn Đã hủy kèm lý do "Hệ thống tự đóng".
+2. Cả hai mở **Đơn nhận nuôi** → hai đơn của **Vàng** (mỗi cửa sổ một đơn), xem khung "Các đơn khác cho bé này". Đơn của Thu Hà có cảnh báo vàng "từng trả lại thú" (Lu) kèm liên kết.
+3. Bấm **Duyệt đơn**, chọn ngày hẹn bàn giao (mặc định sau 2 ngày), xác nhận gần như cùng lúc: một bên thành công, bên kia báo "Bé đã có đơn khác được duyệt". Đơn còn lại tự đóng.
+4. Bên thắng thấy ngày hẹn và nút **Đổi ngày hẹn**. Đăng nhập người có đơn bị đóng (`adopter1` hoặc `adopter2`), vào **Đơn của tôi**: đơn Đã hủy kèm lý do "Hệ thống tự đóng"; người được duyệt thấy "Hẹn bàn giao ngày …".
 
 ### 6. Bàn giao, 3 con số chi phí (S08, QĐ-14, UC-11)
 
-1. `staff1@aar.local` mở đơn của **Đốm** (Đã duyệt) → **Bàn giao**.
+1. `staff1@aar.local` mở đơn của **Đốm** (Đã duyệt, có ngày hẹn bàn giao) → **Bàn giao**.
 2. Hộp thoại hiện 3 con số: tổng chi phí điều trị, đã ủng hộ, còn chưa bù đắp. Nhập khoản ủng hộ, xác nhận.
 3. Đốm chuyển Đã nhận nuôi, hệ thống tạo 2 lịch hậu kiểm (14 và 60 ngày).
 4. Đăng nhập `adopter3@aar.local` → **Thú đã nhận**: thấy Đốm và lịch hậu kiểm.
@@ -104,18 +104,18 @@ Không đăng nhập.
 
 1. `staff1@aar.local` → **Hậu kiểm** → **Tất cả đã lên lịch**.
 2. Chọn lần hậu kiểm của **Miu** → **Ghi kết quả**: hình thức **Thăm nhà**, kết quả **Cần theo dõi** (bắt buộc nhận xét): hệ thống thêm một lần hậu kiểm bổ sung.
-3. Muốn demo thu hồi: chọn **Không đạt** → bàn giao chuyển Chờ thu hồi → mở hồ sơ thú, tab **Bàn giao** → **Tiếp nhận trả lại** (S10, QĐ-13): tạo lượt tiếp nhận RETURN, thú về khu cách ly.
+3. Muốn demo thu hồi: chọn **Không đạt** → bàn giao chuyển Chờ thu hồi → mở hồ sơ thú, tab **Bàn giao** → **Tiếp nhận trả lại** (S10, QĐ-13): tạo lượt tiếp nhận RETURN, thú về khu cách ly. Kết quả do nhân viên tự chọn theo bảng tiêu chí ở 2.1.5. Từ đây mọi đơn mới của Quốc Bảo hiện cảnh báo đỏ "từng bị thu hồi thú".
 
 ### 8. Người nhận nuôi (P05, A01, A02, A03)
 
-1. **Đăng ký** tài khoản mới (hoặc **Đăng ký bằng Google** nếu đã cấu hình).
-2. Hoặc đăng nhập `adopter1@aar.local`, mở **Mướp** → **Nộp đơn nhận nuôi**: chọn nhà ở, kinh nghiệm. Nộp lần hai cho cùng bé thì bị chặn (RB-02).
+1. **Đăng ký** tài khoản mới (hoặc **Đăng ký bằng Google** nếu đã cấu hình). Tài khoản chưa có số điện thoại hoặc địa chỉ thì form nộp đơn hiện thêm hai ô này, bắt buộc nhập (QĐ-08).
+2. Hoặc đăng nhập `adopter1@aar.local`, mở **Mướp** → **Nộp đơn nhận nuôi**: chọn nhà ở, kinh nghiệm. Nộp lần hai cho cùng bé thì bị chặn (RB-02). Mỗi người tối đa 5 đơn đang chờ (tham số `MAX_PENDING_APPLICATIONS`).
 3. **Đơn của tôi**: theo dõi, hủy đơn. Đăng nhập `adopter2@aar.local` → **Thú đã nhận**: Miu và lịch hậu kiểm.
 4. Thử vào `/staff` bằng tài khoản người nhận nuôi: bị chuyển về trang của mình (phân quyền theo vai trò).
 
 ### 9. Thất lạc và tìm lại (S10, QĐ-15, QĐ-16)
 
-1. `staff1@aar.local` mở hồ sơ **Mực** → **Sự kiện kết thúc** → Thất lạc, ghi nơi mất.
+1. `staff1@aar.local` mở hồ sơ **Mực** → **Sự kiện kết thúc** → Thất lạc, ghi nơi mất. Nếu thú còn yêu cầu thú y đang mở, hộp thoại liệt kê chúng và bắt tích xác nhận đã ghi chi phí cần thiết trước khi lưu.
 2. Hồ sơ hiện thông báo thất lạc, các việc đang mở tự đóng.
 3. Bấm **Tìm lại được**: tạo lượt tiếp nhận "Tìm lại sau thất lạc", Mực về Đang chăm sóc, khu cách ly.
 
@@ -132,7 +132,7 @@ Không đăng nhập.
 
 ## Nếu bị hỏi thêm
 
-- Kiểm thử tự động: `cd backend && mvn test` (142 test trên PostgreSQL thật).
+- Kiểm thử tự động: `cd backend && mvn test` (147 test trên PostgreSQL thật).
 - Đo hiệu năng NFR-04: `node scripts/perf-check.mjs`.
 - Sao lưu và khôi phục NFR-06: `./scripts/backup.sh`, `./scripts/restore.sh backups/<tệp>.dump`.
 - Tài liệu API: `http://localhost:8080/swagger-ui.html`.

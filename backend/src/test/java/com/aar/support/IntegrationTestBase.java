@@ -76,6 +76,15 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected JdbcTemplate jdbc;
 
+    /**
+     * Các test dùng chung vài tài khoản người nhận nuôi trên cùng database, nên nới giới hạn đơn chờ (QĐ-08).
+     * ApplicationRulesIntegrationTest tự đặt lại giới hạn khi cần kiểm tra.
+     */
+    @org.junit.jupiter.api.BeforeEach
+    void relaxPendingLimit() {
+        jdbc.update("UPDATE system_parameters SET param_value = '1000' WHERE param_key = 'MAX_PENDING_APPLICATIONS'");
+    }
+
     protected String token(String email) throws Exception {
         String cached = TOKENS.get(email);
         if (cached != null) {
@@ -172,7 +181,7 @@ public abstract class IntegrationTestBase {
         JsonNode vet = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
             map("clinicId", 1, "reason", "Khám tổng quát", "priority", "STABLE", "careMode", "OUTPATIENT"), 201);
         postJson("/api/staff/vet-requests/" + vet.get("request").get("id").asLong() + "/complete", STAFF,
-            map("diagnosisSummary", "Khỏe", "totalCost", 500000), 200);
+            map("diagnosisSummary", "Khỏe", "totalCost", 500000, "healthOk", true), 200);
         backdateIntakes(petId, 30);
         JsonNode result = putJson("/api/staff/pets/" + petId + "/eligibility", STAFF,
             map("vaccinated", true, "dewormed", true, "sterilized", !young, "temperamentOk", true), 200);
@@ -214,5 +223,13 @@ public abstract class IntegrationTestBase {
 
     protected long petIdOfApplication(long applicationId) {
         return jdbc.queryForObject("SELECT pet_id FROM adoption_applications WHERE id = ?", Long.class, applicationId);
+    }
+
+    /** Đăng ký người nhận nuôi mới (có hoặc không có số điện thoại), trả về email. */
+    protected String newAdopter(String phone) throws Exception {
+        String email = "adopter-" + UUID.randomUUID() + "@test.local";
+        postJson("/api/public/auth/register", null,
+            map("email", email, "password", "Password@123", "fullName", "Người thử", "phone", phone), 201);
+        return email;
     }
 }

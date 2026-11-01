@@ -1,6 +1,7 @@
 package com.aar.adoption;
 
 import com.aar.adoption.AdoptionDtos.ApplicantBrief;
+import com.aar.adoption.AdoptionDtos.ApplicantFlag;
 import com.aar.adoption.AdoptionDtos.ApplicationDetail;
 import com.aar.adoption.AdoptionDtos.ApplicationView;
 import com.aar.adoption.AdoptionDtos.PetBrief;
@@ -14,8 +15,11 @@ import com.aar.pet.Pet;
 import com.aar.pet.PetLifecycle;
 import com.aar.pet.PetRepository;
 import com.aar.pet.PetStatus;
+import com.aar.system.SystemParameterService;
 import com.aar.system.User;
 import com.aar.system.UserRepository;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +45,14 @@ public class ApplicationService {
     private final UserRepository users;
     private final StateTransitionService state;
     private final ApplicationCascade cascade;
+    private final SystemParameterService params;
+    private final JdbcTemplate jdbc;
 
     public ApplicationService(AdoptionApplicationRepository applications, PetLifecycle petLifecycle,
                               PetRepository pets, UserRepository users, StateTransitionService state,
-                              ApplicationCascade cascade) {
+                              ApplicationCascade cascade, SystemParameterService params, JdbcTemplate jdbc) {
+        this.params = params;
+        this.jdbc = jdbc;
         this.applications = applications;
         this.petLifecycle = petLifecycle;
         this.pets = pets;
@@ -65,6 +74,22 @@ public class ApplicationService {
         }
         if (applications.existsByPetIdAndApplicantIdAndStatus(pet.getId(), applicantId, ApplicationStatus.PENDING)) {
             throw BusinessException.conflict("DUPLICATE_APPLICATION", "Bạn đã có đơn đang chờ cho thú này");
+        }
+        int maxPending = params.getInt(SystemParameterService.MAX_PENDING_APPLICATIONS);
+        if (applications.countByApplicantIdAndStatus(applicantId, ApplicationStatus.PENDING) >= maxPending) {
+            throw BusinessException.conflict("TOO_MANY_PENDING",
+                "Bạn đã có " + maxPending + " đơn đang chờ xét duyệt. Hãy chờ kết quả hoặc hủy bớt đơn trước khi nộp thêm");
+        }
+        // Nhân viên cần liên hệ khi xét duyệt và hậu kiểm: tài khoản phải có số điện thoại và địa chỉ
+        User applicant = users.findById(applicantId).orElseThrow(this::notFound);
+        String phone = blankToNull(req.phone()) != null ? req.phone().trim() : blankToNull(applicant.getPhone());
+        String address = blankToNull(req.address()) != null ? req.address().trim() : blankToNull(applicant.getAddress());
+        if (phone == null || address == null) {
+            throw BusinessException.badRequest("CONTACT_REQUIRED",
+                "Cần số điện thoại và địa chỉ để nhân viên liên hệ khi xét duyệt và hậu kiểm");
+        }
+        if (!phone.equals(applicant.getPhone()) || !address.equals(applicant.getAddress())) {
+            applicant.updateProfile(applicant.getFullName(), phone, address);
         }
         ApplicationStatus initial = ApplicationStatus.valueOf(state.initialStatus(EntityType.APPLICATION, "SUBMITTED"));
         AdoptionApplication app = applications.save(new AdoptionApplication(pet.getId(), applicantId,
@@ -112,7 +137,32 @@ public class ApplicationService {
         List<AdoptionApplication> others = applications.findByPetIdOrderBySubmittedAtDesc(app.getPetId()).stream()
             .filter(a -> !a.getId().equals(id)).toList();
         return new ApplicationDetail(view(app, pet, users.findById(app.getApplicantId()).orElse(null)),
-            pet.getStatus().name(), views(others));
+            pet.getStatus().name(), views(others), applicantHistory(app.getApplicantId()));
+    }
+
+    /** Cảnh báo cho nhân viên: người nộp từng bị thu hồi thú (hậu kiểm Không đạt) hoặc từng trả lại thú. */
+    private List<ApplicantFlag> applicantHistory(Long applicantId) {
+        return jdbc.query("""
+            SELECT p.id pet_id, p.code, p.name, h.handed_over_at,
+                   EXISTS (SELECT 1 FROM follow_ups f WHERE f.handover_id = h.id AND f.result = 'FAIL') failed,
+                   (SELECT i.reason FROM intakes i WHERE i.returned_handover_id = h.id) return_reason,
+                   h.follow_up_status
+            FROM handovers h
+            JOIN adoption_applications a ON a.id = h.application_id
+            JOIN pets p ON p.id = h.pet_id
+            WHERE a.applicant_id = ?
+            ORDER BY h.handed_over_at DESC""", (rs, i) -> {
+                boolean failed = rs.getBoolean("failed");
+                String returnReason = rs.getString("return_reason");
+                if (!failed && returnReason == null) {
+                    return null;
+                }
+                String note = failed
+                    ? "Hậu kiểm Không đạt" + ("RETURNED".equals(rs.getString("follow_up_status")) ? ", thú đã được thu hồi" : ", đang chờ thu hồi")
+                    : "Đã trả lại thú: " + returnReason;
+                return new ApplicantFlag(failed ? "RECALLED" : "RETURNED", rs.getLong("pet_id"), rs.getString("code"),
+                    rs.getString("name"), rs.getObject("handed_over_at", OffsetDateTime.class), note);
+            }, applicantId).stream().filter(java.util.Objects::nonNull).toList();
     }
 
     /**
@@ -121,6 +171,10 @@ public class ApplicationService {
      * Partial unique index RB-01 là lớp bảo vệ cuối nếu có thao tác song song lọt qua.
      */
     public ApplicationView approve(Long id, String note, Long by) {
+        return approve(id, note, null, by);
+    }
+
+    public ApplicationView approve(Long id, String note, LocalDate handoverDate, Long by) {
         Long petId = applications.findPetIdById(id).orElseThrow(this::notFound);
         Pet pet = petLifecycle.lock(petId);
         AdoptionApplication app = applications.findById(id).orElseThrow(this::notFound);
@@ -137,6 +191,7 @@ public class ApplicationService {
         }
         transition(app, "APPROVED", by, blankToNull(note));
         app.recordReview(blankToNull(note), by);
+        app.scheduleHandover(handoverDate);
         try {
             applications.saveAndFlush(app);
         } catch (DataIntegrityViolationException e) {
@@ -145,6 +200,16 @@ public class ApplicationService {
         petLifecycle.transition(pet, "APPLICATION_APPROVED", by, "Đơn #" + id);
         cascade.cancelOpen(petId, EnumSet.of(ApplicationStatus.PENDING), AUTO_CLOSED_REASON, by);
         return view(app, pet, users.findById(app.getApplicantId()).orElse(null));
+    }
+
+    /** Đổi ngày hẹn bàn giao của đơn đã duyệt (mục 2.1.4 bước 3). */
+    public ApplicationView scheduleHandover(Long id, LocalDate date) {
+        AdoptionApplication app = applications.findById(id).orElseThrow(this::notFound);
+        if (app.getStatus() != ApplicationStatus.APPROVED) {
+            throw BusinessException.conflict("APPLICATION_NOT_APPROVED", "Chỉ hẹn lịch bàn giao cho đơn đã duyệt");
+        }
+        app.scheduleHandover(date);
+        return view(app, pets.findById(app.getPetId()).orElseThrow(), users.findById(app.getApplicantId()).orElse(null));
     }
 
     /** S-2 của UC-10: bắt buộc nhận xét (RB-08). */
@@ -174,7 +239,7 @@ public class ApplicationService {
             applicant == null ? null : new ApplicantBrief(applicant.getId(), applicant.getFullName(),
                 applicant.getEmail(), applicant.getPhone(), applicant.getAddress()),
             a.getHousingType(), a.isHasPetExperience(), a.getMotivation(), a.isSterilizationPledge(), a.getStatus(),
-            a.getReviewNote(), a.getReviewedAt(), a.getCancelReason(), a.getSubmittedAt());
+            a.getReviewNote(), a.getReviewedAt(), a.getHandoverDate(), a.getCancelReason(), a.getSubmittedAt());
     }
 
     private static BusinessException alreadyApproved() {

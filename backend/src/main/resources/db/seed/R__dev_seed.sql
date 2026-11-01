@@ -9,13 +9,13 @@ IF EXISTS (SELECT 1 FROM users) THEN
 END IF;
 
 -- Tài khoản
-INSERT INTO users (id, email, password_hash, full_name, phone, role) VALUES
-  (1, 'manager@aar.local',  '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Nguyễn Văn Quân', '0900000001', 'MANAGER'),
-  (2, 'staff1@aar.local',   '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Trần Thị Lan',    '0900000002', 'STAFF'),
-  (3, 'staff2@aar.local',   '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Lê Minh Tuấn',    '0900000003', 'STAFF'),
-  (4, 'adopter1@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Phạm Thu Hà',     '0900000004', 'ADOPTER'),
-  (5, 'adopter2@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Võ Quốc Bảo',     '0900000005', 'ADOPTER'),
-  (6, 'adopter3@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Đặng Ngọc Mai',   '0900000006', 'ADOPTER');
+INSERT INTO users (id, email, password_hash, full_name, phone, role, address) VALUES
+  (1, 'manager@aar.local',  '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Nguyễn Văn Quân', '0900000001', 'MANAGER', NULL),
+  (2, 'staff1@aar.local',   '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Trần Thị Lan',    '0900000002', 'STAFF', NULL),
+  (3, 'staff2@aar.local',   '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Lê Minh Tuấn',    '0900000003', 'STAFF', NULL),
+  (4, 'adopter1@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Phạm Thu Hà',     '0900000004', 'ADOPTER', '12 Nguyễn Thị Minh Khai, Quận 1'),
+  (5, 'adopter2@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Võ Quốc Bảo',     '0900000005', 'ADOPTER', 'Căn hộ 8.05, Chung cư Sky, Quận 2'),
+  (6, 'adopter3@aar.local', '$2a$10$J54Egu6VIscbm0Ocio7r4.y3kgC9HeCRmwjoyiw3jf0Rwt.EO/cYy', 'Đặng Ngọc Mai',   '0900000006', 'ADOPTER', '45 Lê Văn Sỹ, Quận 3');
 
 INSERT INTO vet_clinics (id, name, address, phone) VALUES
   (1, 'Phòng khám thú y An Bình',  '12 Đường số 3, Quận 7',      '0280000001'),
@@ -84,14 +84,14 @@ INSERT INTO care_logs (pet_id, staff_id, activity_type, weight_kg, note, logged_
 
 -- Yêu cầu thú y
 INSERT INTO vet_requests (id, pet_id, clinic_id, reason, priority, care_mode, status, diagnosis_summary, treatment_summary,
-                          total_cost, aftercare_instructions, created_by, requested_at, completed_at) VALUES
-  (1, 2, 2, 'Nhiễm trùng mắt',               'URGENT',     'INPATIENT',  'IN_TREATMENT', NULL, NULL, NULL, NULL, 2, now() - interval '9 days', NULL),
-  (2, 3, 1, 'Khám tổng quát, tiêm phòng',    'STABLE',     'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 7 bệnh, tẩy giun, triệt sản', 1200000, 'Kiêng tắm 7 ngày', 2, now() - interval '50 days', now() - interval '48 days'),
-  (3, 4, 1, 'Khám tổng quát, tiêm phòng',    'STABLE',     'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 4 bệnh, tẩy giun, triệt sản', 950000, NULL, 2, now() - interval '45 days', now() - interval '44 days'),
-  (4, 5, 2, 'Vết thương cổ, tiêm phòng',     'NEED_CHECK', 'OUTPATIENT', 'COMPLETED', 'Viêm da nhẹ', 'Bôi thuốc, tiêm phòng, triệt sản', 1500000, 'Bôi thuốc ngày 2 lần', 3, now() - interval '45 days', now() - interval '40 days'),
-  (5, 6, 1, 'Khâu tai, tiêm phòng',          'NEED_CHECK', 'OUTPATIENT', 'COMPLETED', 'Rách tai', 'Khâu 3 mũi, tiêm phòng, triệt sản', 1800000, 'Tái khám sau 10 ngày', 3, now() - interval '88 days', now() - interval '85 days'),
-  (6, 7, 2, 'Chụp X-quang chân trước',       'URGENT',     'INPATIENT',  'COMPLETED', 'Nứt xương', 'Bó bột 4 tuần, tiêm phòng, triệt sản', 3500000, 'Hạn chế vận động', 2, now() - interval '79 days', now() - interval '70 days'),
-  (7, 8, 1, 'Suy kiệt, mất nước',            'URGENT',     'INPATIENT',  'COMPLETED', 'Suy thận cấp', 'Truyền dịch', 800000, NULL, 3, now() - interval '20 days', now() - interval '18 days');
+                          total_cost, aftercare_instructions, created_by, requested_at, completed_at, health_ok) VALUES
+  (1, 2, 2, 'Nhiễm trùng mắt',               'URGENT',     'INPATIENT',  'IN_TREATMENT', NULL, NULL, NULL, NULL, 2, now() - interval '9 days', NULL, NULL),
+  (2, 3, 1, 'Khám tổng quát, tiêm phòng',    'STABLE',     'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 7 bệnh, tẩy giun, triệt sản', 1200000, 'Kiêng tắm 7 ngày', 2, now() - interval '50 days', now() - interval '48 days', TRUE),
+  (3, 4, 1, 'Khám tổng quát, tiêm phòng',    'STABLE',     'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 4 bệnh, tẩy giun, triệt sản', 950000, NULL, 2, now() - interval '45 days', now() - interval '44 days', TRUE),
+  (4, 5, 2, 'Vết thương cổ, tiêm phòng',     'NEED_CHECK', 'OUTPATIENT', 'COMPLETED', 'Viêm da nhẹ', 'Bôi thuốc, tiêm phòng, triệt sản', 1500000, 'Bôi thuốc ngày 2 lần', 3, now() - interval '45 days', now() - interval '40 days', TRUE),
+  (5, 6, 1, 'Khâu tai, tiêm phòng',          'NEED_CHECK', 'OUTPATIENT', 'COMPLETED', 'Rách tai', 'Khâu 3 mũi, tiêm phòng, triệt sản', 1800000, 'Tái khám sau 10 ngày', 3, now() - interval '88 days', now() - interval '85 days', TRUE),
+  (6, 7, 2, 'Chụp X-quang chân trước',       'URGENT',     'INPATIENT',  'COMPLETED', 'Nứt xương', 'Bó bột 4 tuần, tiêm phòng, triệt sản', 3500000, 'Hạn chế vận động', 2, now() - interval '79 days', now() - interval '70 days', TRUE),
+  (7, 8, 1, 'Suy kiệt, mất nước',            'URGENT',     'INPATIENT',  'COMPLETED', 'Suy thận cấp', 'Truyền dịch', 800000, NULL, 3, now() - interval '20 days', now() - interval '18 days', FALSE);
 
 -- Đơn nhận nuôi: Vàng có hai đơn đang chờ để demo xử lý đồng thời
 INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation, sterilization_pledge,
@@ -104,6 +104,8 @@ INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_p
   (6, 7, 4, 'HOUSE',     TRUE,  'Muốn nuôi chó giữ nhà',     FALSE, 'HANDED_OVER', 'Phù hợp', 2, now() - interval '62 days', now() - interval '65 days'),
   (7, 4, 5, 'APARTMENT', FALSE, 'Muốn nuôi mèo',             FALSE, 'REJECTED',    'Chung cư không cho nuôi thú', 2, now() - interval '10 days', now() - interval '12 days');
 UPDATE adoption_applications SET cancel_reason = 'Hệ thống tự đóng: thú đã có đơn khác được duyệt' WHERE id = 5;
+-- Đơn đã duyệt của Đốm có lịch hẹn bàn giao (mục 2.1.4 bước 3)
+UPDATE adoption_applications SET handover_date = current_date + 2 WHERE id = 3;
 
 -- Bàn giao: Miu đang hậu kiểm, Lu đã bị trả lại
 INSERT INTO handovers (id, application_id, pet_id, staff_id, handed_over_at, donation_amount, note, follow_up_status) VALUES

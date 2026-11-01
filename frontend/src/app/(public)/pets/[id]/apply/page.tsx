@@ -15,7 +15,7 @@ import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { ApiRequestError, errorMessage } from "@/lib/api";
 import { petName } from "@/lib/format";
-import type { ApplicationView, HousingType, PublicPet } from "@/types/api";
+import type { ApplicationView, HousingType, MeView, PublicPet } from "@/types/api";
 
 const HOUSING_CHOICES: { value: HousingType; label: string }[] = [
   { value: "HOUSE", label: "Nhà riêng" },
@@ -29,6 +29,10 @@ function ApplyForm() {
   const toast = useToast();
   const mutate = useMutation();
   const { data: pet, error: loadError, loading } = useApi<PublicPet>(`/api/public/pets/${id}`);
+  // Nhân viên cần liên hệ khi xét duyệt, hậu kiểm: tài khoản thiếu số điện thoại hoặc địa chỉ thì hỏi bổ sung
+  const { data: me } = useApi<MeView>("/api/me");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   const [housing, setHousing] = useState<HousingType | null>(null);
   const [experience, setExperience] = useState<"yes" | "no" | null>(null);
@@ -38,7 +42,7 @@ function ApplyForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (loading && !pet) return <Skeleton card lines={6} />;
+  if ((loading && !pet) || !me) return <Skeleton card lines={6} />;
   if (!pet) {
     return (
       <Notice tone="error" title="Không mở được đơn" action={<Link href="/">Xem các bé khác</Link>}>
@@ -49,7 +53,12 @@ function ApplyForm() {
 
   const name = petName(pet.name, pet.code);
   const needPledge = !pet.sterilized;
+  const needPhone = !me.phone;
+  const needAddress = !me.address;
+  const phoneValid = /^[0-9+]{9,15}$/.test(phone.trim());
   const errors = {
+    phone: touched && needPhone && !phoneValid ? "Nhập số điện thoại 9 đến 15 chữ số để nhân viên liên hệ." : null,
+    address: touched && needAddress && !address.trim() ? "Nhập địa chỉ nơi bé sẽ sống." : null,
     housing: touched && !housing ? "Chọn loại nhà ở hiện tại." : null,
     experience: touched && !experience ? "Cho biết bạn đã từng nuôi chó mèo chưa." : null,
     pledge: touched && needPledge && !pledge ? "Bé chưa triệt sản, bạn cần cam kết để nộp đơn." : null,
@@ -59,6 +68,7 @@ function ApplyForm() {
     event.preventDefault();
     setTouched(true);
     if (!housing || !experience || (needPledge && !pledge) || !pet) return;
+    if ((needPhone && !phoneValid) || (needAddress && !address.trim())) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -69,6 +79,8 @@ function ApplyForm() {
           hasPetExperience: experience === "yes",
           motivation: motivation.trim() || null,
           sterilizationPledge: needPledge ? pledge : null,
+          phone: needPhone ? phone.trim() : null,
+          address: needAddress ? address.trim() : null,
         },
       });
       toast.success(`Đã nộp đơn nhận nuôi ${name}. Nhân viên sẽ liên hệ với bạn.`);
@@ -96,6 +108,24 @@ function ApplyForm() {
     >
       <form className="stack stack--lg" onSubmit={handleSubmit} noValidate>
         {error && <Notice tone="error">{error}</Notice>}
+        {(needPhone || needAddress) && (
+          <div className="stack">
+            <Notice tone="info">
+              Tài khoản của bạn chưa có {needPhone && needAddress ? "số điện thoại và địa chỉ" : needPhone ? "số điện thoại" : "địa chỉ"}.
+              Nhân viên cần thông tin này để liên hệ khi xét duyệt và hậu kiểm, hệ thống sẽ lưu lại cho lần sau.
+            </Notice>
+            {needPhone && (
+              <Field label="Số điện thoại" required error={errors.phone}>
+                <input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              </Field>
+            )}
+            {needAddress && (
+              <Field label="Địa chỉ" required hint="Nơi bé sẽ sống, dùng cho lần hậu kiểm thăm nhà." error={errors.address}>
+                <input autoComplete="street-address" maxLength={255} value={address} onChange={(e) => setAddress(e.target.value)} />
+              </Field>
+            )}
+          </div>
+        )}
         <ChoiceGroup
           legend="Bạn đang ở"
           required

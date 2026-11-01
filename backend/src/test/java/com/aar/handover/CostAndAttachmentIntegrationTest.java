@@ -48,7 +48,7 @@ class CostAndAttachmentIntegrationTest extends IntegrationTestBase {
         long vetId = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
             map("clinicId", 1, "reason", "Khám", "priority", "STABLE", "careMode", "OUTPATIENT"), 201)
             .get("request").get("id").asLong();
-        String data = json.writeValueAsString(map("diagnosisSummary", "Ổn", "totalCost", 120000));
+        String data = json.writeValueAsString(map("diagnosisSummary", "Ổn", "totalCost", 120000, "healthOk", true));
         JsonNode res = call(multipart("/api/staff/vet-requests/" + vetId + "/complete")
             .file(new MockMultipartFile("data", "", MediaType.APPLICATION_JSON_VALUE, data.getBytes()))
             .file(new MockMultipartFile("files", "phieu-kham.pdf", MediaType.APPLICATION_PDF_VALUE, new byte[]{37, 80, 68, 70})),

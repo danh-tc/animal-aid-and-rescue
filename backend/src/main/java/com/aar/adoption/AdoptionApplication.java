@@ -54,6 +54,10 @@ public class AdoptionApplication {
     @Column(name = "cancel_reason")
     private String cancelReason;
 
+    /** Ngày hẹn bàn giao, nhân viên ghi khi duyệt hoặc đổi sau (mục 2.1.4 bước 3). */
+    @Column(name = "handover_date")
+    private java.time.LocalDate handoverDate;
+
     @Column(name = "submitted_at", nullable = false, updatable = false)
     private OffsetDateTime submittedAt;
 
@@ -100,6 +104,11 @@ public class AdoptionApplication {
     public String getReviewNote() { return reviewNote; }
     public Long getReviewedBy() { return reviewedBy; }
     public OffsetDateTime getReviewedAt() { return reviewedAt; }
+    public java.time.LocalDate getHandoverDate() { return handoverDate; }
+
+    public void scheduleHandover(java.time.LocalDate date) {
+        this.handoverDate = date;
+    }
     public String getCancelReason() { return cancelReason; }
     public OffsetDateTime getSubmittedAt() { return submittedAt; }
 }

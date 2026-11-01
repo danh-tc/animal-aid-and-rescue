@@ -60,6 +60,12 @@ export interface UserView {
   role: Role;
 }
 
+/** GET /api/me: thêm số điện thoại, địa chỉ để form nộp đơn biết cần hỏi bổ sung không. */
+export interface MeView extends UserView {
+  phone: string | null;
+  address: string | null;
+}
+
 export interface AuthResponse {
   accessToken: string;
   expiresInMinutes: number;
@@ -228,6 +234,8 @@ export interface VetRequestView {
   treatmentSummary: string | null;
   totalCost: number | null;
   aftercareInstructions: string | null;
+  /** Kết luận sức khỏe của lần khám (checklist mục 1), có khi đã hoàn tất */
+  healthOk: boolean | null;
   cancelReason: string | null;
   requestedAt: string;
   completedAt: string | null;
@@ -313,6 +321,9 @@ export interface SubmitApplicationRequest {
   hasPetExperience: boolean;
   motivation?: string | null;
   sterilizationPledge?: boolean | null;
+  /** Bắt buộc nếu tài khoản chưa có, được lưu vào tài khoản */
+  phone?: string | null;
+  address?: string | null;
 }
 
 export interface ApplicationView {
@@ -326,14 +337,27 @@ export interface ApplicationView {
   status: ApplicationStatus;
   reviewNote: string | null;
   reviewedAt: string | null;
+  /** Ngày hẹn bàn giao (yyyy-mm-dd) của đơn đã duyệt */
+  handoverDate: string | null;
   cancelReason: string | null;
   submittedAt: string;
+}
+
+/** Lịch sử nhận nuôi của người nộp đơn để cảnh báo khi xét duyệt. */
+export interface ApplicantFlag {
+  kind: "RECALLED" | "RETURNED";
+  petId: number;
+  petCode: string;
+  petName: string | null;
+  handedOverAt: string;
+  note: string;
 }
 
 export interface ApplicationDetail {
   application: ApplicationView;
   petStatus: PetStatus;
   otherApplications: ApplicationView[];
+  applicantHistory: ApplicantFlag[];
 }
 
 /* ---------- Bàn giao, hậu kiểm ---------- */

@@ -109,13 +109,16 @@ public final class CareDtos {
         @Size(max = 2000) String diagnosisSummary,
         @Size(max = 2000) String treatmentSummary,
         @NotNull @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal totalCost,
-        @Size(max = 2000) String aftercareInstructions) {
+        @Size(max = 2000) String aftercareInstructions,
+        /** Kết luận sức khỏe ổn hay chưa (checklist mục 1). */
+        @NotNull Boolean healthOk) {
     }
 
     public record VetRequestView(Long id, Long petId, Long clinicId, String clinicName, String reason,
                                  Priority priority, CareMode careMode, VetRequestStatus status,
                                  String diagnosisSummary, String treatmentSummary, BigDecimal totalCost,
-                                 String aftercareInstructions, String cancelReason, OffsetDateTime requestedAt,
+                                 String aftercareInstructions, Boolean healthOk, String cancelReason,
+                                 OffsetDateTime requestedAt,
                                  OffsetDateTime completedAt) {
     }
 

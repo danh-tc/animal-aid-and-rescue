@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Mail, PackageCheck, Phone, X } from "lucide-react";
+import { CalendarClock, Check, Mail, PackageCheck, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/skeleton/Skeleton";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { ApiRequestError } from "@/lib/api";
-import { formatDateTime, petName } from "@/lib/format";
+import { formatDate, formatDateTime, petName, todayIso } from "@/lib/format";
 import { APPLICATION_STATUS, HOUSING, PET_STATUS } from "@/lib/labels";
 import type { ApplicationDetail, HandoverView } from "@/types/api";
 import "../../detail-page.scss";
@@ -28,7 +28,8 @@ export default function ApplicationDetailPage() {
   const { data, error, loading, reload } = useApi<ApplicationDetail>(`/api/staff/applications/${id}`);
   const mutate = useMutation();
   const toast = useToast();
-  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | null>(null);
+  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | "schedule" | null>(null);
+  const [handoverDate, setHandoverDate] = useState(todayIso(2));
   const [note, setNote] = useState("");
   const [donation, setDonation] = useState("0");
   const [handover, setHandover] = useState<HandoverView | null>(null);
@@ -38,14 +39,16 @@ export default function ApplicationDetailPage() {
   const a = data.application;
   const name = petName(a.pet.name, a.pet.code);
 
-  function openDialog(kind: "approve" | "reject" | "handover") {
+  function openDialog(kind: "approve" | "reject" | "handover" | "schedule") {
     setNote("");
+    setHandoverDate(a.handoverDate ?? todayIso(2));
     setDialog(kind);
   }
 
   async function approve() {
     try {
-      await mutate(`/api/staff/applications/${id}/approve`, { body: { note: note.trim() || null } });
+      if (!handoverDate || handoverDate < todayIso()) throw new Error("Chọn ngày hẹn bàn giao từ hôm nay trở đi.");
+      await mutate(`/api/staff/applications/${id}/approve`, { body: { note: note.trim() || null, handoverDate } });
     } catch (e) {
       if (e instanceof ApiRequestError && e.code === "PET_ALREADY_APPROVED") {
         reload();
@@ -54,6 +57,14 @@ export default function ApplicationDetailPage() {
       throw e;
     }
     toast.success(`Đã duyệt đơn. ${name} chuyển sang Chờ bàn giao, các đơn chờ khác đã tự đóng.`);
+    setDialog(null);
+    reload();
+  }
+
+  async function schedule() {
+    if (!handoverDate || handoverDate < todayIso()) throw new Error("Chọn ngày hẹn bàn giao từ hôm nay trở đi.");
+    await mutate(`/api/staff/applications/${id}/handover-date`, { body: { handoverDate } });
+    toast.success(`Đã hẹn bàn giao ngày ${formatDate(handoverDate)}.`);
     setDialog(null);
     reload();
   }
@@ -105,9 +116,14 @@ export default function ApplicationDetailPage() {
               </>
             )}
             {a.status === "APPROVED" && (
-              <Button icon={<PackageCheck aria-hidden="true" />} onClick={() => openDialog("handover")}>
-                Bàn giao
-              </Button>
+              <>
+                <Button variant="ghost" icon={<CalendarClock aria-hidden="true" />} onClick={() => openDialog("schedule")}>
+                  {a.handoverDate ? "Đổi ngày hẹn" : "Hẹn ngày bàn giao"}
+                </Button>
+                <Button icon={<PackageCheck aria-hidden="true" />} onClick={() => openDialog("handover")}>
+                  Bàn giao
+                </Button>
+              </>
             )}
           </>
         }
@@ -115,6 +131,23 @@ export default function ApplicationDetailPage() {
 
       <div className="detail-page">
         <div className="detail-page__main">
+          {data.applicantHistory.filter((f) => f.kind === "RECALLED").map((f) => (
+            <Notice key={`r-${f.petId}`} tone="error" title="Người nộp từng bị thu hồi thú">
+              {petName(f.petName, f.petCode)} ({f.petCode}), bàn giao {formatDate(f.handedOverAt)}: {f.note}.{" "}
+              <Link href={`/staff/pets/${f.petId}?tab=handovers`}>Xem lịch sử</Link>
+            </Notice>
+          ))}
+          {data.applicantHistory.filter((f) => f.kind === "RETURNED").map((f) => (
+            <Notice key={`t-${f.petId}`} tone="warning" title="Người nộp từng trả lại thú">
+              {petName(f.petName, f.petCode)} ({f.petCode}), bàn giao {formatDate(f.handedOverAt)}. {f.note}.{" "}
+              <Link href={`/staff/pets/${f.petId}?tab=handovers`}>Xem lịch sử</Link>
+            </Notice>
+          ))}
+          {a.status === "APPROVED" && (
+            <Notice tone={a.handoverDate ? "info" : "warning"} title={a.handoverDate ? `Hẹn bàn giao ngày ${formatDate(a.handoverDate)}` : "Chưa hẹn ngày bàn giao"}>
+              {a.handoverDate ? "Người nhận nuôi thấy ngày hẹn trong mục Đơn của tôi." : "Bấm Hẹn ngày bàn giao để báo cho người nhận nuôi."}
+            </Notice>
+          )}
           {a.status === "PENDING" && data.petStatus !== "AVAILABLE" && (
             <Notice tone="warning" title="Chưa duyệt được">
               Bé đang ở trạng thái {PET_STATUS[data.petStatus].label.toLowerCase()}, chỉ duyệt được khi bé Sẵn sàng nhận nuôi.
@@ -213,8 +246,23 @@ export default function ApplicationDetailPage() {
         submitLabel="Duyệt đơn"
         onSubmit={approve}
       >
+        <Field label="Ngày hẹn bàn giao" required hint="Người nhận nuôi thấy ngày này trong mục Đơn của tôi, đổi được sau.">
+          <input type="date" min={todayIso()} value={handoverDate} onChange={(e) => setHandoverDate(e.target.value)} required />
+        </Field>
         <Field label="Ghi chú" hint="Không bắt buộc, người nộp đơn sẽ thấy ghi chú này.">
           <textarea rows={3} maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} />
+        </Field>
+      </Dialog>
+
+      <Dialog
+        open={dialog === "schedule"}
+        onClose={() => setDialog(null)}
+        title="Hẹn ngày bàn giao"
+        submitLabel="Lưu ngày hẹn"
+        onSubmit={schedule}
+      >
+        <Field label="Ngày hẹn bàn giao" required>
+          <input type="date" min={todayIso()} value={handoverDate} onChange={(e) => setHandoverDate(e.target.value)} required />
         </Field>
       </Dialog>
 

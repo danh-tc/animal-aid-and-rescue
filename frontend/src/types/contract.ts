@@ -18,6 +18,8 @@ type Expect<T extends true> = T;
 export type Contract = [
   Expect<SameKeys<S["PublicPet"], Api.PublicPet>>,
   Expect<SameKeys<S["UserView"], Api.UserView>>,
+  Expect<SameKeys<S["MeView"], Api.MeView>>,
+  Expect<SameKeys<S["ApplicantFlag"], Api.ApplicantFlag>>,
   Expect<SameKeys<S["AuthResponse"], Api.AuthResponse>>,
   Expect<SameKeys<S["ReportReceipt"], Api.ReportReceipt>>,
   Expect<SameKeys<S["ReportLookup"], Api.ReportLookup>>,

@@ -3,9 +3,10 @@
 import { CheckCircle2, Play, Upload, XCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { StatusBadge } from "@/components/badge/Badge";
+import { Badge, StatusBadge } from "@/components/badge/Badge";
 import { AttachmentList } from "@/components/attachment-list/AttachmentList";
 import { Button, LinkButton } from "@/components/button/Button";
+import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
 import { FilePicker, filesValid } from "@/components/file-picker/FilePicker";
@@ -30,6 +31,7 @@ export default function VetRequestDetailPage() {
   const [dialog, setDialog] = useState<"complete" | "cancel" | "upload" | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState({ diagnosis: "", treatment: "", cost: "", aftercare: "" });
+  const [healthOk, setHealthOk] = useState<"yes" | "no" | null>(null);
   const [reason, setReason] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [completeFiles, setCompleteFiles] = useState<File[]>([]);
@@ -59,6 +61,7 @@ export default function VetRequestDetailPage() {
   async function complete() {
     const cost = Number(done.cost);
     if (done.cost === "" || !(cost >= 0) || !Number.isInteger(cost)) throw new Error("Nhập tổng chi phí là số nguyên VND, không âm.");
+    if (!healthOk) throw new Error("Chọn kết luận sức khỏe sau lần khám.");
     if (!filesValid(completeFiles)) throw new Error("Có tệp lớn hơn 5MB.");
     // Mục 5.2: multipart gồm phần "data" (JSON kết quả) và "files" (phiếu khám) trong cùng một yêu cầu
     const data = new FormData();
@@ -67,6 +70,7 @@ export default function VetRequestDetailPage() {
       treatmentSummary: done.treatment.trim() || null,
       totalCost: cost,
       aftercareInstructions: done.aftercare.trim() || null,
+      healthOk: healthOk === "yes",
     };
     data.append("data", new Blob([JSON.stringify(result)], { type: "application/json" }));
     completeFiles.forEach((f) => data.append("files", f));
@@ -148,6 +152,10 @@ export default function VetRequestDetailPage() {
                         { label: "Chẩn đoán", value: v.diagnosisSummary, wide: true },
                         { label: "Điều trị", value: v.treatmentSummary, wide: true },
                         { label: "Hướng dẫn chăm sóc", value: v.aftercareInstructions, wide: true },
+                        {
+                          label: "Kết luận",
+                          value: v.healthOk ? <Badge tone="success">Sức khỏe ổn</Badge> : <Badge tone="warning">Chưa ổn</Badge>,
+                        },
                         { label: "Tổng chi phí", value: formatMoney(v.totalCost) },
                         { label: "Hoàn tất lúc", value: formatDateTime(v.completedAt) },
                       ]
@@ -189,6 +197,17 @@ export default function VetRequestDetailPage() {
         <Field label="Tổng chi phí (VND)" required hint="Bắt buộc khi hoàn tất, nhập 0 nếu miễn phí.">
           <input type="number" min={0} step={1000} inputMode="numeric" value={done.cost} onChange={(e) => setDone({ ...done, cost: e.target.value })} required />
         </Field>
+        <ChoiceGroup
+          legend="Kết luận sức khỏe"
+          required
+          columns={2}
+          value={healthOk}
+          onChange={setHealthOk}
+          choices={[
+            { value: "yes", label: "Sức khỏe ổn", hint: "Đạt mục 1 của checklist nhận nuôi" },
+            { value: "no", label: "Chưa ổn", hint: "Cần theo dõi hoặc tái khám" },
+          ]}
+        />
         <FilePicker
           label="Phiếu khám (không bắt buộc)"
           files={completeFiles}

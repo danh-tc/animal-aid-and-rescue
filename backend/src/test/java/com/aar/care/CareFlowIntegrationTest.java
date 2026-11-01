@@ -46,7 +46,7 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         // Hoàn tất phải có chi phí (RB-07)
         postJson("/api/staff/vet-requests/" + firstId + "/complete", STAFF, map("diagnosisSummary", "Ổn"), 400);
         JsonNode done = postJson("/api/staff/vet-requests/" + firstId + "/complete", STAFF,
-            map("diagnosisSummary", "Viêm kết mạc", "totalCost", 750000, "aftercareInstructions", "Nhỏ mắt"), 200);
+            map("diagnosisSummary", "Viêm kết mạc", "totalCost", 750000, "aftercareInstructions", "Nhỏ mắt", "healthOk", true), 200);
         assertThat(done.get("request").get("status").asText()).isEqualTo("COMPLETED");
         assertThat(done.get("petStatus").asText()).isEqualTo("IN_TREATMENT");
 
@@ -93,7 +93,7 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         JsonNode vet = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
             map("clinicId", 1, "reason", "Khám", "priority", "STABLE", "careMode", "OUTPATIENT"), 201);
         postJson("/api/staff/vet-requests/" + vet.get("request").get("id").asLong() + "/complete", STAFF,
-            map("totalCost", 0), 200);
+            map("totalCost", 0, "healthOk", true), 200);
         backdateIntakes(petId, 30);
         JsonNode result = putJson("/api/staff/pets/" + petId + "/eligibility", STAFF,
             map("vaccinated", true, "dewormed", true, "sterilized", false, "temperamentOk", true), 200);
@@ -166,5 +166,27 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         List<String> out = new ArrayList<>();
         array.forEach(n -> out.add(n.get(field).asText()));
         return out;
+    }
+
+    /** Checklist mục 1: lần khám hoàn tất gần nhất phải kết luận sức khỏe ổn. */
+    @Test
+    void healthItemFollowsLatestExamConclusion() throws Exception {
+        long petId = rescuedPet("CAT", LocalDate.now().minusDays(300));
+        long first = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
+            map("clinicId", 1, "reason", "Khám", "priority", "STABLE", "careMode", "OUTPATIENT"), 201).get("request").get("id").asLong();
+        // Thiếu kết luận thì không hoàn tất được
+        postJson("/api/staff/vet-requests/" + first + "/complete", STAFF, map("totalCost", 100000), 400);
+        JsonNode notOk = postJson("/api/staff/vet-requests/" + first + "/complete", STAFF,
+            map("totalCost", 100000, "healthOk", false, "diagnosisSummary", "Viêm phổi nhẹ"), 200);
+        assertThat(notOk.get("request").get("healthOk").asBoolean()).isFalse();
+        JsonNode health = getJson("/api/staff/pets/" + petId, STAFF, 200).get("checklist").get("items").get(0);
+        assertThat(health.get("passed").asBoolean()).isFalse();
+        assertThat(health.get("detail").asText()).contains("chưa ổn");
+
+        long second = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
+            map("clinicId", 1, "reason", "Tái khám", "priority", "STABLE", "careMode", "OUTPATIENT"), 201).get("request").get("id").asLong();
+        postJson("/api/staff/vet-requests/" + second + "/complete", STAFF, map("totalCost", 50000, "healthOk", true), 200);
+        assertThat(getJson("/api/staff/pets/" + petId, STAFF, 200).get("checklist").get("items").get(0)
+            .get("passed").asBoolean()).isTrue();
     }
 }

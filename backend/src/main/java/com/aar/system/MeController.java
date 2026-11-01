@@ -3,7 +3,7 @@ package com.aar.system;
 import com.aar.common.error.BusinessException;
 import com.aar.common.security.AuthUser;
 import com.aar.common.security.CurrentUser;
-import com.aar.system.AuthDtos.UserView;
+import com.aar.system.AuthDtos.MeView;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,8 +18,8 @@ public class MeController {
     }
 
     @GetMapping("/api/me")
-    public UserView me(@CurrentUser AuthUser current) {
-        return users.findById(current.id()).map(UserView::of)
+    public MeView me(@CurrentUser AuthUser current) {
+        return users.findById(current.id()).map(MeView::of)
             .orElseThrow(() -> BusinessException.notFound("Không tìm thấy tài khoản"));
     }
 }

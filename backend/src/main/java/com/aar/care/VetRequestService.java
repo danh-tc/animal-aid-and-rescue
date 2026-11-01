@@ -96,7 +96,7 @@ public class VetRequestService {
         Pet pet = petLifecycle.lock(request.getPetId());
         // Ghi kết quả trước khi đổi trạng thái: CHECK ck_vet_completed_cost đòi COMPLETED phải có chi phí (RB-07)
         request.recordResult(blankToNull(req.diagnosisSummary()), blankToNull(req.treatmentSummary()),
-            req.totalCost(), blankToNull(req.aftercareInstructions()));
+            req.totalCost(), blankToNull(req.aftercareInstructions()), req.healthOk());
         transition(request, "COMPLETED", by, null);
         storage.store(AttachmentOwner.VET_REQUEST, request.getId(), files);
         closeTreatmentIfDone(pet, by);
@@ -179,7 +179,7 @@ public class VetRequestService {
     private static VetRequestView view(VetRequest r, VetClinic clinic) {
         return new VetRequestView(r.getId(), r.getPetId(), r.getClinicId(), clinic == null ? null : clinic.getName(),
             r.getReason(), r.getPriority(), r.getCareMode(), r.getStatus(), r.getDiagnosisSummary(),
-            r.getTreatmentSummary(), r.getTotalCost(), r.getAftercareInstructions(), r.getCancelReason(),
+            r.getTreatmentSummary(), r.getTotalCost(), r.getAftercareInstructions(), r.getHealthOk(), r.getCancelReason(),
             r.getRequestedAt(), r.getCompletedAt());
     }
 

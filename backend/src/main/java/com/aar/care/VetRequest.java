@@ -54,6 +54,10 @@ public class VetRequest {
     @Column(name = "aftercare_instructions")
     private String aftercareInstructions;
 
+    /** Kết luận lần khám: sức khỏe ổn (checklist mục 1 dựa vào lần hoàn tất gần nhất). */
+    @Column(name = "health_ok")
+    private Boolean healthOk;
+
     @Column(name = "cancel_reason")
     private String cancelReason;
 
@@ -88,7 +92,8 @@ public class VetRequest {
         }
     }
 
-    public void recordResult(String diagnosis, String treatment, BigDecimal totalCost, String aftercare) {
+    public void recordResult(String diagnosis, String treatment, BigDecimal totalCost, String aftercare, boolean healthOk) {
+        this.healthOk = healthOk;
         this.diagnosisSummary = diagnosis;
         this.treatmentSummary = treatment;
         this.totalCost = totalCost;
@@ -109,6 +114,7 @@ public class VetRequest {
     public String getDiagnosisSummary() { return diagnosisSummary; }
     public String getTreatmentSummary() { return treatmentSummary; }
     public BigDecimal getTotalCost() { return totalCost; }
+    public Boolean getHealthOk() { return healthOk; }
     public String getAftercareInstructions() { return aftercareInstructions; }
     public String getCancelReason() { return cancelReason; }
     public Long getCreatedBy() { return createdBy; }

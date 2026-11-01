@@ -134,7 +134,7 @@ Toàn bộ phạm vi Đợt 2 ở báo cáo mục 5.1, cùng các chỗ trước
 | Sinh client TypeScript từ springdoc | mục 5.1 | `npm run gen:api` (backend đang chạy) => `src/types/openapi.ts`, `src/types/contract.ts` báo lỗi biên dịch khi API đổi |
 | Sao lưu hằng ngày và khôi phục | NFR-06 | xem bên dưới |
 
-Test backend: 142 test (`mvn test`). Kịch bản demo kèm tài khoản: [docs/demo.md](docs/demo.md). Đo NFR-04: `node scripts/perf-check.mjs`. Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
+Test backend: 147 test (`mvn test`). Kịch bản demo kèm tài khoản: [docs/demo.md](docs/demo.md). Đo NFR-04: `node scripts/perf-check.mjs`. Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
 
 ### Sao lưu và khôi phục (NFR-06)
 

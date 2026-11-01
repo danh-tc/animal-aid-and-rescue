@@ -42,10 +42,13 @@ public class EligibilityService {
 
     public Checklist evaluate(Pet pet) {
         long open = vetRequests.countByPetIdAndStatusIn(pet.getId(), VetRequestStatus.OPEN);
-        boolean everExamined = vetRequests.existsByPetIdAndStatus(pet.getId(), VetRequestStatus.COMPLETED);
-        boolean health = open == 0 && everExamined;
+        // Checklist mục 1: không còn yêu cầu mở và lần khám hoàn tất gần nhất kết luận ổn
+        var lastExam = vetRequests.findFirstByPetIdAndStatusOrderByCompletedAtDesc(pet.getId(), VetRequestStatus.COMPLETED);
+        boolean lastOk = lastExam.map(v -> Boolean.TRUE.equals(v.getHealthOk())).orElse(false);
+        boolean health = open == 0 && lastOk;
         String healthDetail = open > 0 ? "Còn " + open + " yêu cầu thú y đang mở"
-            : everExamined ? null : "Chưa qua thú y lần nào (QĐ-05)";
+            : lastExam.isEmpty() ? "Chưa qua thú y lần nào (QĐ-05)"
+            : lastOk ? null : "Lần khám gần nhất kết luận sức khỏe chưa ổn";
 
         Long ageWeeks = pet.getEstimatedBirthDate() == null ? null
             : ChronoUnit.WEEKS.between(pet.getEstimatedBirthDate(), LocalDate.now());

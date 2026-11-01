@@ -118,7 +118,7 @@ Mọi thú đều qua thú y ít nhất một lần (khám tổng quát, tiêm p
 
 **Checklist đủ điều kiện nhận nuôi** (đủ tất cả mới được chuyển sang Sẵn sàng)
 
-1. Sức khỏe ổn định: không còn yêu cầu thú y đang mở, lần khám gần nhất kết luận ổn.
+1. Sức khỏe ổn định: không còn yêu cầu thú y đang mở, lần khám gần nhất kết luận ổn (nhân viên ghi kết luận sức khỏe khi hoàn tất yêu cầu thú y).
 2. Đã tiêm phòng cơ bản theo loài (chó, mèo).
 3. Đã tẩy giun, ký sinh trùng.
 4. Đủ tuổi tách mẹ.
@@ -134,9 +134,9 @@ Ngưỡng cụ thể (số tuần tuổi, số ngày theo dõi) lấy từ khả
 | Mục tiêu | Chọn được một người nhận nuôi phù hợp cho mỗi thú |
 | Tác nhân | Người nhận nuôi (bắt buộc có tài khoản), Nhân viên |
 | Kích hoạt | Người nhận nuôi chọn một thú đang Sẵn sàng và nộp đơn |
-| Bước chính | 1. Nộp đơn => 2. Nhân viên thẩm định (thông tin, điều kiện nuôi) và duyệt hoặc từ chối => 3. Đơn duyệt: hẹn lịch bàn giao |
+| Bước chính | 1. Nộp đơn => 2. Nhân viên thẩm định (thông tin, điều kiện nuôi) và duyệt hoặc từ chối => 3. Đơn duyệt: nhân viên ghi ngày hẹn bàn giao trên hệ thống (đổi được), người nhận nuôi thấy ngày hẹn trong mục Đơn của tôi |
 | Ngoại lệ | Nhiều đơn cho cùng một thú: chỉ một đơn được duyệt, các đơn còn lại tự đóng. Người nhận nuôi hủy đơn. Thú không đủ điều kiện khi đơn đang chờ: đơn bị đóng |
-| Dữ liệu | Đơn nhận nuôi (kèm cam kết triệt sản nếu thú chưa triệt sản), Người dùng |
+| Dữ liệu | Đơn nhận nuôi (kèm cam kết triệt sản nếu thú chưa triệt sản, ngày hẹn bàn giao), Người dùng (số điện thoại, địa chỉ) |
 | Trạng thái | Đơn: Chờ xét duyệt => Đã duyệt / Từ chối / Đã hủy. Đã duyệt => Đã bàn giao / Đã hủy. Thú: Sẵn sàng => Chờ bàn giao |
 
 ### 2.1.5. Bàn giao, hậu kiểm và trả lại
@@ -163,7 +163,7 @@ Mỗi lần hậu kiểm, nhân viên đánh giá 5 tiêu chí cố định: s�
 | Cần theo dõi | Có vấn đề nhỏ, khắc phục được | Thú chưa thích nghi, chậm tiêm nhắc, chỗ ở chưa phù hợp, lần đầu không liên lạc được |
 | Không đạt | Vi phạm nghiêm trọng hoặc không cải thiện | Thú bị bỏ bê hoặc ngược đãi, chủ tự ý cho hoặc bán thú, quá hạn cam kết triệt sản, không liên lạc được sau lần hậu kiểm bổ sung, hoặc đã Cần theo dõi mà lần bổ sung vẫn không cải thiện |
 
-Hệ thống chỉ ghi nhận kết quả Không đạt. Khi thú thực sự về trung tâm, nhân viên tạo lượt tiếp nhận mới. Trường hợp chủ nuôi không chịu trả thú là vấn đề pháp lý, nằm ngoài phạm vi.
+Kết quả do nhân viên chọn theo bảng tiêu chí trên, hệ thống không tự suy ra. Hệ thống chỉ ghi nhận kết quả Không đạt. Khi thú thực sự về trung tâm, nhân viên tạo lượt tiếp nhận mới. Trường hợp chủ nuôi không chịu trả thú là vấn đề pháp lý, nằm ngoài phạm vi.
 
 ### 2.1.6. Sự kiện kết thúc vòng đời
 
@@ -171,7 +171,7 @@ Ba sự kiện này đưa thú vào trạng thái kết thúc. Hồ sơ và toà
 
 | Sự kiện | Xảy ra khi | Xử lý kèm theo |
 | --- | --- | --- |
-| Qua đời | Khi thú ở trung tâm hoặc trong thời gian hậu kiểm | Hủy yêu cầu thú y đang mở, đóng các đơn đang chờ hoặc đã duyệt |
+| Qua đời | Khi thú ở trung tâm hoặc trong thời gian hậu kiểm | Hủy yêu cầu thú y đang mở (hệ thống nhắc ghi kết quả và chi phí trước để không thiếu trong 3 con số chi phí), đóng các đơn đang chờ hoặc đã duyệt |
 | Thất lạc | Thú trốn khỏi trung tâm, hoặc đi lạc trong thời gian hậu kiểm | Như trên, ghi ngày và nơi mất. Tìm lại được: tạo lượt tiếp nhận mới trên hồ sơ cũ |
 | Chuyển cơ sở | Chuyển thú sang tổ chức khác ngoài hệ thống | Như trên, ghi nơi nhận, ngày và lý do |
 
@@ -224,7 +224,7 @@ Ba sự kiện này đưa thú vào trạng thái kết thúc. Hồ sơ và toà
 | QĐ-05 | Mọi việc cần bác sĩ đi qua Yêu cầu thú y. Mọi thú qua thú y ít nhất một lần trước khi Sẵn sàng | 2.1.3 |
 | QĐ-06 | Thú ở Đang điều trị khi có ít nhất một yêu cầu thú y mở, và về Đang chăm sóc khi yêu cầu cuối cùng đóng | 2.1.3 |
 | QĐ-07 | Chỉ chuyển sang Sẵn sàng khi đạt đủ 6 mục checklist | 2.1.3 |
-| QĐ-08 | Chỉ thú Sẵn sàng mới nhận đơn. Người nộp phải có tài khoản | 2.1.4 |
+| QĐ-08 | Chỉ thú Sẵn sàng mới nhận đơn. Người nộp phải có tài khoản có số điện thoại và địa chỉ (thiếu thì nhập bổ sung khi nộp đơn) và có tối đa 5 đơn đang chờ (tham số MAX\_PENDING\_APPLICATIONS) | 2.1.4 |
 | QĐ-09 | Mỗi thú có tối đa một đơn Đã duyệt. Khi một đơn được duyệt, các đơn đang chờ khác tự đóng | 2.1.4 |
 | QĐ-10 | Thú không đủ điều kiện khi đang Sẵn sàng hoặc Chờ bàn giao thì về Đang chăm sóc, đơn đang chờ hoặc đã duyệt bị hủy | 2.1.3 |
 | QĐ-11 | Hủy trước bàn giao: thú về Sẵn sàng, các đơn đã đóng không mở lại | 2.1.5 |
@@ -353,14 +353,14 @@ Cách đánh số luồng ngoại lệ theo slide chương 2: số đầu là b�
 **Luồng chính**
 
 1. Nhân viên mở danh sách đơn Chờ xét duyệt và chọn một đơn.
-2. Hệ thống hiển thị thông tin người nhận nuôi, thú và các đơn khác cho cùng thú.
+2. Hệ thống hiển thị thông tin người nhận nuôi, thú, các đơn khác cho cùng thú, và cảnh báo nếu người nộp từng bị thu hồi thú (hậu kiểm Không đạt) hoặc từng trả lại thú.
 3. Hệ thống thực hiện Kiểm tra điều kiện thú (include): thú phải còn ở Sẵn sàng.
 4. Nhân viên thẩm định thông tin, điều kiện nuôi và ghi nhận xét.
 5. Nhân viên chọn Duyệt (S-1) hoặc Từ chối (S-2).
 
 **Luồng con**
 
-- S-1 Duyệt: hệ thống kiểm tra lại trong cùng một giao dịch rằng thú chưa có đơn Đã duyệt, rồi chuyển đơn sang Đã duyệt, thú sang Chờ bàn giao và tự đóng các đơn đang chờ khác (QĐ-09). Nhân viên hẹn lịch bàn giao.
+- S-1 Duyệt: hệ thống kiểm tra lại trong cùng một giao dịch rằng thú chưa có đơn Đã duyệt, rồi chuyển đơn sang Đã duyệt, thú sang Chờ bàn giao và tự đóng các đơn đang chờ khác (QĐ-09). Nhân viên ghi ngày hẹn bàn giao.
 - S-2 Từ chối: nhân viên ghi lý do, đơn chuyển sang Từ chối.
 
 **Luồng ngoại lệ**
@@ -516,8 +516,8 @@ Số ghi ở đầu mỗi đường là bản số của thực thể ở đầu
 | Lượt tiếp nhận (intakes) | nguồn (RESCUE, RETURN, FOUND), ngày, lý do, mức ưu tiên, đánh giá ban đầu |
 | Nhật ký chăm sóc (care\_logs) | loại hoạt động, cân nặng, ghi chú, thời điểm |
 | Cơ sở thú y (vet\_clinics) | tên, địa chỉ, số điện thoại |
-| Yêu cầu thú y (vet\_requests) | lý do, mức ưu tiên, hình thức (ngoại trú, lưu trú), trạng thái, chẩn đoán tóm tắt, tổng chi phí, hướng dẫn sau điều trị |
-| Đơn nhận nuôi (adoption\_applications) | loại nhà ở, kinh nghiệm nuôi, lý do nhận nuôi, cam kết triệt sản, trạng thái, nhận xét thẩm định |
+| Yêu cầu thú y (vet\_requests) | lý do, mức ưu tiên, hình thức (ngoại trú, lưu trú), trạng thái, chẩn đoán tóm tắt, kết luận sức khỏe ổn, tổng chi phí, hướng dẫn sau điều trị |
+| Đơn nhận nuôi (adoption\_applications) | loại nhà ở, kinh nghiệm nuôi, lý do nhận nuôi, cam kết triệt sản, trạng thái, nhận xét thẩm định, ngày hẹn bàn giao |
 | Bàn giao (handovers) | ngày bàn giao, khoản ủng hộ, trạng thái hậu kiểm |
 | Hậu kiểm (follow\_ups) | lần thứ, hạn, lần bổ sung, hình thức liên hệ, 5 tiêu chí, kết quả, lý do |
 | Sự kiện kết thúc (pet\_end\_events) | loại (DECEASED, LOST, TRANSFERRED), thời điểm, chi tiết, nơi nhận |
@@ -556,6 +556,7 @@ Mô hình gồm 16 bảng trên PostgreSQL. Bảng dưới đây tóm tắt khó
 | FOLLOW\_UP\_1\_DAYS | 14 | Hậu kiểm lần 1, tính từ ngày bàn giao |
 | FOLLOW\_UP\_2\_DAYS | 60 | Hậu kiểm lần 2, tính từ ngày bàn giao |
 | APPLICATION\_ALERT\_DAYS | 7 | Đơn chờ quá số ngày này thì vào báo cáo ngoại lệ |
+| MAX\_PENDING\_APPLICATIONS | 5 | Số đơn đang chờ tối đa của một người nhận nuôi (QĐ-08) |
 | REPORT\_RATE\_LIMIT\_PER\_HOUR | 5 | Số báo cáo tối đa của một số điện thoại trong một giờ |
 | MIN\_STERILIZATION\_AGE\_WEEKS | 24 | Tuổi tối thiểu để triệt sản (tuần). Checklist mục 5: chưa đủ tuổi thì đơn phải kèm cam kết triệt sản (migration V3) |
 
@@ -590,6 +591,9 @@ Ràng buộc được cài ở hai tầng. Tầng cơ sở dữ liệu chặn d�
 | RB-14 | Chỉ thú đang Sẵn sàng mới nhận đơn và được duyệt đơn | Ứng dụng: kiểm tra trong cùng giao dịch, có khóa dòng | QĐ-08, QĐ-10 |
 | RB-15 | Tra cứu báo cáo phải khớp cả mã và số điện thoại | Ứng dụng | NFR-01 |
 | RB-16 | Hậu kiểm đã thực hiện phải có hình thức liên hệ | CSDL: CHECK ck_follow_up_done_contact (migration V4) | QĐ-12 |
+| RB-17 | Yêu cầu thú y Hoàn tất phải có kết luận sức khỏe | CSDL: CHECK ck\_vet\_completed\_health (migration V5) | QĐ-07 |
+| RB-18 | Mỗi người nhận nuôi có tối đa MAX\_PENDING\_APPLICATIONS đơn đang chờ | Ứng dụng | QĐ-08 |
+| RB-19 | Nộp đơn nhận nuôi phải có số điện thoại và địa chỉ | Ứng dụng: thiếu thì nhập bổ sung ở form nộp đơn | QĐ-08 |
 
 **Xử lý đồng thời khi duyệt đơn (RB-01, RB-14)**
 
@@ -670,7 +674,7 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 | Báo cáo thống kê | Không | Không | Không | Có |
 | Tài khoản, cơ sở thú y, tham số hệ thống | Không | Không | Không | Có |
 
-Quản lý kế thừa toàn bộ quyền của Nhân viên (cài bằng RoleHierarchy MANAGER > STAFF của Spring Security). Riêng phân công người đi cứu chỉ Quản lý được làm, Nhân viên tạo ca ở trạng thái Chưa phân công. Trách nhiệm từng thao tác vẫn truy vết được qua người thực hiện ghi trong status\_histories.
+Quản lý kế thừa toàn bộ quyền của Nhân viên (cài bằng RoleHierarchy MANAGER > STAFF của Spring Security). Riêng phân công người đi cứu chỉ Quản lý được làm, Nhân viên tạo ca ở trạng thái Chưa phân công. Yêu cầu vận hành: trong giờ làm việc luôn có ít nhất một Quản lý để phân công ca cứu hộ. Trách nhiệm từng thao tác vẫn truy vết được qua người thực hiện ghi trong status\_histories.
 
 **Danh sách API cho MVP**
 
@@ -687,7 +691,8 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | POST | /api/public/auth/login | P05 | Trả JWT |
 | POST | /api/public/auth/google | P05 | Đăng nhập, đăng ký nhanh bằng Google: xác thực ID token. Email đã có tài khoản (kể cả Nhân viên, Quản lý) thì đăng nhập vào tài khoản đó, chưa có thì tạo tài khoản ADOPTER |
 | GET | /api/public/auth/config | P05 | Có bật đăng nhập Google hay không (cấu hình GOOGLE_CLIENT_ID) |
-| POST | /api/adopter/applications | A01 | Kiểm tra thú AVAILABLE (RB-02, RB-14) |
+| GET | /api/me | A01 | Tài khoản đang đăng nhập, gồm số điện thoại và địa chỉ để form nộp đơn hỏi bổ sung |
+| POST | /api/adopter/applications | A01 | Kiểm tra thú AVAILABLE (RB-02, RB-14). Bắt buộc số điện thoại và địa chỉ nếu tài khoản chưa có (RB-19), tối đa 5 đơn đang chờ (RB-18) |
 | GET | /api/adopter/applications | A02 | Đơn của người đang đăng nhập |
 | POST | /api/adopter/applications/{id}/cancel | A02 | Đơn PENDING hoặc APPROVED |
 | GET | /api/adopter/adoptions | A03 | Thú đã nhận, bàn giao và lịch hậu kiểm |
@@ -715,12 +720,13 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/staff/vet-requests?status=, /api/staff/vet-requests/{id} | S06 |  |
 | GET | /api/staff/vet-clinics | S06 | Cơ sở thú y đang hợp tác |
 | POST | /api/staff/vet-requests/{id}/start | S06 | PENDING => IN\_TREATMENT |
-| POST | /api/staff/vet-requests/{id}/complete | S06 | JSON: kết quả, chi phí (bắt buộc), hướng dẫn. Không còn yêu cầu mở thì thú về IN\_CARE và về trung tâm |
+| POST | /api/staff/vet-requests/{id}/complete | S06 | Multipart (phần data là JSON, phần files là phiếu khám) hoặc JSON: chẩn đoán, kết luận sức khỏe ổn (bắt buộc), chi phí (bắt buộc), hướng dẫn. Không còn yêu cầu mở thì thú về IN\_CARE và về trung tâm |
 | POST | /api/staff/vet-requests/{id}/attachments | S06 | Multipart `files`: phiếu khám (ảnh hoặc PDF) |
 | POST | /api/staff/vet-requests/{id}/cancel | S06 | Bắt buộc lý do |
 | GET | /api/staff/applications?status=&petId= | S07 |  |
-| GET | /api/staff/applications/{id} | S07 | Kèm các đơn khác cho cùng thú |
-| POST | /api/staff/applications/{id}/approve | S07 | Khóa dòng thú, 409 PET\_ALREADY\_APPROVED nếu thú đã có đơn được duyệt. Tự đóng các đơn chờ khác |
+| GET | /api/staff/applications/{id} | S07 | Kèm các đơn khác cho cùng thú và cảnh báo nếu người nộp từng bị thu hồi hoặc trả lại thú |
+| POST | /api/staff/applications/{id}/approve | S07 | Khóa dòng thú, 409 PET\_ALREADY\_APPROVED nếu thú đã có đơn được duyệt. Tự đóng các đơn chờ khác. Nhận ngày hẹn bàn giao |
+| POST | /api/staff/applications/{id}/handover-date | S07 | Hẹn hoặc đổi ngày bàn giao cho đơn đã duyệt |
 | POST | /api/staff/applications/{id}/reject | S07 | Bắt buộc nhận xét |
 | POST | /api/staff/applications/{id}/handover | S08 | Tạo bàn giao và 2 lịch hậu kiểm |
 | GET | /api/staff/follow-ups?dueBefore= | S09 | Lịch đến hạn |

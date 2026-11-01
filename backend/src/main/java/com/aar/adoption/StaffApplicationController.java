@@ -2,6 +2,7 @@ package com.aar.adoption;
 
 import com.aar.adoption.AdoptionDtos.ApplicationDetail;
 import com.aar.adoption.AdoptionDtos.ApplicationView;
+import com.aar.adoption.AdoptionDtos.HandoverDateRequest;
 import com.aar.adoption.AdoptionDtos.RejectRequest;
 import com.aar.adoption.AdoptionDtos.ReviewRequest;
 import com.aar.common.PageResponse;
@@ -43,7 +44,13 @@ public class StaffApplicationController {
     @PostMapping("/{id}/approve")
     public ApplicationView approve(@PathVariable Long id, @Valid @RequestBody(required = false) ReviewRequest req,
                                    @CurrentUser AuthUser me) {
-        return service.approve(id, req == null ? null : req.note(), me.id());
+        return service.approve(id, req == null ? null : req.note(), req == null ? null : req.handoverDate(), me.id());
+    }
+
+    /** Hẹn hoặc đổi ngày bàn giao cho đơn đã duyệt (mục 2.1.4 bước 3). */
+    @PostMapping("/{id}/handover-date")
+    public ApplicationView handoverDate(@PathVariable Long id, @Valid @RequestBody HandoverDateRequest req) {
+        return service.scheduleHandover(id, req.handoverDate());
     }
 
     @PostMapping("/{id}/reject")

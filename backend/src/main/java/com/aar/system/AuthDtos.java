@@ -39,6 +39,15 @@ public final class AuthDtos {
         }
     }
 
+    /** /api/me: thêm số điện thoại, địa chỉ để form nộp đơn biết cần hỏi bổ sung không. */
+    public record MeView(Long id, String email, String fullName, Role role, String phone, String address) {
+
+        static MeView of(User user) {
+            return new MeView(user.getId(), user.getEmail(), user.getFullName(), user.getRole(), user.getPhone(),
+                user.getAddress());
+        }
+    }
+
     public record AuthResponse(String accessToken, long expiresInMinutes, UserView user) {
     }
 }

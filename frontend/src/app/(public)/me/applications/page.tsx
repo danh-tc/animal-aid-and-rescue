@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/page-header/PageHeader";
 import { Skeleton } from "@/components/skeleton/Skeleton";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
-import { formatDateTime, petName } from "@/lib/format";
+import { formatDate, formatDateTime, petName } from "@/lib/format";
 import { APPLICATION_STATUS, HOUSING } from "@/lib/labels";
 import type { ApplicationView } from "@/types/api";
 import "./my-applications.scss";
@@ -80,7 +80,10 @@ export default function MyApplicationsPage() {
               </p>
               {a.status === "APPROVED" && (
                 <Notice tone="success" title="Đơn đã được duyệt">
-                  Nhân viên sẽ liên hệ để hẹn ngày bàn giao. {a.reviewNote}
+                  {a.handoverDate
+                    ? `Hẹn bàn giao ngày ${formatDate(a.handoverDate)}. Nhân viên sẽ liên hệ xác nhận trước khi đón bé.`
+                    : "Nhân viên sẽ liên hệ để hẹn ngày bàn giao."}{" "}
+                  {a.reviewNote}
                 </Notice>
               )}
               {a.status === "REJECTED" && (

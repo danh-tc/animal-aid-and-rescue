@@ -372,6 +372,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/staff/applications/{id}/handover-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["handoverDate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/staff/applications/{id}/approve": {
         parameters: {
             query?: never;
@@ -1072,6 +1088,7 @@ export interface components {
             treatmentSummary?: string;
             totalCost?: number;
             aftercareInstructions?: string;
+            healthOk?: boolean;
             cancelReason?: string;
             /** Format: date-time */
             requestedAt?: string;
@@ -1083,6 +1100,7 @@ export interface components {
             treatmentSummary?: string;
             totalCost: number;
             aftercareInstructions?: string;
+            healthOk: boolean;
         };
         ReasonRequest: {
             reason: string;
@@ -1332,6 +1350,8 @@ export interface components {
             reviewNote?: string;
             /** Format: date-time */
             reviewedAt?: string;
+            /** Format: date */
+            handoverDate?: string;
             cancelReason?: string;
             /** Format: date-time */
             submittedAt?: string;
@@ -1367,8 +1387,14 @@ export interface components {
             status?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
             followUps?: components["schemas"]["FollowUpView"][];
         };
+        HandoverDateRequest: {
+            /** Format: date */
+            handoverDate: string;
+        };
         ReviewRequest: {
             note?: string;
+            /** Format: date */
+            handoverDate?: string;
         };
         ReportRequest: {
             reporterName: string;
@@ -1427,6 +1453,8 @@ export interface components {
             hasPetExperience: boolean;
             motivation?: string;
             sterilizationPledge?: boolean;
+            phone?: string;
+            address?: string;
         };
         CancelRequest: {
             reason?: string;
@@ -1715,10 +1743,21 @@ export interface components {
             /** Format: int32 */
             totalPages?: number;
         };
+        ApplicantFlag: {
+            kind?: string;
+            /** Format: int64 */
+            petId?: number;
+            petCode?: string;
+            petName?: string;
+            /** Format: date-time */
+            handedOverAt?: string;
+            note?: string;
+        };
         ApplicationDetail: {
             application?: components["schemas"]["ApplicationView"];
             petStatus?: string;
             otherApplications?: components["schemas"]["ApplicationView"][];
+            applicantHistory?: components["schemas"]["ApplicantFlag"][];
         };
         CaseProgress: {
             /** @enum {string} */
@@ -1766,6 +1805,16 @@ export interface components {
         AuthConfig: {
             googleEnabled?: boolean;
             googleClientId?: string;
+        };
+        MeView: {
+            /** Format: int64 */
+            id?: number;
+            email?: string;
+            fullName?: string;
+            /** @enum {string} */
+            role?: "ADOPTER" | "STAFF" | "MANAGER";
+            phone?: string;
+            address?: string;
         };
         PageResponseUserAdminView: {
             items?: components["schemas"]["UserAdminView"][];
@@ -2625,6 +2674,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HandoverView"];
+                };
+            };
+        };
+    };
+    handoverDate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoverDateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApplicationView"];
                 };
             };
         };
@@ -3525,7 +3600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["UserView"];
+                    "*/*": components["schemas"]["MeView"];
                 };
             };
         };

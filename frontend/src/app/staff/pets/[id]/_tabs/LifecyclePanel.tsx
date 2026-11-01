@@ -1,12 +1,13 @@
 "use client";
 
 import { Flag, Search } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { Badge, StatusBadge } from "@/components/badge/Badge";
 import { Button } from "@/components/button/Button";
 import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
 import { Dialog } from "@/components/dialog/Dialog";
-import { Field } from "@/components/form-field/Field";
+import { CheckField, Field } from "@/components/form-field/Field";
 import { Notice } from "@/components/notice/Notice";
 import { useToast } from "@/components/toast/Toast";
 import { useMutation } from "@/hooks/useApi";
@@ -25,10 +26,15 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
   const [form, setForm] = useState({ occurredAt: "", detail: "", destination: "" });
   const [found, setFound] = useState({ reason: "", priority: "NEED_CHECK" as Priority, assessment: "" });
   const adopted = pet.status === "ADOPTED";
+  // QĐ-15: yêu cầu thú y đang mở sẽ bị hủy, chi phí chưa ghi sẽ không vào 3 con số và báo cáo chi phí
+  const openVet = pet.vetRequests.filter((v) => v.status === "PENDING" || v.status === "IN_TREATMENT");
+  const [costsConfirmed, setCostsConfirmed] = useState(false);
   const canEnd = AT_CENTER.includes(pet.status) || adopted;
 
   async function record() {
     if (!type) throw new Error("Chọn loại sự kiện.");
+    if (openVet.length > 0 && !costsConfirmed)
+      throw new Error("Hãy ghi kết quả và chi phí cho các yêu cầu thú y đang mở, hoặc xác nhận không cần ghi.");
     if (type === "LOST" && !form.detail.trim()) throw new Error("Ghi nơi và hoàn cảnh mất.");
     if (type === "TRANSFERRED" && (!form.destination.trim() || !form.detail.trim()))
       throw new Error("Chuyển cơ sở phải ghi nơi nhận và lý do.");
@@ -74,6 +80,7 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
           icon={<Flag aria-hidden="true" />}
           onClick={() => {
             setType(null);
+            setCostsConfirmed(false);
             setForm({ occurredAt: "", detail: "", destination: "" });
             setOpen("end");
           }}
@@ -92,6 +99,27 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
         onSubmit={record}
         size="lg"
       >
+        {openVet.length > 0 && (
+          <div className="stack stack--sm">
+            <Notice tone="warning" title={`Còn ${openVet.length} yêu cầu thú y đang mở`}>
+              Yêu cầu đang mở sẽ bị hủy. Nếu đã phát sinh chi phí, hãy ghi kết quả kèm chi phí trước để không thiếu trong
+              3 con số chi phí và báo cáo chi phí:{" "}
+              {openVet.map((v, i) => (
+                <span key={v.id}>
+                  {i > 0 && ", "}
+                  <Link href={`/staff/vet-requests/${v.id}`}>
+                    #{v.id} {v.clinicName}
+                  </Link>
+                </span>
+              ))}
+            </Notice>
+            <CheckField
+              label="Tôi đã ghi chi phí cần thiết, hủy các yêu cầu còn lại"
+              checked={costsConfirmed}
+              onChange={setCostsConfirmed}
+            />
+          </div>
+        )}
         {adopted && (
           <Notice tone="info">
             Thú đã nhận nuôi chỉ ghi được khi còn trong thời gian hậu kiểm. Lịch hậu kiểm còn lại sẽ bị hủy.
