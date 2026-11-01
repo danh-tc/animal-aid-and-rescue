@@ -22,6 +22,9 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "AVAILABLE", label: "Sẵn sàng" },
   { value: "PENDING_HANDOVER", label: "Chờ bàn giao" },
   { value: "ADOPTED", label: "Đã có chủ" },
+  { value: "LOST", label: "Thất lạc" },
+  { value: "DECEASED", label: "Đã mất" },
+  { value: "TRANSFERRED", label: "Đã chuyển đi" },
 ];
 
 /** S04: Danh sách thú, lọc theo trạng thái, loài, tìm theo tên hoặc mã */
@@ -97,7 +100,7 @@ export default function PetsPage() {
           { key: "name", header: "Tên", render: (p) => `${petName(p.name)} · ${p.code}` },
           { key: "species", header: "Loài", render: (p) => SPECIES[p.species] },
           { key: "status", header: "Trạng thái", render: (p) => <StatusBadge map={PET_STATUS} value={p.status} /> },
-          { key: "area", header: "Khu", render: (p) => AREA[p.area], hideOnMobile: true },
+          { key: "area", header: "Khu", render: (p) => (p.area ? AREA[p.area] : "—"), hideOnMobile: true },
           { key: "location", header: "Vị trí", render: (p) => p.currentLocation ?? "—", hideOnMobile: true },
           { key: "created", header: "Tiếp nhận", render: (p) => formatDate(p.createdAt), hideOnMobile: true },
         ]}

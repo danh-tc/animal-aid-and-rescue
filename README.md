@@ -117,6 +117,33 @@ Giao diện cho toàn bộ màn hình MVP ở báo cáo mục 5.3, gọi API th�
 
 Đã chạy thử toàn bộ luồng trên dữ liệu mẫu bằng Playwright: báo cứu hộ kèm ảnh, tạo 2 ca, cứu thành công, tạo và hoàn tất yêu cầu thú y, checklist, đăng ký và nộp đơn, duyệt, bàn giao, hậu kiểm Cần theo dõi (tự thêm lần bổ sung), nhận lại thú, sửa tham số, tạo nhân viên. Không có lỗi console.
 
+## Đã có sau Đợt 2
+
+Toàn bộ phạm vi Đợt 2 ở báo cáo mục 5.1, cùng các chỗ trước đây code còn lệch so với `BaoCao_DoAn.docx`.
+
+| Hạng mục | Báo cáo | Đường dẫn |
+| --- | --- | --- |
+| Tra cứu báo cáo bằng mã và số điện thoại | FR-02, P04, RB-15 | `/rescue/lookup`, `GET /api/public/rescue-reports/lookup` |
+| Ca đang mở ở gần (sắp theo khoảng cách) và gộp báo cáo trùng | QĐ-01, UC-07 bước 2 và 2a | S02, `POST /api/staff/rescue-reports/{id}/merge` |
+| Sự kiện kết thúc: qua đời, thất lạc, chuyển cơ sở | FR-16, QĐ-15, QĐ-16, bảng 3.4 | S05/S10, `POST /api/staff/pets/{id}/end-events` |
+| Tìm lại thú thất lạc, lượt tiếp nhận FOUND | QĐ-16 | `POST /api/staff/pets/{id}/found` |
+| 3 con số chi phí khi bàn giao | QĐ-14, UC-11 bước 2 | S08, hồ sơ thú, `GET /api/staff/pets/{id}/costs` |
+| Báo cáo thống kê: tổng hợp, ngoại lệ, chi phí và ủng hộ | FR-18, M01, mục 5.3 | `/admin/reports`, `GET /api/admin/reports/{summary,exceptions,costs}` |
+| Ghi kết quả thú y, hậu kiểm dạng multipart kèm tệp | mục 5.2 | phần `data` là JSON, phần `files` (thú y) hoặc `photos` (hậu kiểm). Vẫn nhận JSON thuần |
+| Giới hạn tần suất `/api/public/**` theo IP | mục 5.1 | đăng nhập/đăng ký 10, tra cứu 20, gửi báo cáo 10, còn lại 300 yêu cầu mỗi phút (`app.rate-limit.*`) |
+| Sinh client TypeScript từ springdoc | mục 5.1 | `npm run gen:api` (backend đang chạy) => `src/types/openapi.ts`, `src/types/contract.ts` báo lỗi biên dịch khi API đổi |
+| Sao lưu hằng ngày và khôi phục | NFR-06 | xem bên dưới |
+
+Test backend: 132 test tích hợp (`mvn test`). Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
+
+### Sao lưu và khôi phục (NFR-06)
+
+```bash
+docker compose up -d            # gồm cả container backup: sao lưu lúc khởi động và 02:00 mỗi ngày, giữ 7 ngày, lưu ở backups/
+./scripts/backup.sh             # sao lưu ngay
+./scripts/restore.sh backups/aar-YYYYMMDD-HHMMSS.dump   # khôi phục, hỏi xác nhận trước khi ghi đè
+```
+
 ## Lộ trình
 
 | Đợt | Phạm vi |

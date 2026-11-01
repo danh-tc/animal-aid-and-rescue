@@ -22,6 +22,7 @@ import com.aar.pet.Species;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,8 +31,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /** S04, S05, S06. */
 @RestController
@@ -126,7 +129,15 @@ public class StaffCareController {
         return vet.start(id, me.id());
     }
 
-    @PostMapping("/vet-requests/{id}/complete")
+    /** Mục 5.2: multipart, phần "data" là JSON kết quả, phần "files" là phiếu khám (ảnh hoặc PDF). */
+    @PostMapping(value = "/vet-requests/{id}/complete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public VetRequestResult completeWithFiles(@PathVariable Long id, @Valid @RequestPart("data") VetRequestComplete req,
+                                              @RequestPart(value = "files", required = false) List<MultipartFile> files,
+                                              @CurrentUser AuthUser me) {
+        return vet.complete(id, req, files, me.id());
+    }
+
+    @PostMapping(value = "/vet-requests/{id}/complete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public VetRequestResult complete(@PathVariable Long id, @Valid @RequestBody VetRequestComplete req,
                                      @CurrentUser AuthUser me) {
         return vet.complete(id, req, me.id());

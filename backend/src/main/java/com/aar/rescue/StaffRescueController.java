@@ -7,6 +7,7 @@ import com.aar.rescue.RescueDtos.AssignRequest;
 import com.aar.rescue.RescueDtos.CaseDetail;
 import com.aar.rescue.RescueDtos.CaseSummary;
 import com.aar.rescue.RescueDtos.CreateCasesRequest;
+import com.aar.rescue.RescueDtos.MergeRequest;
 import com.aar.rescue.RescueDtos.ReasonRequest;
 import com.aar.rescue.RescueDtos.ReportDetail;
 import com.aar.rescue.RescueDtos.ReportSummary;
@@ -54,6 +55,12 @@ public class StaffRescueController {
     public List<CaseSummary> createCases(@PathVariable Long id, @Valid @RequestBody CreateCasesRequest req,
                                          @CurrentUser AuthUser me) {
         return reports.createCases(id, req, me.id());
+    }
+
+    /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào ca đang mở. */
+    @PostMapping("/rescue-reports/{id}/merge")
+    public ReportSummary merge(@PathVariable Long id, @Valid @RequestBody MergeRequest req, @CurrentUser AuthUser me) {
+        return reports.merge(id, req.caseId(), me.id());
     }
 
     @PostMapping("/rescue-reports/{id}/invalid")

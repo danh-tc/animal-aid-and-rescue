@@ -2,6 +2,7 @@
 
 import {
   Ambulance,
+  BarChart3,
   ClipboardCheck,
   FileText,
   Globe,
@@ -63,6 +64,7 @@ const NAV: NavGroup[] = [
     title: "Quản trị",
     managerOnly: true,
     items: [
+      { href: "/admin/reports", label: "Báo cáo thống kê", icon: BarChart3 },
       { href: "/admin/users", label: "Tài khoản", icon: Users },
       { href: "/admin/clinics", label: "Cơ sở thú y", icon: Hospital },
       { href: "/admin/parameters", label: "Tham số hệ thống", icon: Settings2 },

@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Badge, StatusBadge } from "@/components/badge/Badge";
 import { Button, LinkButton } from "@/components/button/Button";
+import { CostSummary } from "@/components/cost-summary/CostSummary";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
 import { Field } from "@/components/form-field/Field";
@@ -234,11 +235,12 @@ export default function ApplicationDetailPage() {
         open={dialog === "handover"}
         onClose={() => setDialog(null)}
         title={`Bàn giao ${name}`}
-        description="Xác nhận chủ nuôi đã nhận bé. Hệ thống tự tạo 2 lịch hậu kiểm theo tham số."
+        description="Cho người nhận xem 3 con số chi phí của bé, ghi khoản ủng hộ nếu có. Hệ thống tự tạo 2 lịch hậu kiểm."
         submitLabel="Xác nhận bàn giao"
         onSubmit={doHandover}
       >
-        <Field label="Khoản ủng hộ (VND)" hint="Không bắt buộc.">
+        <CostSummary petId={a.pet.id} />
+        <Field label="Khoản ủng hộ (VND)" hint="Tùy tâm, không hoàn lại khi trả thú. Hệ thống chỉ ghi nhận số tiền.">
           <input type="number" min={0} step={10000} inputMode="numeric" value={donation} onChange={(e) => setDonation(e.target.value)} />
         </Field>
         <Field label="Ghi chú">

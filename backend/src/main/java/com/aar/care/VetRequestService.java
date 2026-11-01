@@ -1,5 +1,9 @@
 package com.aar.care;
 
+import com.aar.common.storage.AttachmentOwner;
+import com.aar.common.storage.StorageService;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.aar.adoption.ApplicationCascade;
 import com.aar.care.CareDtos.VetRequestComplete;
 import com.aar.care.CareDtos.VetRequestCreate;
@@ -34,14 +38,16 @@ public class VetRequestService {
     private final StateTransitionService state;
     private final PetLifecycle petLifecycle;
     private final ApplicationCascade applicationCascade;
+    private final StorageService storage;
 
     public VetRequestService(VetRequestRepository requests, VetClinicRepository clinics, StateTransitionService state,
-                             PetLifecycle petLifecycle, ApplicationCascade applicationCascade) {
+                             PetLifecycle petLifecycle, ApplicationCascade applicationCascade, StorageService storage) {
         this.requests = requests;
         this.clinics = clinics;
         this.state = state;
         this.petLifecycle = petLifecycle;
         this.applicationCascade = applicationCascade;
+        this.storage = storage;
     }
 
     /** S-2 của UC-09 và ngoại lệ 3a: thú Sẵn sàng hoặc Chờ bàn giao bị bệnh thì hủy đơn liên quan. */
@@ -81,12 +87,18 @@ public class VetRequestService {
 
     /** S-3 của UC-09: ghi kết quả. Không còn yêu cầu mở thì thú về Đang chăm sóc. */
     public VetRequestResult complete(Long requestId, VetRequestComplete req, Long by) {
+        return complete(requestId, req, List.of(), by);
+    }
+
+    /** Bản multipart theo mục 5.2: kết quả, chi phí, hướng dẫn và phiếu khám trong cùng một giao dịch. */
+    public VetRequestResult complete(Long requestId, VetRequestComplete req, List<MultipartFile> files, Long by) {
         VetRequest request = find(requestId);
         Pet pet = petLifecycle.lock(request.getPetId());
         // Ghi kết quả trước khi đổi trạng thái: CHECK ck_vet_completed_cost đòi COMPLETED phải có chi phí (RB-07)
         request.recordResult(blankToNull(req.diagnosisSummary()), blankToNull(req.treatmentSummary()),
             req.totalCost(), blankToNull(req.aftercareInstructions()));
         transition(request, "COMPLETED", by, null);
+        storage.store(AttachmentOwner.VET_REQUEST, request.getId(), files);
         closeTreatmentIfDone(pet, by);
         return new VetRequestResult(view(request), pet.getStatus(), 0);
     }
@@ -99,6 +111,20 @@ public class VetRequestService {
         transition(request, "CANCELLED", by, reason);
         closeTreatmentIfDone(pet, by);
         return new VetRequestResult(view(request), pet.getStatus(), 0);
+    }
+
+    /**
+     * QĐ-15: sự kiện kết thúc hủy mọi yêu cầu thú y đang mở của thú. Không đổi trạng thái thú,
+     * người gọi chịu trách nhiệm chuyển thú sang trạng thái kết thúc. Trả về số yêu cầu đã hủy.
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public int cancelAllOpen(Long petId, String reason, Long by) {
+        List<VetRequest> open = requests.findByPetIdAndStatusIn(petId, VetRequestStatus.OPEN);
+        for (VetRequest r : open) {
+            r.recordCancel(reason);
+            transition(r, "CANCELLED", by, reason);
+        }
+        return open.size();
     }
 
     @Transactional(readOnly = true)

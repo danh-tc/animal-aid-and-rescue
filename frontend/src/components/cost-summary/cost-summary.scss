@@ -1,0 +1,47 @@
+@use "abstracts" as *;
+
+.cost-summary {
+  display: grid;
+  gap: $space-2;
+  margin: 0;
+
+  &__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $space-1 $space-3;
+    padding: $space-2 $space-3;
+    border-radius: $radius-sm;
+    background: $color-surface-2;
+
+    dt {
+      color: $color-muted;
+      font-size: $font-size-sm;
+    }
+
+    dd {
+      margin: 0;
+      font-weight: $font-weight-semibold;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &--strong {
+      background: $color-accent-soft;
+
+      dt {
+        color: $color-text;
+      }
+
+      dd {
+        color: $color-accent-text;
+        font-size: $font-size-md;
+      }
+    }
+  }
+
+  &__error {
+    color: $color-danger;
+    font-size: $font-size-sm;
+  }
+}

@@ -38,3 +38,9 @@ app:
     # Thư mục lưu tệp đính kèm. Không commit thư mục này
     dir: ${STORAGE_DIR:./data/uploads}
     max-files-per-request: 5
+  # Giới hạn tần suất /api/public/** theo IP, mỗi phút
+  rate-limit:
+    auth-per-minute: 10
+    lookup-per-minute: 20
+    report-per-minute: 10
+    other-per-minute: 300

@@ -138,7 +138,10 @@ export default function RescuePage() {
               {copied ? "Đã sao chép" : "Sao chép mã"}
             </Button>
           </div>
-          <p className="rescue-form__note">Hãy lưu mã này để trao đổi với trung tâm khi cần.</p>
+          <p className="rescue-form__note">
+            Hãy lưu mã này. Bạn có thể <Link href={`/rescue/lookup?code=${receipt.code}`}>tra cứu tiến độ</Link> bằng mã
+            và số điện thoại đã khai.
+          </p>
           <div className="rescue-form__actions">
             <LinkButton href="/" variant="ghost">
               Về trang chủ
@@ -169,7 +172,7 @@ export default function RescuePage() {
         description={
           <>
             Không cần tài khoản. Nếu con vật đang gặp nguy hiểm tính mạng, hãy gọi trực tiếp cho trung tâm sau khi gửi.
-            Đã có tài khoản nhân viên? <Link href="/login">Đăng nhập</Link>
+            Đã gửi trước đó? <Link href="/rescue/lookup">Tra cứu báo cáo</Link>
           </>
         }
       >

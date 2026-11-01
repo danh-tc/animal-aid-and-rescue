@@ -70,6 +70,11 @@ public class RescueCase {
         }
     }
 
+    /** Gộp báo cáo trùng vào ca này (QĐ-01). */
+    public void addReport(RescueReport report) {
+        this.reports.add(report);
+    }
+
     public void assignTo(Long staffId) {
         this.assignedStaffId = staffId;
     }

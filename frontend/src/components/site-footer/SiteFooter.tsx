@@ -14,6 +14,7 @@ export function SiteFooter() {
         <nav className="site-footer__links" aria-label="Liên kết cuối trang">
           <Link href="/">Thú chờ nhận nuôi</Link>
           <Link href="/rescue">Báo cứu hộ</Link>
+          <Link href="/rescue/lookup">Tra cứu báo cáo</Link>
           <Link href="/login">Đăng nhập</Link>
         </nav>
       </div>

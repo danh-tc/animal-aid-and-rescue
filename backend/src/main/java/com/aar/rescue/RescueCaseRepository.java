@@ -11,6 +11,8 @@ public interface RescueCaseRepository extends JpaRepository<RescueCase, Long> {
 
     Page<RescueCase> findByStatus(CaseStatus status, Pageable pageable);
 
+    List<RescueCase> findByStatusInOrderByCreatedAtDesc(java.util.Collection<CaseStatus> statuses);
+
     @Query("select c from RescueCase c join c.reports r where r.id = :reportId order by c.id")
     List<RescueCase> findByReportId(@Param("reportId") Long reportId);
 }

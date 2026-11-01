@@ -1,0 +1,7 @@
+@use "abstracts" as *;
+
+.pet-record {
+  &__alert:not(:empty) {
+    margin-bottom: $space-5;
+  }
+}

@@ -120,18 +120,7 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         assertThat(due.findValuesAsText("id")).doesNotContain(handover.get("followUps").get(1).get("id").asText());
     }
 
-    private long approvedApplication(String adopter) throws Exception {
-        long petId = availablePet(false);
-        long appId = submitApplication(petId, adopter, false);
-        postJson("/api/staff/applications/" + appId + "/approve", STAFF, null, 200);
-        return appId;
-    }
-
-    private JsonNode handedOver(String adopter) throws Exception {
-        return postJson("/api/staff/applications/" + approvedApplication(adopter) + "/handover", STAFF, null, 201);
-    }
-
-    private static Object criteria(String result, String reason) {
+    static Object criteria(String result, String reason) {
         boolean ok = "PASS".equals(result);
         return map("result", result, "healthOk", true, "housingOk", ok, "commitmentOk", true,
             "petPresent", true, "ownerReachable", true, "reason", reason);

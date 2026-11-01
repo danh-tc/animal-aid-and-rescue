@@ -1,31 +1,34 @@
 // Kiểu dữ liệu khớp DTO của API Spring (backend/src/main/java/com/aar/**/*Dtos.java).
 // Sau này có thể thay bằng client sinh từ springdoc-openapi.
 
-export type Species = "DOG" | "CAT";
-export type Sex = "MALE" | "FEMALE" | "UNKNOWN";
-export type Role = "ADOPTER" | "STAFF" | "MANAGER";
-export type PetStatus =
-  | "IN_CARE"
-  | "IN_TREATMENT"
-  | "AVAILABLE"
-  | "PENDING_HANDOVER"
-  | "ADOPTED"
-  | "DECEASED"
-  | "LOST"
-  | "TRANSFERRED";
-export type PetArea = "QUARANTINE" | "GENERAL";
-export type Priority = "URGENT" | "NEED_CHECK" | "STABLE";
-export type ReportStatus = "NEW" | "PROCESSED" | "DUPLICATE" | "INVALID";
-export type CaseStatus = "NEW" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED";
-export type CareActivity = "FEEDING" | "CLEANING" | "WEIGHT" | "MEDICATION" | "HEALTH_NOTE" | "AREA_CHANGE";
-export type CareMode = "OUTPATIENT" | "INPATIENT";
-export type VetRequestStatus = "PENDING" | "IN_TREATMENT" | "COMPLETED" | "CANCELLED";
-export type IntakeSource = "RESCUE" | "RETURN" | "FOUND";
-export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "HANDED_OVER";
-export type HousingType = "HOUSE" | "APARTMENT" | "OTHER";
-export type HandoverStatus = "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
-export type FollowUpStatus = "SCHEDULED" | "DONE" | "CANCELLED";
-export type FollowUpResult = "PASS" | "WATCH" | "FAIL";
+import type { components } from "./openapi";
+
+/**
+ * Kiểu enum lấy thẳng từ hợp đồng API do springdoc sinh ra (npm run gen:api => openapi.ts),
+ * nên đổi enum ở backend thì frontend báo lỗi biên dịch ngay. Kiểu view bên dưới viết tay để
+ * ghi rõ trường nào có thể null (springdoc không biết), và được đối chiếu với openapi.ts trong contract.ts.
+ */
+type Schemas = components["schemas"];
+type EnumOf<T> = NonNullable<T>;
+
+export type Species = EnumOf<Schemas["PublicPet"]["species"]>;
+export type Sex = EnumOf<Schemas["PublicPet"]["sex"]>;
+export type Role = EnumOf<Schemas["UserView"]["role"]>;
+export type PetStatus = EnumOf<Schemas["PetSummary"]["status"]>;
+export type PetArea = EnumOf<Schemas["PetSummary"]["area"]>;
+export type Priority = EnumOf<Schemas["IntakeView"]["priority"]>;
+export type ReportStatus = EnumOf<Schemas["ReportSummary"]["status"]>;
+export type CaseStatus = EnumOf<Schemas["CaseSummary"]["status"]>;
+export type CareActivity = EnumOf<Schemas["CareLogView"]["activityType"]>;
+export type CareMode = EnumOf<Schemas["VetRequestView"]["careMode"]>;
+export type VetRequestStatus = EnumOf<Schemas["VetRequestView"]["status"]>;
+export type IntakeSource = EnumOf<Schemas["IntakeView"]["source"]>;
+export type ApplicationStatus = EnumOf<Schemas["ApplicationView"]["status"]>;
+export type HousingType = EnumOf<Schemas["ApplicationView"]["housingType"]>;
+export type HandoverStatus = EnumOf<Schemas["HandoverView"]["status"]>;
+export type FollowUpStatus = EnumOf<Schemas["FollowUpView"]["status"]>;
+export type FollowUpResult = EnumOf<Schemas["FollowUpView"]["result"]>;
+export type EndEventType = EnumOf<Schemas["EndEventView"]["eventType"]>;
 
 export interface PageResponse<T> {
   items: T[];
@@ -124,6 +127,22 @@ export interface ReportDetail extends ReportSummary {
   handledAt: string | null;
   photos: AttachmentView[];
   cases: CaseSummary[];
+  openCases: OpenCase[];
+}
+
+export interface OpenCase {
+  rescueCase: CaseSummary;
+  /** null khi báo cáo hoặc ca không có tọa độ */
+  distanceKm: number | null;
+  reportCodes: string[];
+}
+
+export interface ReportLookup {
+  code: string;
+  status: ReportStatus;
+  createdAt: string;
+  handledAt: string | null;
+  cases: { status: CaseStatus; closedAt: string | null }[];
 }
 
 export interface CaseDetail extends CaseSummary {
@@ -166,7 +185,8 @@ export interface PetSummary {
   species: Species;
   sex: Sex;
   status: PetStatus;
-  area: PetArea;
+  /** null khi thú đã có chủ hoặc ở trạng thái kết thúc */
+  area: PetArea | null;
   currentLocation: string | null;
   createdAt: string;
 }
@@ -222,7 +242,8 @@ export interface PetDetail {
   color: string | null;
   description: string | null;
   status: PetStatus;
-  area: PetArea;
+  /** null khi thú đã có chủ hoặc ở trạng thái kết thúc */
+  area: PetArea | null;
   currentLocation: string | null;
   vaccinated: boolean;
   dewormed: boolean;
@@ -382,6 +403,109 @@ export interface ReturnResult {
   intakeId: number;
   handoverId: number;
   cancelledFollowUps: number;
+}
+
+/* ---------- Sự kiện kết thúc, chi phí (đợt 2) ---------- */
+
+export interface EndEventView {
+  id: number;
+  eventType: EndEventType;
+  occurredAt: string;
+  detail: string | null;
+  destinationOrg: string | null;
+  recordedBy: number;
+}
+
+export interface EndEventResult {
+  event: EndEventView;
+  petStatus: PetStatus;
+  cancelledVetRequests: number;
+  cancelledApplications: number;
+  cancelledFollowUps: number;
+  handoverClosed: boolean;
+}
+
+export interface FoundResult {
+  petId: number;
+  petStatus: PetStatus;
+  intakeId: number;
+}
+
+export interface PetCosts {
+  petId: number;
+  totalTreatmentCost: number;
+  totalDonated: number;
+  outstanding: number;
+}
+
+/* ---------- Báo cáo thống kê M01 (đợt 2) ---------- */
+
+export interface Period {
+  from: string;
+  to: string;
+}
+
+export interface SummaryReport {
+  period: Period;
+  reportsReceived: number;
+  casesCreated: number;
+  casesSucceeded: number;
+  casesFailed: number;
+  adoptions: number;
+  returns: number;
+  endEvents: Record<EndEventType, number>;
+  petsByStatus: Partial<Record<PetStatus, number>>;
+  months: { month: string; casesSucceeded: number; adoptions: number; returns: number }[];
+}
+
+export interface ExceptionReport {
+  applicationAlertDays: number;
+  overdueFollowUps: {
+    followUpId: number;
+    petId: number;
+    petCode: string;
+    petName: string | null;
+    sequenceNo: number;
+    dueDate: string;
+    daysOverdue: number;
+    ownerName: string;
+    ownerPhone: string | null;
+  }[];
+  staleApplications: {
+    applicationId: number;
+    petId: number;
+    petCode: string;
+    petName: string | null;
+    applicantName: string;
+    submittedAt: string;
+    daysWaiting: number;
+  }[];
+  recallPending: {
+    handoverId: number;
+    petId: number;
+    petCode: string;
+    petName: string | null;
+    ownerName: string;
+    ownerPhone: string | null;
+    handedOverAt: string;
+  }[];
+}
+
+export interface CostReport {
+  period: Period;
+  periodTreatmentCost: number;
+  periodDonations: number;
+  months: { month: string; treatmentCost: number; donations: number; difference: number }[];
+  byClinic: { clinicId: number; clinicName: string; completedRequests: number; treatmentCost: number }[];
+  byPet: {
+    petId: number;
+    petCode: string;
+    petName: string | null;
+    petStatus: PetStatus;
+    treatmentCost: number;
+    donated: number;
+    outstanding: number;
+  }[];
 }
 
 /* ---------- Bảng công việc, tra cứu ---------- */

@@ -1,11 +1,11 @@
 "use client";
 
-import { Ambulance, Ban, MapPin, Phone } from "lucide-react";
+import { Ambulance, Ban, MapPin, Merge, Phone } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { AttachmentList } from "@/components/attachment-list/AttachmentList";
-import { StatusBadge } from "@/components/badge/Badge";
+import { Badge, StatusBadge } from "@/components/badge/Badge";
 import { Button } from "@/components/button/Button";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
@@ -19,7 +19,11 @@ import { useApi, useMutation } from "@/hooks/useApi";
 import { useStaffMembers } from "@/hooks/useStaffMembers";
 import { formatDateTime } from "@/lib/format";
 import { CASE_STATUS, REPORT_STATUS } from "@/lib/labels";
-import type { CaseSummary, ReportDetail } from "@/types/api";
+import type { CaseSummary, OpenCase, ReportDetail } from "@/types/api";
+
+function formatDistance(km: number): string {
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toLocaleString("vi-VN")} km`;
+}
 import "../../detail-page.scss";
 
 /** S02: Chi tiết báo cáo, tạo ca, đánh dấu không hợp lệ */
@@ -30,6 +34,7 @@ export default function ReportDetailPage() {
   const mutate = useMutation();
   const toast = useToast();
   const [dialog, setDialog] = useState<"cases" | "invalid" | null>(null);
+  const [mergeTarget, setMergeTarget] = useState<OpenCase | null>(null);
   const [count, setCount] = useState("1");
   const [assignee, setAssignee] = useState("");
   const [reason, setReason] = useState("");
@@ -51,6 +56,14 @@ export default function ReportDetailPage() {
     });
     toast.success(`Đã tạo ${created.length} ca cứu hộ.`);
     setDialog(null);
+    reload();
+  }
+
+  async function merge() {
+    if (!mergeTarget) return;
+    await mutate(`/api/staff/rescue-reports/${id}/merge`, { body: { caseId: mergeTarget.rescueCase.id } });
+    toast.success(`Đã gộp báo cáo vào ca #${mergeTarget.rescueCase.id}.`);
+    setMergeTarget(null);
     reload();
   }
 
@@ -125,6 +138,32 @@ export default function ReportDetailPage() {
         </div>
 
         <aside className="detail-page__side">
+          {isNew && (
+            <Panel
+              title="Ca đang mở ở gần"
+              description={
+                r.openCases.length === 0
+                  ? "Không có ca nào đang mở."
+                  : "Kiểm tra trùng trước khi tạo ca mới. Trùng thì gộp vào ca có sẵn."
+              }
+            >
+              <ul className="detail-page__links">
+                {r.openCases.map((o) => (
+                  <li key={o.rescueCase.id} className="detail-page__link">
+                    <Link href={`/staff/cases/${o.rescueCase.id}`}>Ca #{o.rescueCase.id}</Link>
+                    <StatusBadge map={CASE_STATUS} value={o.rescueCase.status} />
+                    {o.distanceKm !== null && <Badge tone="info">{formatDistance(o.distanceKm)}</Badge>}
+                    <span className="detail-page__link-meta">
+                      {o.rescueCase.locationText} · {o.reportCodes.join(", ")}
+                    </span>
+                    <Button size="sm" variant="ghost" icon={<Merge aria-hidden="true" />} onClick={() => setMergeTarget(o)}>
+                      Gộp vào ca này
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          )}
           <Panel title="Ca cứu hộ" description={r.cases.length === 0 ? "Chưa tạo ca nào." : undefined}>
             <ul className="detail-page__links">
               {r.cases.map((c) => (
@@ -162,6 +201,22 @@ export default function ReportDetailPage() {
             ))}
           </select>
         </Field>
+      </Dialog>
+
+      <Dialog
+        open={mergeTarget !== null}
+        onClose={() => setMergeTarget(null)}
+        title={`Gộp vào ca #${mergeTarget?.rescueCase.id ?? ""}?`}
+        description="Báo cáo chuyển sang Trùng và gắn vào ca đã có, không tạo ca mới."
+        submitLabel="Gộp báo cáo"
+        onSubmit={merge}
+      >
+        {mergeTarget && (
+          <p>
+            Ca #{mergeTarget.rescueCase.id} tại {mergeTarget.rescueCase.locationText}
+            {mergeTarget.distanceKm !== null && `, cách khoảng ${formatDistance(mergeTarget.distanceKm)}`}.
+          </p>
+        )}
       </Dialog>
 
       <Dialog

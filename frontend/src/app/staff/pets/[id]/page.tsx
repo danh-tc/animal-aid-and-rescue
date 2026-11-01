@@ -16,14 +16,16 @@ import { useApi, useMutation } from "@/hooks/useApi";
 import { useUrlState } from "@/hooks/useUrlState";
 import { petName } from "@/lib/format";
 import { AREA, PET_STATUS, SPECIES } from "@/lib/labels";
-import type { IneligibleResult, PetDetail } from "@/types/api";
+import type { EndEventView, IneligibleResult, PetDetail } from "@/types/api";
 import { CareTab } from "./_tabs/CareTab";
 import { ChecklistTab } from "./_tabs/ChecklistTab";
 import { HandoverTab } from "./_tabs/HandoverTab";
 import { HistoryTab } from "./_tabs/HistoryTab";
 import { InfoTab } from "./_tabs/InfoTab";
 import { IntakeTab } from "./_tabs/IntakeTab";
+import { EndEventNotice, LifecycleActions } from "./_tabs/LifecyclePanel";
 import { VetTab } from "./_tabs/VetTab";
+import "./pet-record.scss";
 
 type Tab = "info" | "intakes" | "care" | "vet" | "checklist" | "history" | "handovers";
 const AT_CENTER = ["IN_CARE", "IN_TREATMENT", "AVAILABLE", "PENDING_HANDOVER"];
@@ -32,7 +34,12 @@ const AT_CENTER = ["IN_CARE", "IN_TREATMENT", "AVAILABLE", "PENDING_HANDOVER"];
 export default function PetRecordPage() {
   const { id } = useParams<{ id: string }>();
   const [tab, setTab] = useUrlState<Tab>("tab", "info");
-  const { data: pet, error, loading, reload } = useApi<PetDetail>(`/api/staff/pets/${id}`);
+  const { data: pet, error, loading, reload: reloadPet } = useApi<PetDetail>(`/api/staff/pets/${id}`);
+  const endEvents = useApi<EndEventView[]>(`/api/staff/pets/${id}/end-events`);
+  const reload = () => {
+    reloadPet();
+    endEvents.reload();
+  };
   const mutate = useMutation();
   const toast = useToast();
   const [ineligibleOpen, setIneligibleOpen] = useState(false);
@@ -67,11 +74,12 @@ export default function PetRecordPage() {
             <span>{pet.code}</span>
             <span>{SPECIES[pet.species]}</span>
             <StatusBadge map={PET_STATUS} value={pet.status} />
-            <Badge tone={pet.area === "QUARANTINE" ? "warning" : "neutral"}>{AREA[pet.area]}</Badge>
+            {pet.area && <Badge tone={pet.area === "QUARANTINE" ? "warning" : "neutral"}>{AREA[pet.area]}</Badge>}
           </>
         }
         actions={
           <>
+            <LifecycleActions pet={pet} onChanged={reload} />
             {canMarkIneligible && (
               <Button variant="ghost" icon={<Ban aria-hidden="true" />} onClick={() => setIneligibleOpen(true)}>
                 Không đủ điều kiện
@@ -85,6 +93,10 @@ export default function PetRecordPage() {
           </>
         }
       />
+
+      <div className="pet-record__alert">
+        <EndEventNotice pet={pet} events={endEvents.data} />
+      </div>
 
       <Tabs
         label="Các phần của hồ sơ"

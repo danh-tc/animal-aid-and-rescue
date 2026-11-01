@@ -1,5 +1,9 @@
 package com.aar.handover;
 
+import com.aar.common.storage.AttachmentOwner;
+import com.aar.common.storage.StorageService;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.aar.adoption.AdoptionApplication;
 import com.aar.adoption.AdoptionApplicationRepository;
 import com.aar.adoption.ApplicationStatus;
@@ -48,11 +52,13 @@ public class HandoverService {
     private final IntakeRepository intakes;
     private final StateTransitionService state;
     private final SystemParameterService params;
+    private final StorageService storage;
 
     public HandoverService(HandoverRepository handovers, FollowUpRepository followUps,
                            AdoptionApplicationRepository applications, PetLifecycle petLifecycle,
                            PetRepository pets, UserRepository users, IntakeRepository intakes,
-                           StateTransitionService state, SystemParameterService params) {
+                           StateTransitionService state, SystemParameterService params, StorageService storage) {
+        this.storage = storage;
         this.handovers = handovers;
         this.followUps = followUps;
         this.applications = applications;
@@ -117,6 +123,11 @@ public class HandoverService {
      * Đạt và không còn lịch nào: kết thúc hậu kiểm.
      */
     public FollowUpOutcome recordResult(Long followUpId, FollowUpResultRequest req, Long by) {
+        return recordResult(followUpId, req, List.of(), by);
+    }
+
+    /** Bản multipart theo mục 5.2: 5 tiêu chí, kết quả, lý do và ảnh trong cùng một giao dịch. */
+    public FollowUpOutcome recordResult(Long followUpId, FollowUpResultRequest req, List<MultipartFile> photos, Long by) {
         FollowUp followUp = followUps.findById(followUpId)
             .orElseThrow(() -> BusinessException.notFound("Không tìm thấy lịch hậu kiểm"));
         Handover handover = handovers.findById(followUp.getHandoverId()).orElseThrow();
@@ -134,6 +145,7 @@ public class HandoverService {
         followUp.recordResult(req.result(), req.healthOk(), req.housingOk(), req.commitmentOk(), req.petPresent(),
             req.ownerReachable(), reason, by);
         followUps.flush();
+        storage.store(AttachmentOwner.FOLLOW_UP, followUp.getId(), photos);
 
         FollowUp additional = null;
         switch (req.result()) {

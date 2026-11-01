@@ -77,18 +77,13 @@ export default function FollowUpsPage() {
     if (result !== "PASS" && !reason.trim()) throw new Error("Cần theo dõi hoặc Không đạt phải ghi lý do.");
     if (!filesValid(files)) throw new Error("Có tệp lớn hơn 5MB.");
     const id = target.followUp.id;
-    const outcome = await mutate<FollowUpOutcome>(`/api/staff/follow-ups/${id}/result`, {
-      body: { result, ...criteria, reason: reason.trim() || null },
-    });
-    if (files.length > 0) {
-      const data = new FormData();
-      files.forEach((f) => data.append("files", f));
-      try {
-        await mutate(`/api/staff/follow-ups/${id}/attachments`, { body: data });
-      } catch {
-        toast.error("Đã lưu kết quả nhưng tải ảnh thất bại. Thử tải lại sau.");
-      }
-    }
+    // Mục 5.2: multipart gồm phần "data" (5 tiêu chí, kết quả, lý do) và "photos" (ảnh hậu kiểm)
+    const data = new FormData();
+    data.append("data", new Blob([JSON.stringify({ result, ...criteria, reason: reason.trim() || null })], {
+      type: "application/json",
+    }));
+    files.forEach((f) => data.append("photos", f));
+    const outcome = await mutate<FollowUpOutcome>(`/api/staff/follow-ups/${id}/result`, { body: data });
     const extra = outcome.additionalFollowUp
       ? ` Đã thêm lần hậu kiểm bổ sung ngày ${formatDate(outcome.additionalFollowUp.dueDate)}.`
       : "";

@@ -14,6 +14,7 @@ import { useMutation } from "@/hooks/useApi";
 import { ageLabel, formatDate, formatDateTime, todayIso } from "@/lib/format";
 import { AREA, SEX, SPECIES } from "@/lib/labels";
 import type { AttachmentView, PetArea, PetDetail, Sex, UpdatePetRequest } from "@/types/api";
+import { CostPanel } from "./CostPanel";
 import "../../../detail-page.scss";
 
 export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => void }) {
@@ -28,7 +29,7 @@ export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => v
     birth: pet.estimatedBirthDate ?? "",
     color: pet.color ?? "",
     description: pet.description ?? "",
-    area: pet.area,
+    area: pet.area ?? ("QUARANTINE" as PetArea),
     location: pet.currentLocation ?? "",
   });
 
@@ -39,7 +40,7 @@ export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => v
       estimatedBirthDate: form.birth || null,
       color: form.color.trim() || null,
       description: form.description.trim() || null,
-      area: form.area !== pet.area ? form.area : null,
+      area: pet.area && form.area !== pet.area ? form.area : null,
       currentLocation: form.location.trim() || null,
     };
     await mutate(`/api/staff/pets/${pet.id}`, { method: "PATCH", body });
@@ -77,7 +78,7 @@ export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => v
               { label: "Giới tính", value: SEX[pet.sex] },
               { label: "Ngày sinh ước tính", value: `${formatDate(pet.estimatedBirthDate)} ${ageLabel(pet.estimatedBirthDate) ? `(${ageLabel(pet.estimatedBirthDate)})` : ""}` },
               { label: "Màu lông", value: pet.color },
-              { label: "Khu", value: AREA[pet.area] },
+              { label: "Khu", value: pet.area ? AREA[pet.area] : "—" },
               { label: "Vị trí hiện tại", value: pet.currentLocation },
               { label: "Mô tả", value: pet.description, wide: true },
               { label: "Tạo hồ sơ", value: formatDateTime(pet.createdAt) },
@@ -86,6 +87,7 @@ export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => v
         </Panel>
       </div>
       <aside className="detail-page__side">
+        <CostPanel petId={pet.id} />
         <Panel
           title="Ảnh"
           description="Ảnh hiện trên trang công khai khi thú sẵn sàng nhận nuôi."

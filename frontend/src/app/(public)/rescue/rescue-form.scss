@@ -76,6 +76,13 @@
     text-align: center;
   }
 
+  &__result {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-top: $space-4;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;

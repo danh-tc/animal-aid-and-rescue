@@ -1,4 +1,4 @@
-# Cơ sở dữ liệu cho môi trường dev. Chạy: docker compose up -d
+# Môi trường dev. Chạy: docker compose up -d
 services:
   postgres:
     image: postgres:16-alpine
@@ -17,6 +17,27 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # NFR-06: sao lưu hằng ngày bằng pg_dump vào ./backups, giữ BACKUP_KEEP_DAYS ngày gần nhất.
+  # Khôi phục: scripts/restore.sh backups/<tệp>.dump
+  backup:
+    image: postgres:16-alpine
+    container_name: aar-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: aar
+      PGUSER: aar
+      PGPASSWORD: aar
+      TZ: Asia/Ho_Chi_Minh
+      BACKUP_AT: "02:00"
+      BACKUP_KEEP_DAYS: "7"
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup-loop.sh:/backup-loop.sh:ro
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
 
 volumes:
   aar-pgdata:

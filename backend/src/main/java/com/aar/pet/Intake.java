@@ -68,6 +68,11 @@ public class Intake {
         return new Intake(petId, IntakeSource.RESCUE, caseId, null, reason, priority, assessment, by);
     }
 
+    /** Tìm lại thú thất lạc (QĐ-16): lượt tiếp nhận mới trên hồ sơ cũ. */
+    public static Intake fromFound(Long petId, String reason, Priority priority, String initialAssessment, Long by) {
+        return new Intake(petId, IntakeSource.FOUND, null, null, reason, priority, initialAssessment, by);
+    }
+
     public static Intake fromReturn(Long petId, Long handoverId, String reason, Priority priority,
                                     String assessment, Long by) {
         return new Intake(petId, IntakeSource.RETURN, null, handoverId, reason, priority, assessment, by);

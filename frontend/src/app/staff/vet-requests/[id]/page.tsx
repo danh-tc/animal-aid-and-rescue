@@ -4,6 +4,7 @@ import { CheckCircle2, Play, Upload, XCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { StatusBadge } from "@/components/badge/Badge";
+import { AttachmentList } from "@/components/attachment-list/AttachmentList";
 import { Button, LinkButton } from "@/components/button/Button";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
@@ -31,7 +32,8 @@ export default function VetRequestDetailPage() {
   const [done, setDone] = useState({ diagnosis: "", treatment: "", cost: "", aftercare: "" });
   const [reason, setReason] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [uploaded, setUploaded] = useState<AttachmentView[]>([]);
+  const [completeFiles, setCompleteFiles] = useState<File[]>([]);
+  const attachments = useApi<AttachmentView[]>(`/api/staff/vet-requests/${id}/attachments`);
 
   if (loading && !v) return <Skeleton card lines={6} />;
   if (!v) return <Notice tone="error">{error}</Notice>;
@@ -57,17 +59,23 @@ export default function VetRequestDetailPage() {
   async function complete() {
     const cost = Number(done.cost);
     if (done.cost === "" || !(cost >= 0) || !Number.isInteger(cost)) throw new Error("Nhập tổng chi phí là số nguyên VND, không âm.");
-    const res = await mutate<VetRequestResult>(`/api/staff/vet-requests/${id}/complete`, {
-      body: {
-        diagnosisSummary: done.diagnosis.trim() || null,
-        treatmentSummary: done.treatment.trim() || null,
-        totalCost: cost,
-        aftercareInstructions: done.aftercare.trim() || null,
-      },
-    });
+    if (!filesValid(completeFiles)) throw new Error("Có tệp lớn hơn 5MB.");
+    // Mục 5.2: multipart gồm phần "data" (JSON kết quả) và "files" (phiếu khám) trong cùng một yêu cầu
+    const data = new FormData();
+    const result = {
+      diagnosisSummary: done.diagnosis.trim() || null,
+      treatmentSummary: done.treatment.trim() || null,
+      totalCost: cost,
+      aftercareInstructions: done.aftercare.trim() || null,
+    };
+    data.append("data", new Blob([JSON.stringify(result)], { type: "application/json" }));
+    completeFiles.forEach((f) => data.append("files", f));
+    const res = await mutate<VetRequestResult>(`/api/staff/vet-requests/${id}/complete`, { body: data });
     notify(res, "Đã ghi kết quả khám.");
+    setCompleteFiles([]);
     setDialog(null);
     reload();
+    attachments.reload();
   }
 
   async function cancel() {
@@ -83,7 +91,7 @@ export default function VetRequestDetailPage() {
     const data = new FormData();
     files.forEach((f) => data.append("files", f));
     const saved = await mutate<AttachmentView[]>(`/api/staff/vet-requests/${id}/attachments`, { body: data });
-    setUploaded([...uploaded, ...saved]);
+    attachments.reload();
     toast.success(`Đã tải lên ${saved.length} tệp.`);
     setFiles([]);
     setDialog(null);
@@ -163,17 +171,7 @@ export default function VetRequestDetailPage() {
               </Button>
             }
           >
-            {uploaded.length === 0 ? (
-              <p className="form-field__hint">Ảnh chụp hoặc PDF phiếu khám, tối đa 5 tệp mỗi lần.</p>
-            ) : (
-              <ul className="detail-page__links">
-                {uploaded.map((a) => (
-                  <li key={a.id} className="detail-page__link">
-                    {a.originalName}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {attachments.data && <AttachmentList items={attachments.data} />}
           </Panel>
         </aside>
       </div>
@@ -191,6 +189,13 @@ export default function VetRequestDetailPage() {
         <Field label="Tổng chi phí (VND)" required hint="Bắt buộc khi hoàn tất, nhập 0 nếu miễn phí.">
           <input type="number" min={0} step={1000} inputMode="numeric" value={done.cost} onChange={(e) => setDone({ ...done, cost: e.target.value })} required />
         </Field>
+        <FilePicker
+          label="Phiếu khám (không bắt buộc)"
+          files={completeFiles}
+          onChange={setCompleteFiles}
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          hint="JPG, PNG, WEBP hoặc PDF, tối đa 5 tệp, mỗi tệp không quá 5MB."
+        />
       </Dialog>
 
       <Dialog open={dialog === "cancel"} onClose={() => setDialog(null)} title="Hủy yêu cầu thú y?" submitLabel="Hủy yêu cầu" submitVariant="danger" onSubmit={cancel}>

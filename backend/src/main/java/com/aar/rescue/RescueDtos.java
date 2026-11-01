@@ -47,10 +47,29 @@ public final class RescueDtos {
         }
     }
 
+    /**
+     * openCases: các ca đang mở để nhân viên kiểm tra trùng (bước 2 của UC-07), ca gần nhất trước.
+     * distanceKm chỉ có khi cả báo cáo này và báo cáo gốc của ca đều có tọa độ.
+     */
     public record ReportDetail(Long id, String code, String reporterName, String reporterPhone, String locationText,
                                BigDecimal latitude, BigDecimal longitude, String description, ReportStatus status,
                                Long handledBy, OffsetDateTime createdAt, OffsetDateTime handledAt,
-                               List<AttachmentView> photos, List<CaseSummary> cases) {
+                               List<AttachmentView> photos, List<CaseSummary> cases, List<OpenCase> openCases) {
+    }
+
+    public record OpenCase(CaseSummary rescueCase, Double distanceKm, List<String> reportCodes) {
+    }
+
+    /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào một ca đang mở (QĐ-01). */
+    public record MergeRequest(@NotNull Long caseId) {
+    }
+
+    /** P04: Khách tra cứu bằng mã và số điện thoại (RB-15). Chỉ trả tiến độ, không lộ dữ liệu nội bộ. */
+    public record ReportLookup(String code, ReportStatus status, OffsetDateTime createdAt, OffsetDateTime handledAt,
+                               List<CaseProgress> cases) {
+    }
+
+    public record CaseProgress(CaseStatus status, OffsetDateTime closedAt) {
     }
 
     /** Tách báo cáo nhiều thú thành nhiều ca (QĐ-01). assignedStaffId có thì phân công luôn. */

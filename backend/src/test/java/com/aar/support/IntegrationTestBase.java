@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -35,6 +36,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Mỗi test tự tạo dữ liệu riêng qua API thay vì sửa dữ liệu mẫu.
  */
 @SpringBootTest
+// Mọi test chạy từ cùng một IP, nới giới hạn tần suất để không ảnh hưởng nhau.
+// RateLimitIntegrationTest khai báo @TestPropertySource riêng để ghi đè.
+@TestPropertySource(properties = {
+    "app.rate-limit.auth-per-minute=100000",
+    "app.rate-limit.lookup-per-minute=100000",
+    "app.rate-limit.report-per-minute=100000",
+    "app.rate-limit.other-per-minute=100000"})
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
 @Testcontainers(disabledWithoutDocker = true)
@@ -189,5 +197,22 @@ public abstract class IntegrationTestBase {
     protected long submitApplication(long petId, String adopter, boolean pledge) throws Exception {
         return postJson("/api/adopter/applications", adopter, map("petId", petId, "housingType", "HOUSE",
             "hasPetExperience", true, "motivation", "Yêu chó", "sterilizationPledge", pledge), 201).get("id").asLong();
+    }
+
+    /** Thú Sẵn sàng => đơn của adopter => đã duyệt. Trả về id đơn. */
+    protected long approvedApplication(String adopter) throws Exception {
+        long petId = availablePet(false);
+        long appId = submitApplication(petId, adopter, false);
+        postJson("/api/staff/applications/" + appId + "/approve", STAFF, null, 200);
+        return appId;
+    }
+
+    /** Đã bàn giao, đang hậu kiểm (IN_PROGRESS). Trả về HandoverView. */
+    protected JsonNode handedOver(String adopter) throws Exception {
+        return postJson("/api/staff/applications/" + approvedApplication(adopter) + "/handover", STAFF, null, 201);
+    }
+
+    protected long petIdOfApplication(long applicationId) {
+        return jdbc.queryForObject("SELECT pet_id FROM adoption_applications WHERE id = ?", Long.class, applicationId);
     }
 }

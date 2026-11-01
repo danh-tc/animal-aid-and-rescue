@@ -10,6 +10,8 @@ public interface VetRequestRepository extends JpaRepository<VetRequest, Long> {
 
     List<VetRequest> findByPetIdOrderByRequestedAtDesc(Long petId);
 
+    List<VetRequest> findByPetIdAndStatusIn(Long petId, java.util.Collection<VetRequestStatus> statuses);
+
     long countByPetIdAndStatusIn(Long petId, Collection<VetRequestStatus> statuses);
 
     boolean existsByPetIdAndStatus(Long petId, VetRequestStatus status);

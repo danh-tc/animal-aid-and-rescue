@@ -1,6 +1,7 @@
 package com.aar.common.config;
 
 import com.aar.common.security.JwtAuthenticationFilter;
+import com.aar.common.security.PublicRateLimitFilter;
 import com.aar.common.security.RestAuthenticationHandlers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
                                             JwtAuthenticationFilter jwtFilter,
+                                            PublicRateLimitFilter rateLimitFilter,
                                             RestAuthenticationHandlers handlers) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
@@ -48,7 +50,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/staff/**").hasRole("STAFF")
                 .requestMatchers("/api/admin/**").hasRole("MANAGER")
                 .anyRequest().authenticated())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 

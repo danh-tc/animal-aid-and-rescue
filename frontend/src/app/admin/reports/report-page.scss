@@ -1,0 +1,109 @@
+@use "abstracts" as *;
+
+.report-page {
+  &__period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+
+    input {
+      @include control;
+      width: auto;
+      min-height: $control-height-sm;
+    }
+  }
+
+  &__range {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__tiles {
+    display: grid;
+    gap: $space-4;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+
+  &__tile {
+    @include surface($radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $space-4 $space-5;
+  }
+
+  &__tile-label {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__tile-value {
+    font-family: $font-family-heading;
+    font-size: clamp(#{$font-size-lg}, 2.2vw, #{$font-size-xl});
+    white-space: nowrap;
+    font-weight: $font-weight-bold;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+  }
+
+  &__tile-hint {
+    color: $color-muted;
+    font-size: $font-size-xs;
+  }
+
+  &__columns {
+    display: grid;
+    gap: $space-5;
+
+    @include from-lg {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &__counts {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: $space-3;
+      padding-bottom: $space-2;
+      border-bottom: 1px solid $color-border;
+    }
+
+    strong {
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2;
+    color: $color-muted;
+    font-size: $font-size-sm;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

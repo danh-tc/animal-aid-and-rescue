@@ -1,0 +1,186 @@
+@use "abstracts" as *;
+
+.bar-chart {
+  margin: 0;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2 $space-4;
+    margin-bottom: $space-3;
+  }
+
+  &__title {
+    font-weight: $font-weight-semibold;
+  }
+
+  &__legend {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: $space-1 $space-4;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+
+    &--1 {
+      background: $color-chart-1;
+    }
+
+    &--2 {
+      background: $color-chart-2;
+    }
+
+    &--3 {
+      background: $color-chart-3;
+    }
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
+    min-height: 36px;
+    margin-left: auto;
+    padding: 0 $space-3;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-pill;
+    background: $color-surface;
+    color: $color-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: $color-surface-2;
+    }
+  }
+
+  &__plot {
+    position: relative;
+    overflow-x: auto;
+  }
+
+  &__svg {
+    display: block;
+    max-width: none;
+  }
+
+  &__grid {
+    stroke: $color-chart-grid;
+    stroke-width: 1;
+  }
+
+  &__axis {
+    fill: $color-muted;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__hit {
+    fill: transparent;
+  }
+
+  &__group {
+    cursor: default;
+    outline: none;
+
+    &--active .bar-chart__hit,
+    &:focus-visible .bar-chart__hit {
+      fill: $color-surface-2;
+    }
+  }
+
+  &__bar {
+    &--1 {
+      fill: $color-chart-1;
+    }
+
+    &--2 {
+      fill: $color-chart-2;
+    }
+
+    &--3 {
+      fill: $color-chart-3;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    min-width: 180px;
+    padding: $space-2 $space-3;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    box-shadow: $shadow-md;
+    font-size: $font-size-sm;
+    pointer-events: none;
+  }
+
+  &__tooltip-title {
+    margin-bottom: $space-1;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+
+    strong {
+      margin-left: auto;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th,
+    td {
+      padding: $space-2 $space-3;
+      border-bottom: 1px solid $color-border;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th:first-child {
+      text-align: left;
+    }
+
+    thead th {
+      color: $color-muted;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+    }
+  }
+}

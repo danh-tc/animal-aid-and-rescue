@@ -13,6 +13,7 @@ import type {
   PetStatus,
   Priority,
   ReportStatus,
+  EndEventType,
   Role,
   Sex,
   Species,
@@ -36,7 +37,7 @@ export const CARE_MODE: Record<CareMode, string> = { OUTPATIENT: "Khám ngoại 
 export const INTAKE_SOURCE: Record<IntakeSource, string> = {
   RESCUE: "Cứu hộ",
   RETURN: "Trả lại / thu hồi",
-  FOUND: "Nhặt được",
+  FOUND: "Tìm lại sau thất lạc",
 };
 export const CARE_ACTIVITY: Record<CareActivity, string> = {
   FEEDING: "Cho ăn",
@@ -45,6 +46,12 @@ export const CARE_ACTIVITY: Record<CareActivity, string> = {
   MEDICATION: "Cho thuốc",
   HEALTH_NOTE: "Ghi chú sức khỏe",
   AREA_CHANGE: "Đổi khu",
+};
+
+export const END_EVENT: Record<EndEventType, Labeled> = {
+  DECEASED: { label: "Qua đời", tone: "neutral" },
+  LOST: { label: "Thất lạc", tone: "warning" },
+  TRANSFERRED: { label: "Chuyển cơ sở", tone: "info" },
 };
 
 export const PRIORITY: Record<Priority, Labeled> = {

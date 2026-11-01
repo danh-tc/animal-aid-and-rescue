@@ -52,3 +52,16 @@ export function todayIso(offsetDays = 0): string {
 export function petName(name: string | null | undefined, code?: string): string {
   return name?.trim() ? name : code ? `Bé ${code}` : "Chưa đặt tên";
 }
+
+const compactFmt = new Intl.NumberFormat("vi-VN", { notation: "compact", maximumFractionDigits: 1 });
+
+/** Số gọn cho trục biểu đồ: 1,2 Tr, 500 N */
+export function formatCompact(value: number): string {
+  return compactFmt.format(value);
+}
+
+/** "2026-03" => "T3/2026" */
+export function formatMonth(month: string): string {
+  const [y, m] = month.split("-");
+  return `T${Number(m)}/${y}`;
+}

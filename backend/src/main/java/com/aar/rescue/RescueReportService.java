@@ -1,5 +1,12 @@
 package com.aar.rescue;
 
+import com.aar.rescue.RescueDtos.CaseProgress;
+import com.aar.rescue.RescueDtos.OpenCase;
+import com.aar.rescue.RescueDtos.ReportLookup;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.aar.common.Pages;
 import com.aar.common.PageResponse;
 import com.aar.common.code.CodeGenerator;
@@ -32,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class RescueReportService {
 
     private static final int MAX_CODE_ATTEMPTS = 5;
+    private static final Set<CaseStatus> OPEN_CASES = EnumSet.of(CaseStatus.NEW, CaseStatus.IN_PROGRESS);
 
     private final RescueReportRepository reports;
     private final RescueCaseRepository cases;
@@ -86,7 +94,63 @@ public class RescueReportService {
             r.getLocationText(), r.getLatitude(), r.getLongitude(), r.getDescription(), r.getStatus(),
             r.getHandledBy(), r.getCreatedAt(), r.getHandledAt(),
             attachments.findByReportIdOrderById(id).stream().map(AttachmentView::of).toList(),
-            cases.findByReportId(id).stream().map(CaseSummary::of).toList());
+            cases.findByReportId(id).stream().map(CaseSummary::of).toList(), openCases(r));
+    }
+
+    /** Ca NEW hoặc IN_PROGRESS, sắp theo khoảng cách tới báo cáo (ca không có tọa độ xếp sau), tối đa 10 ca. */
+    private List<OpenCase> openCases(RescueReport report) {
+        if (report.getStatus() != ReportStatus.NEW) {
+            return List.of();
+        }
+        return cases.findByStatusInOrderByCreatedAtDesc(OPEN_CASES).stream()
+            .map(c -> new OpenCase(CaseSummary.of(c), distanceKm(report, c),
+                c.getReports().stream().map(RescueReport::getCode).sorted().toList()))
+            .sorted(Comparator.comparing(OpenCase::distanceKm, Comparator.nullsLast(Comparator.naturalOrder())))
+            .limit(10)
+            .toList();
+    }
+
+    private static Double distanceKm(RescueReport report, RescueCase rescueCase) {
+        if (report.getLatitude() == null || report.getLongitude() == null) {
+            return null;
+        }
+        return rescueCase.getReports().stream()
+            .filter(r -> r.getLatitude() != null && r.getLongitude() != null)
+            .map(r -> haversineKm(report.getLatitude().doubleValue(), report.getLongitude().doubleValue(),
+                r.getLatitude().doubleValue(), r.getLongitude().doubleValue()))
+            .min(Double::compare)
+            .map(d -> Math.round(d * 100) / 100.0)
+            .orElse(null);
+    }
+
+    private static double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.pow(Math.sin(dLat / 2), 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.pow(Math.sin(dLon / 2), 2);
+        return 6371.0 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào ca đang mở, báo cáo chuyển sang Trùng (QĐ-01). */
+    public ReportSummary merge(Long reportId, Long caseId, Long by) {
+        RescueReport report = find(reportId);
+        RescueCase rescueCase = cases.findById(caseId)
+            .orElseThrow(() -> BusinessException.notFound("Không tìm thấy ca cứu hộ"));
+        if (!OPEN_CASES.contains(rescueCase.getStatus())) {
+            throw BusinessException.conflict("CASE_NOT_OPEN", "Chỉ gộp vào ca đang mở (Chưa phân công hoặc Đang xử lý)");
+        }
+        transition(report, "MERGED", by, "Gộp vào ca #" + caseId);
+        rescueCase.addReport(report);
+        return ReportSummary.of(report);
+    }
+
+    /** P04: khớp cả mã và số điện thoại mới trả kết quả (RB-15). Sai một trong hai đều báo không tìm thấy. */
+    @Transactional(readOnly = true)
+    public ReportLookup lookup(String code, String phone) {
+        RescueReport r = reports.findByCodeAndReporterPhone(code.trim().toUpperCase(), phone.trim())
+            .orElseThrow(() -> BusinessException.notFound("Không tìm thấy báo cáo khớp mã và số điện thoại"));
+        return new ReportLookup(r.getCode(), r.getStatus(), r.getCreatedAt(), r.getHandledAt(),
+            cases.findByReportId(r.getId()).stream().map(c -> new CaseProgress(c.getStatus(), c.getClosedAt())).toList());
     }
 
     /** Bước 3 của UC-07: tạo một hoặc nhiều ca, mỗi ca một thú. Báo cáo chuyển sang Đã xử lý. */
