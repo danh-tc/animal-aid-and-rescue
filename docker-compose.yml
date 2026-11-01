@@ -1,0 +1,22 @@
+# Cơ sở dữ liệu cho môi trường dev. Chạy: docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aar-postgres
+    environment:
+      POSTGRES_DB: aar
+      POSTGRES_USER: aar
+      POSTGRES_PASSWORD: aar
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5432:5432"
+    volumes:
+      - aar-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aar -d aar"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  aar-pgdata:

@@ -1,0 +1,5 @@
+package com.aar.pet;
+
+public enum PetStatus {
+    IN_CARE, IN_TREATMENT, AVAILABLE, PENDING_HANDOVER, ADOPTED, DECEASED, LOST, TRANSFERRED
+}

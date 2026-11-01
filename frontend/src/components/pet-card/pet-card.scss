@@ -1,0 +1,58 @@
+@use "abstracts" as *;
+
+.pet-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: $radius-md;
+  background: $color-surface;
+  box-shadow: $shadow-card;
+
+  &__media {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    font-size: 3rem;
+    background: $color-primary-soft;
+  }
+
+  &--cat &__media {
+    background: $color-accent-soft;
+  }
+
+  &__body {
+    padding: $space-4;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: $font-size-lg;
+  }
+
+  &__code {
+    font-size: $font-size-sm;
+    color: $color-muted;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin: $space-3 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    padding: 2px $space-3;
+    border-radius: $radius-pill;
+    font-size: $font-size-sm;
+    background: $color-bg;
+    color: $color-muted;
+  }
+
+  &__description {
+    margin: 0;
+    color: $color-muted;
+  }
+}

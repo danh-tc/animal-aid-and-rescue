@@ -1,0 +1,67 @@
+@use "abstracts" as *;
+
+.site-header {
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    font-weight: 700;
+    font-size: $font-size-lg;
+    color: $color-primary;
+    text-decoration: none;
+  }
+
+  &__logo-mark {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-sm;
+    background: $color-primary-soft;
+  }
+
+  &__logo-text {
+    white-space: nowrap;
+
+    &--full {
+      display: none;
+
+      @include from-md {
+        display: inline;
+      }
+    }
+
+    &--short {
+      @include from-md {
+        display: none;
+      }
+    }
+  }
+
+  &__nav {
+    display: flex;
+    gap: $space-4;
+  }
+
+  &__link {
+    white-space: nowrap;
+    color: $color-muted;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover,
+    &--active {
+      color: $color-text;
+    }
+  }
+}

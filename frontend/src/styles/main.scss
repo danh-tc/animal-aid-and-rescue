@@ -1,0 +1,23 @@
+// Điểm vào duy nhất cho style toàn cục. Style của component nằm cạnh component đó.
+@use "base/reset";
+@use "base/typography";
+@use "abstracts" as *;
+
+.container {
+  width: 100%;
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $space-4;
+}
+
+.notice {
+  padding: $space-4 $space-6;
+  border-radius: $radius-md;
+  background: $color-accent-soft;
+  color: $color-text;
+
+  &--error {
+    background: $color-danger-soft;
+    color: $color-danger;
+  }
+}

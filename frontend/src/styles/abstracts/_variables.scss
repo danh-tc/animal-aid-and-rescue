@@ -1,0 +1,38 @@
+// Màu, khoảng cách, bo góc dùng chung. Không viết mã màu trực tiếp trong file component.
+
+$color-bg: #f8f5ef;
+$color-surface: #ffffff;
+$color-text: #1d2a2c;
+$color-muted: #5a6a6d;
+$color-border: #e4ddd1;
+$color-primary: #2d6a5f;
+$color-primary-dark: #22524a;
+$color-primary-soft: #e3efe9;
+$color-accent: #d9823b;
+$color-accent-soft: #fbeedf;
+$color-danger: #b42318;
+$color-danger-soft: #fdecea;
+
+$font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.75rem;
+$font-size-xxl: 2.5rem;
+
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-6: 1.5rem;
+$space-8: 2rem;
+$space-12: 3rem;
+
+$radius-sm: 6px;
+$radius-md: 12px;
+$radius-pill: 999px;
+
+$shadow-card: 0 1px 2px rgba(29, 42, 44, 0.06), 0 4px 16px rgba(29, 42, 44, 0.06);
+
+$container-width: 1120px;
+$breakpoint-md: 768px;

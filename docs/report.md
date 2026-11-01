@@ -20,7 +20,7 @@
 - Khách: người dân không đăng nhập (báo cứu hộ, tra cứu báo cáo, xem thú sẵn sàng).
 - Người nhận nuôi: có tài khoản, kế thừa quyền của Khách.
 - Nhân viên trung tâm.
-- Quản lý trung tâm.
+- Quản lý trung tâm: kế thừa quyền của Nhân viên, thêm báo cáo và quản trị hệ thống.
 
 # Chương 2. Phân tích yêu cầu hệ thống
 
@@ -261,7 +261,7 @@ Nhóm 1 đến 4 là nghiệp vụ (khớp 2.1.2 đến 2.1.6), nhóm 5 và 6 l�
 | Khách | Không đăng nhập | Báo cứu hộ, tra cứu báo cáo, xem thú sẵn sàng, đăng ký tài khoản |
 | Người nhận nuôi | Đăng nhập, kế thừa Khách | Nộp, hủy, theo dõi đơn, xem thú đã nhận và lịch hậu kiểm |
 | Nhân viên | Đăng nhập | Xử lý cứu hộ, chăm sóc, thú y, duyệt đơn, bàn giao, hậu kiểm |
-| Quản lý | Đăng nhập | Báo cáo, tài khoản, danh mục cơ sở thú y |
+| Quản lý | Đăng nhập, kế thừa Nhân viên | Mọi việc của Nhân viên, cộng báo cáo, tài khoản, danh mục cơ sở thú y, tham số hệ thống |
 
 > Sơ đồ này xem ở bản báo cáo online: https://claude.ai/artifact/UESS64WHDvFkrjWkQciXVM
 
@@ -558,6 +558,13 @@ Mô hình gồm 16 bảng trên PostgreSQL. Bảng dưới đây tóm tắt khó
 | APPLICATION\_ALERT\_DAYS | 7 | Đơn chờ quá số ngày này thì vào báo cáo ngoại lệ |
 | REPORT\_RATE\_LIMIT\_PER\_HOUR | 5 | Số báo cáo tối đa của một số điện thoại trong một giờ |
 
+**Quy tắc sinh mã**
+
+| Mã | Định dạng | Ví dụ | Cách sinh |
+| --- | --- | --- | --- |
+| Mã báo cáo cứu hộ | BC- và 6 ký tự | BC-7K2M9Q | Ngẫu nhiên (SecureRandom) từ 31 ký tự, bỏ các ký tự dễ nhầm 0, O, 1, I, L. Khó đoán nên an toàn khi Khách tra cứu bằng mã kèm số điện thoại |
+| Mã hồ sơ thú | TH-năm-4 chữ số | TH-2026-0007 | Năm tạo hồ sơ và số thứ tự lấy từ sequence pet\_code\_seq (migration V2), tăng liên tục, không đặt lại theo năm |
+
 ## 4.3. Sơ đồ lớp (Class Diagram)
 
 ## 4.4. Ràng buộc toàn vẹn dữ liệu
@@ -653,12 +660,63 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 | Báo cứu hộ, tra cứu báo cáo, xem thú sẵn sàng | Có | Có | Có | Có |
 | Nộp, hủy đơn nhận nuôi | Không | Có | Không | Không |
 | Xem đơn, thú đã nhận và lịch hậu kiểm của mình | Không | Có | Không | Không |
-| Xử lý báo cáo và ca cứu hộ | Không | Không | Có | Chỉ xem |
-| Hồ sơ thú, chăm sóc, yêu cầu thú y, checklist | Không | Không | Có | Chỉ xem |
-| Xét duyệt đơn | Không | Không | Có | Chỉ xem |
-| Bàn giao, hậu kiểm, trả lại, sự kiện kết thúc | Không | Không | Có | Chỉ xem |
+| Xử lý báo cáo và ca cứu hộ | Không | Không | Có | Có |
+| Hồ sơ thú, chăm sóc, yêu cầu thú y, checklist | Không | Không | Có | Có |
+| Xét duyệt đơn | Không | Không | Có | Có |
+| Bàn giao, hậu kiểm, trả lại, sự kiện kết thúc | Không | Không | Có | Có |
 | Báo cáo thống kê | Không | Không | Không | Có |
 | Tài khoản, cơ sở thú y, tham số hệ thống | Không | Không | Không | Có |
+
+Quản lý kế thừa toàn bộ quyền của Nhân viên (cài bằng RoleHierarchy MANAGER > STAFF của Spring Security). Trách nhiệm từng thao tác vẫn truy vết được qua người thực hiện ghi trong status\_histories.
+
+**Danh sách API cho MVP**
+
+Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`) thay vì sửa thẳng cột trạng thái, để mọi thay đổi đi qua service chuyển trạng thái (RB-12). Chuyển trạng thái không hợp lệ hoặc xung đột đồng thời trả mã 409. Endpoint `/api/staff/**` mở cho cả STAFF và MANAGER.
+
+| Method | Endpoint | Màn hình | Ghi chú |
+| --- | --- | --- | --- |
+| GET | /api/public/pets | P01 | Thú AVAILABLE, lọc theo loài, phân trang |
+| GET | /api/public/pets/{id} | P02 | Chỉ trả thú AVAILABLE |
+| POST | /api/public/rescue-reports | P03 | Multipart: thông tin và ảnh. Trả mã báo cáo. Giới hạn tần suất theo số điện thoại |
+| GET | /api/public/rescue-reports/lookup?code=&phone= | P04 | Đợt 2 |
+| POST | /api/public/auth/register | P05 | Luôn tạo tài khoản ADOPTER |
+| POST | /api/public/auth/login | P05 | Trả JWT |
+| POST | /api/adopter/applications | A01 | Kiểm tra thú AVAILABLE (RB-02, RB-14) |
+| GET | /api/adopter/applications | A02 | Đơn của người đang đăng nhập |
+| POST | /api/adopter/applications/{id}/cancel | A02 | Đơn PENDING hoặc APPROVED |
+| GET | /api/adopter/adoptions | A03 | Thú đã nhận, bàn giao và lịch hậu kiểm |
+| GET | /api/staff/dashboard | S01 | Số báo cáo mới, đơn chờ, hậu kiểm đến hạn |
+| GET | /api/staff/rescue-reports?status= | S02 |  |
+| POST | /api/staff/rescue-reports/{id}/cases | S02 | Tạo một hoặc nhiều ca (tách báo cáo nhiều thú) |
+| POST | /api/staff/rescue-reports/{id}/invalid | S02 |  |
+| POST | /api/staff/rescue-reports/{id}/merge | S02 | Đợt 2 |
+| GET | /api/staff/rescue-cases?status= | S03 |  |
+| POST | /api/staff/rescue-cases/{id}/assign | S03 | NEW => IN\_PROGRESS |
+| POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú và lượt tiếp nhận RESCUE trong một giao dịch |
+| POST | /api/staff/rescue-cases/{id}/fail | S03 | Bắt buộc lý do |
+| GET | /api/staff/pets?status= | S04 |  |
+| GET | /api/staff/pets/{id} | S05 | Kèm lượt tiếp nhận và checklist tính ra |
+| PATCH | /api/staff/pets/{id} | S05 | Thông tin mô tả, khu vực, nơi ở. Không sửa trạng thái |
+| GET | /api/staff/pets/{id}/history | S05 | Đọc status\_histories |
+| GET, POST | /api/staff/pets/{id}/care-logs | S05 |  |
+| PUT | /api/staff/pets/{id}/eligibility | S05 | Lưu checklist. Đủ 6 mục thì chuyển AVAILABLE (RB-13) |
+| POST | /api/staff/pets/{id}/ineligible | S05 | AVAILABLE hoặc PENDING\_HANDOVER => IN\_CARE, hủy đơn liên quan |
+| POST | /api/staff/pets/{id}/vet-requests | S06 | Thú => IN\_TREATMENT |
+| POST | /api/staff/vet-requests/{id}/start | S06 | PENDING => IN\_TREATMENT |
+| POST | /api/staff/vet-requests/{id}/complete | S06 | Multipart: kết quả, chi phí, hướng dẫn, phiếu khám |
+| POST | /api/staff/vet-requests/{id}/cancel | S06 | Bắt buộc lý do |
+| GET | /api/staff/applications?status= | S07 |  |
+| POST | /api/staff/applications/{id}/approve | S07 | Khóa dòng thú, 409 nếu thú đã có đơn được duyệt |
+| POST | /api/staff/applications/{id}/reject | S07 | Bắt buộc nhận xét |
+| POST | /api/staff/applications/{id}/handover | S08 | Tạo bàn giao và 2 lịch hậu kiểm |
+| GET | /api/staff/follow-ups?dueBefore= | S09 | Lịch đến hạn |
+| POST | /api/staff/follow-ups/{id}/result | S09 | 5 tiêu chí, kết quả, lý do, ảnh |
+| POST | /api/staff/pets/{id}/returns | S10 | Tạo lượt tiếp nhận RETURN |
+| POST | /api/staff/pets/{id}/end-events | S10 | Đợt 2 |
+| GET, POST, PATCH | /api/admin/users | M02 | Tạo tài khoản STAFF, MANAGER, khóa tài khoản |
+| GET, POST, PATCH | /api/admin/vet-clinics | M03 |  |
+| GET, PUT | /api/admin/system-parameters | M04 |  |
+| GET | /api/admin/reports/\* | M01 | Đợt 2 |
 
 ## 5.3. Thiết kế báo cáo đầu ra
 
@@ -667,6 +725,20 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 - Báo cáo chi phí và ủng hộ: chi phí điều trị theo thú và theo cơ sở thú y, đối chiếu chi phí điều trị, tiền ủng hộ và phần chênh lệch theo tháng và theo từng thú.
 
 ## 5.4. Demo các chức năng chính
+
+**Dữ liệu mẫu cho demo**
+
+Dữ liệu mẫu nằm trong `db/seed/R__dev_seed.sql`, chỉ nạp khi chạy profile dev và chỉ chèn khi database còn trống. Mọi tài khoản mẫu dùng mật khẩu Password@123.
+
+| Nhóm | Dữ liệu | Dùng để demo |
+| --- | --- | --- |
+| Tài khoản | 1 Quản lý, 2 Nhân viên, 3 Người nhận nuôi | Phân quyền, Quản lý kế thừa quyền Nhân viên |
+| Báo cáo cứu hộ | 2 mới, 1 không hợp lệ, 9 đã xử lý, trong đó 1 báo cáo có hai mèo được tách thành hai ca | Xử lý báo cáo, tách nhiều thú |
+| Ca cứu hộ | 1 đang xử lý, 1 thất bại có lý do, 8 thành công | Cập nhật kết quả ca |
+| Thú cưng | Mực (Đang chăm sóc, cách ly), Bông (Đang điều trị, lưu trú), Vàng và Mướp (Sẵn sàng), Đốm (Chờ bàn giao), Miu (Đã nhận nuôi), Lu (bị trả lại), Tí (Qua đời) | Mỗi trạng thái của vòng đời có ít nhất một mẫu |
+| Đơn nhận nuôi | Vàng có 2 đơn đang chờ của hai người khác nhau, Đốm có 1 đơn đã duyệt, thêm đơn bị từ chối và đơn bị hệ thống tự đóng | Xử lý đồng thời khi duyệt đơn (RB-01) |
+| Bàn giao và hậu kiểm | Miu: hậu kiểm lần 1 Đạt, lần 2 đã lên lịch. Lu: hậu kiểm lần 1 Cần theo dõi, sau đó chủ nuôi trả lại | Hậu kiểm, trả lại, lượt tiếp nhận RETURN |
+| Thú y | 1 yêu cầu đang điều trị, 6 yêu cầu hoàn tất có chi phí | Chi phí điều trị, khoản ủng hộ |
 
 ## 5.5. Kiểm thử và đánh giá kết quả
 
@@ -695,7 +767,7 @@ API REST chia theo nhóm quyền để Spring Security cấu hình theo đườn
 
 ## Phụ lục B. Từ điển dữ liệu
 
-Script tạo bảng PostgreSQL, dùng làm migration Flyway `V1__init.sql`. Bản file riêng: [`docs/db/V1__init.sql`](db/V1__init.sql), đã chạy thử trên PostgreSQL 16.
+Script tạo bảng PostgreSQL, dùng làm migration Flyway `V1__init.sql`. Bản chính thức nằm ở [`backend/src/main/resources/db/migration`](../backend/src/main/resources/db/migration), đã chạy thử trên PostgreSQL 16.
 
 ```sql
 CREATE TABLE users (
