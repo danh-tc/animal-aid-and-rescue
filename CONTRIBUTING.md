@@ -11,6 +11,9 @@
 
 - Package chia theo 6 nhóm chức năng của BFD (báo cáo mục 2.4): `rescue`, `care`, `adoption`, `handover`, `report`, `system`. Phần dùng chung nằm trong `common` và `pet`.
 - **Đổi trạng thái chỉ qua `StateTransitionService`** (RB-12). Thêm chuyển trạng thái mới thì sửa `TransitionTable` và báo cáo mục 3.4 cùng lúc.
+- Ghi dữ liệu đi kèm (lý do, chi phí, nhận xét) vào entity **trước** khi gọi chuyển trạng thái. CHECK constraint trong database đòi trạng thái mới phải có các dữ liệu này, nếu có flush xen giữa sẽ bị chặn.
+- Thao tác thay đổi trạng thái thú phải khóa dòng thú trước (`PetLifecycle.lock`) để tuần tự hóa với các thao tác khác trên cùng thú.
+- Test tích hợp kế thừa `support/IntegrationTestBase`, tự tạo dữ liệu qua API (`availablePet()`, `submitApplication()`...) thay vì sửa dữ liệu mẫu.
 - Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST /api/staff/applications/{id}/approve`). Lỗi trạng thái trả 409.
 - Lỗi nghiệp vụ ném `BusinessException`, không tự trả `ResponseEntity` lỗi trong controller.
 - Migration Flyway đặt ở `src/main/resources/db/migration`, đánh số `V3__mo_ta.sql`, `V4__...`. **Không sửa migration đã gộp vào `main`**, muốn đổi thì viết migration mới.

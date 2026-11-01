@@ -557,6 +557,7 @@ Mô hình gồm 16 bảng trên PostgreSQL. Bảng dưới đây tóm tắt khó
 | FOLLOW\_UP\_2\_DAYS | 60 | Hậu kiểm lần 2, tính từ ngày bàn giao |
 | APPLICATION\_ALERT\_DAYS | 7 | Đơn chờ quá số ngày này thì vào báo cáo ngoại lệ |
 | REPORT\_RATE\_LIMIT\_PER\_HOUR | 5 | Số báo cáo tối đa của một số điện thoại trong một giờ |
+| MIN\_STERILIZATION\_AGE\_WEEKS | 24 | Tuổi tối thiểu để triệt sản (tuần). Checklist mục 5: chưa đủ tuổi thì đơn phải kèm cam kết triệt sản (migration V3) |
 
 **Quy tắc sinh mã**
 
@@ -677,7 +678,8 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | --- | --- | --- | --- |
 | GET | /api/public/pets | P01 | Thú AVAILABLE, lọc theo loài, phân trang |
 | GET | /api/public/pets/{id} | P02 | Chỉ trả thú AVAILABLE |
-| POST | /api/public/rescue-reports | P03 | Multipart: thông tin và ảnh. Trả mã báo cáo. Giới hạn tần suất theo số điện thoại |
+| POST | /api/public/rescue-reports | P03 | Multipart (phần `report` là JSON, phần `photos` là ảnh) hoặc JSON thuần. Trả mã báo cáo. Quá giới hạn tần suất theo số điện thoại trả 429 |
+| GET | /api/public/pets/{id}/photos/{photoId} | P02 | Ảnh của thú đang AVAILABLE |
 | GET | /api/public/rescue-reports/lookup?code=&phone= | P04 | Đợt 2 |
 | POST | /api/public/auth/register | P05 | Luôn tạo tài khoản ADOPTER |
 | POST | /api/public/auth/login | P05 | Trả JWT |
@@ -687,35 +689,46 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/adopter/adoptions | A03 | Thú đã nhận, bàn giao và lịch hậu kiểm |
 | GET | /api/staff/dashboard | S01 | Số báo cáo mới, đơn chờ, hậu kiểm đến hạn |
 | GET | /api/staff/rescue-reports?status= | S02 |  |
-| POST | /api/staff/rescue-reports/{id}/cases | S02 | Tạo một hoặc nhiều ca (tách báo cáo nhiều thú) |
-| POST | /api/staff/rescue-reports/{id}/invalid | S02 |  |
+| GET | /api/staff/rescue-reports/{id} | S02 | Kèm ảnh và các ca đã tạo |
+| POST | /api/staff/rescue-reports/{id}/cases | S02 | `numberOfAnimals` ca, mỗi ca một thú (tách báo cáo nhiều thú). Có `assignedStaffId` thì phân công luôn |
+| POST | /api/staff/rescue-reports/{id}/invalid | S02 | Bắt buộc lý do |
 | POST | /api/staff/rescue-reports/{id}/merge | S02 | Đợt 2 |
 | GET | /api/staff/rescue-cases?status= | S03 |  |
+| GET | /api/staff/rescue-cases/{id} | S03 | Kèm báo cáo gốc và thú đã tạo |
+| GET | /api/staff/staff-members | S03 | Nhân viên đang hoạt động để phân công |
 | POST | /api/staff/rescue-cases/{id}/assign | S03 | NEW => IN\_PROGRESS |
-| POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú và lượt tiếp nhận RESCUE trong một giao dịch |
+| POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú và lượt tiếp nhận RESCUE trong một giao dịch. Đánh giá Khẩn cấp thì trả cờ nhắc tạo yêu cầu thú y |
 | POST | /api/staff/rescue-cases/{id}/fail | S03 | Bắt buộc lý do |
-| GET | /api/staff/pets?status= | S04 |  |
-| GET | /api/staff/pets/{id} | S05 | Kèm lượt tiếp nhận và checklist tính ra |
-| PATCH | /api/staff/pets/{id} | S05 | Thông tin mô tả, khu vực, nơi ở. Không sửa trạng thái |
+| GET | /api/staff/pets?status=&species=&q= | S04 | q tìm theo mã hoặc tên |
+| GET | /api/staff/pets/{id} | S05 | Kèm lượt tiếp nhận, checklist tính ra, yêu cầu thú y, ảnh |
+| POST | /api/staff/pets/{id}/attachments | S05 | Multipart `files`: ảnh thú |
+| PATCH | /api/staff/pets/{id} | S05 | Thông tin mô tả, khu vực, nơi ở. Không sửa trạng thái. Đổi khu vực tự ghi nhật ký AREA\_CHANGE |
 | GET | /api/staff/pets/{id}/history | S05 | Đọc status\_histories |
 | GET, POST | /api/staff/pets/{id}/care-logs | S05 |  |
-| PUT | /api/staff/pets/{id}/eligibility | S05 | Lưu checklist. Đủ 6 mục thì chuyển AVAILABLE (RB-13) |
+| PUT | /api/staff/pets/{id}/eligibility | S05 | Lưu checklist khi IN\_CARE hoặc IN\_TREATMENT. Đủ 6 mục và đang IN\_CARE thì chuyển AVAILABLE, chuyển khu chung (RB-13). Thiếu thì trả danh sách mục còn thiếu |
 | POST | /api/staff/pets/{id}/ineligible | S05 | AVAILABLE hoặc PENDING\_HANDOVER => IN\_CARE, hủy đơn liên quan |
-| POST | /api/staff/pets/{id}/vet-requests | S06 | Thú => IN\_TREATMENT |
+| GET, POST | /api/staff/pets/{id}/vet-requests | S06 | POST: thú => IN\_TREATMENT, hủy đơn nếu thú đang AVAILABLE hoặc PENDING\_HANDOVER, lưu trú thì nơi ở là phòng khám |
+| GET | /api/staff/vet-requests?status=, /api/staff/vet-requests/{id} | S06 |  |
+| GET | /api/staff/vet-clinics | S06 | Cơ sở thú y đang hợp tác |
 | POST | /api/staff/vet-requests/{id}/start | S06 | PENDING => IN\_TREATMENT |
-| POST | /api/staff/vet-requests/{id}/complete | S06 | Multipart: kết quả, chi phí, hướng dẫn, phiếu khám |
+| POST | /api/staff/vet-requests/{id}/complete | S06 | JSON: kết quả, chi phí (bắt buộc), hướng dẫn. Không còn yêu cầu mở thì thú về IN\_CARE và về trung tâm |
+| POST | /api/staff/vet-requests/{id}/attachments | S06 | Multipart `files`: phiếu khám (ảnh hoặc PDF) |
 | POST | /api/staff/vet-requests/{id}/cancel | S06 | Bắt buộc lý do |
-| GET | /api/staff/applications?status= | S07 |  |
-| POST | /api/staff/applications/{id}/approve | S07 | Khóa dòng thú, 409 nếu thú đã có đơn được duyệt |
+| GET | /api/staff/applications?status=&petId= | S07 |  |
+| GET | /api/staff/applications/{id} | S07 | Kèm các đơn khác cho cùng thú |
+| POST | /api/staff/applications/{id}/approve | S07 | Khóa dòng thú, 409 PET\_ALREADY\_APPROVED nếu thú đã có đơn được duyệt. Tự đóng các đơn chờ khác |
 | POST | /api/staff/applications/{id}/reject | S07 | Bắt buộc nhận xét |
 | POST | /api/staff/applications/{id}/handover | S08 | Tạo bàn giao và 2 lịch hậu kiểm |
 | GET | /api/staff/follow-ups?dueBefore= | S09 | Lịch đến hạn |
-| POST | /api/staff/follow-ups/{id}/result | S09 | 5 tiêu chí, kết quả, lý do, ảnh |
-| POST | /api/staff/pets/{id}/returns | S10 | Tạo lượt tiếp nhận RETURN |
+| POST | /api/staff/follow-ups/{id}/result | S09 | JSON: 5 tiêu chí, kết quả, lý do. WATCH thêm lần bổ sung, FAIL => RECALL\_PENDING, đạt hết => COMPLETED |
+| POST | /api/staff/follow-ups/{id}/attachments | S09 | Multipart `files`: ảnh hậu kiểm |
+| GET | /api/staff/pets/{id}/handovers | S10 | Lịch sử bàn giao và hậu kiểm của thú |
+| POST | /api/staff/pets/{id}/returns | S10 | Tạo lượt tiếp nhận RETURN, thú về khu cách ly, hủy lịch hậu kiểm còn lại |
+| GET | /api/staff/attachments/{id} | S02, S05, S06, S09 | Tải tệp đính kèm |
 | POST | /api/staff/pets/{id}/end-events | S10 | Đợt 2 |
-| GET, POST, PATCH | /api/admin/users | M02 | Tạo tài khoản STAFF, MANAGER, khóa tài khoản |
+| GET, POST, PATCH | /api/admin/users | M02 | Tạo tài khoản STAFF, MANAGER, khóa tài khoản, đặt lại mật khẩu. Không tự khóa chính mình |
 | GET, POST, PATCH | /api/admin/vet-clinics | M03 |  |
-| GET, PUT | /api/admin/system-parameters | M04 |  |
+| GET, PUT | /api/admin/system-parameters, /api/admin/system-parameters/{key} | M04 | Giá trị là số nguyên dương |
 | GET | /api/admin/reports/\* | M01 | Đợt 2 |
 
 ## 5.3. Thiết kế báo cáo đầu ra
@@ -741,6 +754,19 @@ Dữ liệu mẫu nằm trong `db/seed/R__dev_seed.sql`, chỉ nạp khi chạy 
 | Thú y | 1 yêu cầu đang điều trị, 6 yêu cầu hoàn tất có chi phí | Chi phí điều trị, khoản ủng hộ |
 
 ## 5.5. Kiểm thử và đánh giá kết quả
+
+**Kiểm thử tự động (Sprint 1)**
+
+Test tích hợp chạy trên PostgreSQL thật (Testcontainers), gọi API như frontend, mỗi test tự tạo dữ liệu của mình. Chạy bằng `mvn test`.
+
+| Bộ test | Nội dung chính | Quy tắc |
+| --- | --- | --- |
+| TransitionTableTest | Mọi chuyển trạng thái hợp lệ và không hợp lệ theo bảng 3.4 | RB-12 |
+| RescueFlowIntegrationTest | Báo cáo kèm ảnh, giới hạn tần suất, tách nhiều ca, không hợp lệ, phân công, ca thành công tạo thú và lượt tiếp nhận, ca thất bại | QĐ-01, QĐ-02, RB-03 |
+| CareFlowIntegrationTest | Yêu cầu thú y điều khiển trạng thái Đang điều trị, checklist 6 mục, không đủ điều kiện hủy đơn, nhật ký, lịch sử trạng thái | QĐ-05, QĐ-06, QĐ-07, QĐ-10, RB-07, RB-13 |
+| AdoptionFlowIntegrationTest | Nộp đơn, cam kết triệt sản, duyệt tự đóng đơn khác, từ chối, hủy trước bàn giao, **hai nhân viên duyệt đồng thời** chỉ một thành công | QĐ-08, QĐ-09, QĐ-11, RB-01, RB-02, RB-14 |
+| HandoverFlowIntegrationTest | Bàn giao tạo 2 lịch hậu kiểm, Cần theo dõi thêm lần bổ sung, Không đạt chờ thu hồi, trả lại bất kỳ lúc nào | QĐ-12, QĐ-13, RB-06, RB-09 |
+| AdminIntegrationTest | Tài khoản, khóa tài khoản, cơ sở thú y, tham số, phân quyền | NFR-01 |
 
 # Kết luận
 

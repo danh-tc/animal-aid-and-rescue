@@ -13,6 +13,10 @@ spring:
       hibernate.jdbc.time_zone: UTC
   flyway:
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 25MB
 
 server:
   port: ${PORT:8080}
@@ -30,3 +34,7 @@ app:
     expiration-minutes: 480
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  storage:
+    # Thư mục lưu tệp đính kèm. Không commit thư mục này
+    dir: ${STORAGE_DIR:./data/uploads}
+    max-files-per-request: 5

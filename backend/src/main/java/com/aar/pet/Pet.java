@@ -82,6 +82,20 @@ public class Pet {
     protected Pet() {
     }
 
+    public Pet(String code, String name, Species species, Sex sex, LocalDate estimatedBirthDate, String color,
+               String description, PetStatus status, PetArea area, String currentLocation) {
+        this.code = code;
+        this.name = name;
+        this.species = species;
+        this.sex = sex;
+        this.estimatedBirthDate = estimatedBirthDate;
+        this.color = color;
+        this.description = description;
+        this.status = status;
+        this.area = area;
+        this.currentLocation = currentLocation;
+    }
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {
@@ -92,6 +106,36 @@ public class Pet {
     /** Chỉ gọi với trạng thái đích do StateTransitionService trả về. */
     public void changeStatus(PetStatus newStatus) {
         this.status = newStatus;
+    }
+
+    /** Thông tin mô tả (S05). Loài không đổi sau khi tạo hồ sơ. */
+    public void updateInfo(String name, Sex sex, LocalDate estimatedBirthDate, String color, String description) {
+        this.name = name;
+        this.sex = sex;
+        this.estimatedBirthDate = estimatedBirthDate;
+        this.color = color;
+        this.description = description;
+    }
+
+    public void changeArea(PetArea area) {
+        this.area = area;
+    }
+
+    public void changeLocation(String currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    /** Các mục checklist do nhân viên đánh dấu (QĐ-07). Các mục còn lại tính từ dữ liệu khác. */
+    public void updateChecklist(boolean vaccinated, boolean dewormed, boolean sterilized, boolean temperamentOk) {
+        this.vaccinated = vaccinated;
+        this.dewormed = dewormed;
+        this.sterilized = sterilized;
+        this.temperamentOk = temperamentOk;
+    }
+
+    public void markEligibilityChecked(Long by) {
+        this.eligibilityCheckedAt = OffsetDateTime.now();
+        this.eligibilityCheckedBy = by;
     }
 
     public Long getId() { return id; }

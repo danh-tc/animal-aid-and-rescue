@@ -21,6 +21,10 @@ export interface PublicPet {
   estimatedBirthDate: string | null;
   color: string | null;
   description: string | null;
+  /** false: đơn nhận nuôi phải kèm cam kết triệt sản */
+  sterilized: boolean;
+  /** Ảnh: GET /api/public/pets/{id}/photos/{photoId} */
+  photoIds: number[];
 }
 
 export interface UserView {

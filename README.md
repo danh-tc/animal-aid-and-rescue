@@ -84,6 +84,21 @@ Mục cần đọc trước khi code:
 - Định dạng lỗi thống nhất (`ApiError`), lỗi trạng thái và xung đột đồng thời trả 409.
 - Frontend: trang danh sách thú sẵn sàng nhận nuôi (P01), trang đăng nhập (P05), bộ SCSS dùng chung.
 
+## Đã có sau sprint 1 (MVP backend)
+
+Toàn bộ API MVP ở báo cáo mục 5.2, mỗi thao tác đổi trạng thái đi qua `StateTransitionService`, có test tích hợp trên PostgreSQL thật (115 test, `mvn test`).
+
+| Nhóm | Package | API chính |
+| --- | --- | --- |
+| Cứu hộ | `rescue` | Báo cáo (mã BC-, ảnh, giới hạn 5 báo cáo/giờ/số điện thoại), tạo ca tách nhiều thú, không hợp lệ, phân công, ca thành công tạo thú + lượt tiếp nhận, ca thất bại |
+| Chăm sóc, thú y | `care` | Hồ sơ thú, nhật ký, yêu cầu thú y (tạo, bắt đầu, hoàn tất, hủy), checklist 6 mục, không đủ điều kiện, lịch sử trạng thái |
+| Nhận nuôi | `adoption` | Nộp, hủy đơn, duyệt có khóa dòng thú (`SELECT ... FOR UPDATE`), từ chối |
+| Bàn giao | `handover` | Bàn giao + 2 lịch hậu kiểm, kết quả hậu kiểm (Đạt / Cần theo dõi / Không đạt), tiếp nhận trả lại, thú đã nhận của Người nhận nuôi |
+| Quản trị | `system` | Tài khoản, cơ sở thú y, tham số hệ thống |
+| Tệp đính kèm | `common.storage` | Ảnh báo cáo, ảnh thú, phiếu khám, ảnh hậu kiểm. Lưu ở `STORAGE_DIR` (mặc định `backend/data/uploads`, đã gitignore) |
+
+Ghi chú khi nâng cấp database đã có: migration `V3` thêm tham số `MIN_STERILIZATION_AGE_WEEKS`, Flyway tự chạy khi khởi động.
+
 ## Lộ trình
 
 | Đợt | Phạm vi |

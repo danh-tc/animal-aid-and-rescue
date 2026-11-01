@@ -60,6 +60,28 @@ public class User {
         }
     }
 
+    public void updateProfile(String fullName, String phone, String address) {
+        this.fullName = fullName;
+        this.phone = phone;
+        this.address = address;
+    }
+
+    public void changeRole(Role role) {
+        this.role = role;
+    }
+
+    public void changeActive(boolean active) {
+        this.active = active;
+    }
+
+    public void changePasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public boolean isStaffOrManager() {
+        return role == Role.STAFF || role == Role.MANAGER;
+    }
+
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
