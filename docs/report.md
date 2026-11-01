@@ -146,7 +146,7 @@ Ngưỡng cụ thể (số tuần tuổi, số ngày theo dõi) lấy từ khả
 | Mục tiêu | Giao thú cho chủ nuôi và theo dõi đến khi ổn định |
 | Tác nhân | Nhân viên, Người nhận nuôi có đơn đã duyệt (gọi là chủ nuôi sau khi bàn giao) |
 | Kích hoạt | Đơn nhận nuôi được duyệt |
-| Bước chính | 1. Bàn giao, ký biên bản, ghi khoản ủng hộ tự nguyện (nếu có) => 2. Lập 2 lần hậu kiểm (khoảng 2 tuần và 2 tháng sau bàn giao) => 3. Hậu kiểm theo 5 tiêu chí, ghi kết quả Đạt / Cần theo dõi / Không đạt (hai mức sau bắt buộc ghi lý do) => 4. Đạt cả 2 lần: kết thúc hậu kiểm |
+| Bước chính | 1. Bàn giao (hệ thống chỉ ghi nhận xác nhận bàn giao, không xuất biên bản), ghi khoản ủng hộ tự nguyện (nếu có) => 2. Lập 2 lần hậu kiểm (khoảng 2 tuần và 2 tháng sau bàn giao) => 3. Hậu kiểm theo 5 tiêu chí, ghi kết quả Đạt / Cần theo dõi / Không đạt (hai mức sau bắt buộc ghi lý do) => 4. Đạt cả 2 lần: kết thúc hậu kiểm |
 | Ngoại lệ | Hủy trước bàn giao: thú về Sẵn sàng, các đơn đã đóng không mở lại, người dân nộp đơn mới nếu muốn. Chủ nuôi trả lại (bất kỳ lúc nào, kể cả sau hậu kiểm) hoặc hậu kiểm không đạt: tạo lượt tiếp nhận mới (nguồn trả lại), thú về Đang chăm sóc, lịch sử nhận nuôi cũ được giữ. Cần theo dõi: thêm một lần hậu kiểm bổ sung. Thú qua đời hoặc đi lạc trong thời gian hậu kiểm: ghi nhận Qua đời / Thất lạc, kết thúc hậu kiểm |
 | Dữ liệu | Bàn giao (kèm khoản ủng hộ), Hậu kiểm, Đơn nhận nuôi, Lượt tiếp nhận (khi trả lại) |
 | Trạng thái | Thú: Chờ bàn giao => Đã nhận nuôi (=> Đang chăm sóc nếu bị trả lại). Đơn: Đã duyệt => Đã bàn giao |
@@ -155,7 +155,7 @@ Sau khi hậu kiểm kết thúc, trung tâm ngừng chủ động theo dõi. Th
 
 **Tiêu chí kết quả hậu kiểm**
 
-Mỗi lần hậu kiểm, nhân viên đánh giá 5 tiêu chí cố định: sức khỏe thú, điều kiện chỗ ở, thực hiện cam kết (tiêm nhắc, triệt sản), thú còn ở với chủ nuôi, chủ nuôi liên lạc được. Lần 1 gọi điện, chủ nuôi gửi ảnh qua kênh ngoài (Zalo, email) và nhân viên đính kèm vào kết quả. Lần 2 thăm nhà hoặc gọi video. Kết quả chọn theo bảng sau.
+Mỗi lần hậu kiểm, nhân viên đánh giá 5 tiêu chí cố định: sức khỏe thú, điều kiện chỗ ở, thực hiện cam kết (tiêm nhắc, triệt sản), thú còn ở với chủ nuôi, chủ nuôi liên lạc được. Lần 1 gọi điện, chủ nuôi gửi ảnh qua kênh ngoài (Zalo, email) và nhân viên đính kèm vào kết quả. Lần 2 thăm nhà hoặc gọi video. Hệ thống ghi hình thức liên hệ của từng lần (gọi điện, thăm nhà, gọi video). Kết quả chọn theo bảng sau.
 
 | Kết quả | Khi nào | Ví dụ |
 | --- | --- | --- |
@@ -383,14 +383,14 @@ Cách đánh số luồng ngoại lệ theo slide chương 2: số đầu là b�
 
 1. Nhân viên mở đơn Đã duyệt đến lịch bàn giao.
 2. Hệ thống hiển thị 3 con số chi phí của thú: tổng chi phí điều trị, đã được ủng hộ, còn chưa bù đắp (QĐ-14).
-3. Nhân viên xác nhận bàn giao và ký biên bản. Nếu người nhận ủng hộ, nhân viên ghi số tiền (extend Ghi khoản ủng hộ).
+3. Nhân viên xác nhận bàn giao trên hệ thống (không xuất biên bản). Nếu người nhận ủng hộ, nhân viên ghi số tiền (extend Ghi khoản ủng hộ).
 4. Hệ thống chuyển đơn sang Đã bàn giao, thú sang Đã nhận nuôi và tạo 2 lịch hậu kiểm (khoảng 2 tuần và 2 tháng).
 5. Đến lịch, nhân viên thực hiện S-1.
 6. Đạt cả 2 lần thì hệ thống kết thúc hậu kiểm.
 
 **Luồng con**
 
-- S-1 Hậu kiểm: nhân viên liên hệ chủ nuôi (lần 1 gọi điện và nhận ảnh qua kênh ngoài, lần 2 thăm nhà hoặc gọi video), đánh giá 5 tiêu chí, chọn kết quả và đính kèm ảnh.
+- S-1 Hậu kiểm: nhân viên liên hệ chủ nuôi (lần 1 gọi điện và nhận ảnh qua kênh ngoài, lần 2 thăm nhà hoặc gọi video), ghi hình thức liên hệ, đánh giá 5 tiêu chí, chọn kết quả và đính kèm ảnh.
 - S-2 Tiếp nhận trả lại: nhân viên tạo lượt tiếp nhận mới (nguồn trả lại, lý do, đánh giá ban đầu). Hệ thống đưa thú về Đang chăm sóc, hủy các lịch hậu kiểm còn lại và giữ nguyên lịch sử nhận nuôi (QĐ-13).
 
 **Luồng ngoại lệ**
@@ -519,7 +519,7 @@ Số ghi ở đầu mỗi đường là bản số của thực thể ở đầu
 | Yêu cầu thú y (vet\_requests) | lý do, mức ưu tiên, hình thức (ngoại trú, lưu trú), trạng thái, chẩn đoán tóm tắt, tổng chi phí, hướng dẫn sau điều trị |
 | Đơn nhận nuôi (adoption\_applications) | loại nhà ở, kinh nghiệm nuôi, lý do nhận nuôi, cam kết triệt sản, trạng thái, nhận xét thẩm định |
 | Bàn giao (handovers) | ngày bàn giao, khoản ủng hộ, trạng thái hậu kiểm |
-| Hậu kiểm (follow\_ups) | lần thứ, hạn, lần bổ sung, 5 tiêu chí, kết quả, lý do |
+| Hậu kiểm (follow\_ups) | lần thứ, hạn, lần bổ sung, hình thức liên hệ, 5 tiêu chí, kết quả, lý do |
 | Sự kiện kết thúc (pet\_end\_events) | loại (DECEASED, LOST, TRANSFERRED), thời điểm, chi tiết, nơi nhận |
 
 Các mục checklist không lưu mà tính ra: sức khỏe ổn định (không còn yêu cầu thú y mở), đủ tuổi (từ ngày sinh ước tính) và hết cách ly (từ ngày của lượt tiếp nhận gần nhất).
@@ -589,6 +589,7 @@ Ràng buộc được cài ở hai tầng. Tầng cơ sở dữ liệu chặn d�
 | RB-13 | Chỉ chuyển sang Sẵn sàng khi đủ 6 mục checklist | Ứng dụng: kiểm tra trường lưu và trường tính ra trước khi chuyển | QĐ-07 |
 | RB-14 | Chỉ thú đang Sẵn sàng mới nhận đơn và được duyệt đơn | Ứng dụng: kiểm tra trong cùng giao dịch, có khóa dòng | QĐ-08, QĐ-10 |
 | RB-15 | Tra cứu báo cáo phải khớp cả mã và số điện thoại | Ứng dụng | NFR-01 |
+| RB-16 | Hậu kiểm đã thực hiện phải có hình thức liên hệ | CSDL: CHECK ck_follow_up_done_contact (migration V4) | QĐ-12 |
 
 **Xử lý đồng thời khi duyệt đơn (RB-01, RB-14)**
 
@@ -684,7 +685,7 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/public/rescue-reports/lookup?code=&phone= | P04 | Đợt 2 |
 | POST | /api/public/auth/register | P05 | Luôn tạo tài khoản ADOPTER |
 | POST | /api/public/auth/login | P05 | Trả JWT |
-| POST | /api/public/auth/google | P05 | Đăng nhập, đăng ký nhanh bằng Google: xác thực ID token, email chưa có tài khoản thì tạo tài khoản ADOPTER |
+| POST | /api/public/auth/google | P05 | Đăng nhập, đăng ký nhanh bằng Google: xác thực ID token. Email đã có tài khoản (kể cả Nhân viên, Quản lý) thì đăng nhập vào tài khoản đó, chưa có thì tạo tài khoản ADOPTER |
 | GET | /api/public/auth/config | P05 | Có bật đăng nhập Google hay không (cấu hình GOOGLE_CLIENT_ID) |
 | POST | /api/adopter/applications | A01 | Kiểm tra thú AVAILABLE (RB-02, RB-14) |
 | GET | /api/adopter/applications | A02 | Đơn của người đang đăng nhập |
@@ -700,7 +701,7 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | GET | /api/staff/rescue-cases/{id} | S03 | Kèm báo cáo gốc và thú đã tạo |
 | GET | /api/staff/staff-members | S03 | Nhân viên đang hoạt động để phân công |
 | POST | /api/staff/rescue-cases/{id}/assign | S03 | NEW => IN_PROGRESS. Chỉ Quản lý, Nhân viên gọi nhận 403 |
-| POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú và lượt tiếp nhận RESCUE trong một giao dịch. Đánh giá Khẩn cấp thì trả cờ nhắc tạo yêu cầu thú y |
+| POST | /api/staff/rescue-cases/{id}/succeed | S03 | Tạo hồ sơ thú (kèm ảnh) và lượt tiếp nhận RESCUE trong một giao dịch. Multipart: phần data là JSON, phần photos là ảnh thú, hoặc JSON thuần nếu không có ảnh. Đánh giá Khẩn cấp thì trả cờ nhắc tạo yêu cầu thú y |
 | POST | /api/staff/rescue-cases/{id}/fail | S03 | Bắt buộc lý do |
 | GET | /api/staff/pets?status=&species=&q= | S04 | q tìm theo mã hoặc tên |
 | GET | /api/staff/pets/{id} | S05 | Kèm lượt tiếp nhận, checklist tính ra, yêu cầu thú y, ảnh |
@@ -723,7 +724,7 @@ Thao tác đổi trạng thái dùng endpoint dạng lệnh (`POST .../approve`)
 | POST | /api/staff/applications/{id}/reject | S07 | Bắt buộc nhận xét |
 | POST | /api/staff/applications/{id}/handover | S08 | Tạo bàn giao và 2 lịch hậu kiểm |
 | GET | /api/staff/follow-ups?dueBefore= | S09 | Lịch đến hạn |
-| POST | /api/staff/follow-ups/{id}/result | S09 | JSON: 5 tiêu chí, kết quả, lý do. WATCH thêm lần bổ sung, FAIL => RECALL\_PENDING, đạt hết => COMPLETED |
+| POST | /api/staff/follow-ups/{id}/result | S09 | Multipart (phần data là JSON, phần photos là ảnh) hoặc JSON: hình thức liên hệ, 5 tiêu chí, kết quả, lý do. WATCH thêm lần bổ sung, FAIL => RECALL_PENDING, đạt hết => COMPLETED |
 | POST | /api/staff/follow-ups/{id}/attachments | S09 | Multipart `files`: ảnh hậu kiểm |
 | GET | /api/staff/pets/{id}/handovers | S10 | Lịch sử bàn giao và hậu kiểm của thú |
 | POST | /api/staff/pets/{id}/returns | S10 | Tạo lượt tiếp nhận RETURN, thú về khu cách ly, hủy lịch hậu kiểm còn lại |
@@ -770,6 +771,38 @@ Test tích hợp chạy trên PostgreSQL thật (Testcontainers), gọi API như
 | AdoptionFlowIntegrationTest | Nộp đơn, cam kết triệt sản, duyệt tự đóng đơn khác, từ chối, hủy trước bàn giao, **hai nhân viên duyệt đồng thời** chỉ một thành công | QĐ-08, QĐ-09, QĐ-11, RB-01, RB-02, RB-14 |
 | HandoverFlowIntegrationTest | Bàn giao tạo 2 lịch hậu kiểm, Cần theo dõi thêm lần bổ sung, Không đạt chờ thu hồi, trả lại bất kỳ lúc nào | QĐ-12, QĐ-13, RB-06, RB-09 |
 | AdminIntegrationTest | Tài khoản, khóa tài khoản, cơ sở thú y, tham số, phân quyền | NFR-01 |
+
+**Đánh giá hiệu năng (NFR-04)**
+
+Đo bằng scripts/perf-check.mjs (gọi API 50 lần mỗi thao tác, sau một lần làm nóng) và trình duyệt Chromium (thời gian từ lúc mở trang đến khi dữ liệu hiện ra, 5 lần mỗi trang). Backend, frontend và PostgreSQL chạy cùng một máy với dữ liệu demo của profile dev, đo ngày 01/11/2026.
+
+**Thời gian phản hồi API**
+
+| Thao tác | p50 (ms) | p95 (ms) | Lớn nhất (ms) |
+| --- | --- | --- | --- |
+| P01 Danh sách thú công khai | 14 | 22 | 23 |
+| P02 Chi tiết thú | 9 | 15 | 17 |
+| P05 Đăng nhập | 98 | 107 | 116 |
+| S01 Bảng công việc | 7 | 8 | 19 |
+| S04 Danh sách thú có lọc và tìm | 5 | 7 | 9 |
+| S05 Hồ sơ thú đầy đủ | 18 | 27 | 29 |
+| S05 Ghi nhật ký chăm sóc | 9 | 14 | 21 |
+| S07 Danh sách đơn | 7 | 13 | 15 |
+| M01 Báo cáo tổng hợp 12 tháng | 8 | 12 | 17 |
+| M01 Báo cáo chi phí và ủng hộ | 5 | 8 | 9 |
+
+**Thời gian tải trang trên trình duyệt**
+
+| Trang | Trung vị (ms) | Lớn nhất (ms) |
+| --- | --- | --- |
+| P01 Trang chủ | 159 | 189 |
+| P02 Chi tiết thú | 145 | 181 |
+| S01 Bảng công việc | 147 | 175 |
+| S04 Danh sách thú | 152 | 159 |
+| S05 Hồ sơ thú | 171 | 187 |
+| S07 Đơn nhận nuôi | 127 | 178 |
+
+Mọi thao tác và trang đều dưới 0,2 giây, đạt NFR-04 (ngưỡng 2 giây). Đăng nhập chậm nhất phía API (khoảng 0,1 giây) do băm mật khẩu BCrypt có chủ đích. Số đo trên máy phát triển, chưa tính độ trễ mạng khi triển khai thật. Chạy lại bằng lệnh: node scripts/perf-check.mjs
 
 # Kết luận
 

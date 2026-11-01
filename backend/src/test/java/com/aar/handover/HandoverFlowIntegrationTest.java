@@ -122,7 +122,32 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
 
     static Object criteria(String result, String reason) {
         boolean ok = "PASS".equals(result);
-        return map("result", result, "healthOk", true, "housingOk", ok, "commitmentOk", true,
+        return map("result", result, "contactMethod", "PHONE", "healthOk", true, "housingOk", ok, "commitmentOk", true,
             "petPresent", true, "ownerReachable", true, "reason", reason);
+    }
+
+    /** Mục 2.1.5: mỗi lần hậu kiểm ghi hình thức liên hệ (gọi điện, thăm nhà, gọi video). */
+    @Test
+    void followUpRecordsContactMethod() throws Exception {
+        JsonNode handover = handedOver(ADOPTER3);
+        long first = handover.get("followUps").get(0).get("id").asLong();
+        long second = handover.get("followUps").get(1).get("id").asLong();
+
+        @SuppressWarnings("unchecked")
+        var noMethod = (java.util.Map<String, Object>) criteria("PASS", null);
+        noMethod.remove("contactMethod");
+        postJson("/api/staff/follow-ups/" + first + "/result", STAFF, noMethod, 400);
+
+        JsonNode phone = postJson("/api/staff/follow-ups/" + first + "/result", STAFF, criteria("PASS", null), 200);
+        assertThat(phone.get("followUp").get("contactMethod").asText()).isEqualTo("PHONE");
+
+        @SuppressWarnings("unchecked")
+        var visit = (java.util.Map<String, Object>) criteria("PASS", null);
+        visit.put("contactMethod", "HOME_VISIT");
+        postJson("/api/staff/follow-ups/" + second + "/result", STAFF, visit, 200);
+
+        JsonNode after = getJson("/api/staff/pets/" + handover.get("petId").asLong() + "/handovers", STAFF, 200).get(0);
+        assertThat(after.get("followUps").findValuesAsText("contactMethod")).containsExactly("PHONE", "HOME_VISIT");
+        assertThat(after.get("status").asText()).isEqualTo("COMPLETED");
     }
 }

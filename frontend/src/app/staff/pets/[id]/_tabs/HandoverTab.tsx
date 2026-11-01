@@ -16,7 +16,7 @@ import { Timeline } from "@/components/timeline/Timeline";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
-import { FOLLOW_UP_RESULT, FOLLOW_UP_STATUS, HANDOVER_STATUS, PRIORITY } from "@/lib/labels";
+import { CONTACT_METHOD, FOLLOW_UP_RESULT, FOLLOW_UP_STATUS, HANDOVER_STATUS, PRIORITY } from "@/lib/labels";
 import type { HandoverView, PetDetail, Priority, ReturnResult } from "@/types/api";
 import "../../../detail-page.scss";
 
@@ -94,7 +94,9 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
                     </>
                   ),
                   time: `Hạn ${formatDate(f.dueDate)}`,
-                  body: f.performedAt ? `Thực hiện ${formatDateTime(f.performedAt)}${f.reason ? `. ${f.reason}` : ""}` : undefined,
+                  body: f.performedAt
+                    ? `${f.contactMethod ? `${CONTACT_METHOD[f.contactMethod]}, ` : ""}${formatDateTime(f.performedAt)}${f.reason ? `. ${f.reason}` : ""}`
+                    : undefined,
                 }))}
               />
             </article>

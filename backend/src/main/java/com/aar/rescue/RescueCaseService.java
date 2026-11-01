@@ -1,12 +1,13 @@
 package com.aar.rescue;
 
-import com.aar.system.Role;
-import com.aar.common.security.AuthUser;
-import com.aar.common.Pages;
 import com.aar.common.PageResponse;
+import com.aar.common.Pages;
 import com.aar.common.error.BusinessException;
+import com.aar.common.security.AuthUser;
 import com.aar.common.state.EntityType;
 import com.aar.common.state.StateTransitionService;
+import com.aar.common.storage.AttachmentOwner;
+import com.aar.common.storage.StorageService;
 import com.aar.pet.Intake;
 import com.aar.pet.IntakeRepository;
 import com.aar.pet.Pet;
@@ -18,12 +19,15 @@ import com.aar.rescue.RescueDtos.CaseSummary;
 import com.aar.rescue.RescueDtos.ReportSummary;
 import com.aar.rescue.RescueDtos.SucceedRequest;
 import com.aar.rescue.RescueDtos.SucceedResult;
+import com.aar.system.Role;
 import com.aar.system.User;
 import com.aar.system.UserRepository;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /** Ca cứu hộ (S03): phân công, thành công (tạo thú + lượt tiếp nhận), thất bại. */
 @Service
@@ -36,9 +40,12 @@ public class RescueCaseService {
     private final PetLifecycle petLifecycle;
     private final PetRepository pets;
     private final IntakeRepository intakes;
+    private final StorageService storage;
 
     public RescueCaseService(RescueCaseRepository cases, StateTransitionService state, UserRepository users,
-                             PetLifecycle petLifecycle, PetRepository pets, IntakeRepository intakes) {
+                             PetLifecycle petLifecycle, PetRepository pets, IntakeRepository intakes,
+                             StorageService storage) {
+        this.storage = storage;
         this.cases = cases;
         this.state = state;
         this.users = users;
@@ -96,12 +103,18 @@ public class RescueCaseService {
 
     /** S-1 của UC-07. Ràng buộc RB-03 (mỗi ca tối đa một lượt tiếp nhận) được database bảo đảm thêm. */
     public SucceedResult succeed(Long caseId, SucceedRequest req, Long by) {
+        return succeed(caseId, req, List.of(), by);
+    }
+
+    /** Bản multipart: ảnh thú (S-1 của UC-07 "loài, đặc điểm, ảnh") lưu cùng giao dịch với hồ sơ. */
+    public SucceedResult succeed(Long caseId, SucceedRequest req, List<MultipartFile> photos, Long by) {
         RescueCase rescueCase = find(caseId);
         transition(rescueCase, "SUCCEEDED", by, null);
         var p = req.pet();
         Pet pet = petLifecycle.createFromRescue(blankToNull(p.name()), p.species(), p.sex(),
             p.estimatedBirthDate(), blankToNull(p.color()), blankToNull(p.description()), by);
         var i = req.intake();
+        storage.store(AttachmentOwner.PET, pet.getId(), photos);
         Intake intake = intakes.save(Intake.fromRescue(pet.getId(), rescueCase.getId(), blankToNull(i.reason()),
             i.priority(), blankToNull(i.initialAssessment()), by));
         return new SucceedResult(CaseSummary.of(rescueCase), pet.getId(), pet.getCode(), intake.getId(),

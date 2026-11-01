@@ -184,4 +184,29 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
             map("numberOfAnimals", 1, "assignedStaffId", 1), 201).get(0).get("assignedStaffId").asLong();
         assertThat(other).isEqualTo(1L);
     }
+
+    /** S-1 của UC-07: hồ sơ thú gồm loài, đặc điểm và ảnh, tạo trong cùng một yêu cầu. */
+    @Test
+    void succeedWithPhotosStoresPetPhotos() throws Exception {
+        long reportId = reportId(submitReport());
+        long caseId = postJson("/api/staff/rescue-reports/" + reportId + "/cases", MANAGER,
+            map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
+        String data = json.writeValueAsString(succeedBody("STABLE"));
+        JsonNode result = call(multipart("/api/staff/rescue-cases/" + caseId + "/succeed")
+            .file(new MockMultipartFile("data", "", MediaType.APPLICATION_JSON_VALUE, data.getBytes()))
+            .file(new MockMultipartFile("photos", "luc-cuu.jpg", MediaType.IMAGE_JPEG_VALUE, new byte[]{1, 2, 3}))
+            .file(new MockMultipartFile("photos", "luc-cuu-2.png", MediaType.IMAGE_PNG_VALUE, new byte[]{4, 5, 6})),
+            STAFF, 200);
+        JsonNode pet = getJson("/api/staff/pets/" + result.get("petId").asLong(), STAFF, 200);
+        assertThat(pet.get("photos").findValuesAsText("originalName")).containsExactly("luc-cuu.jpg", "luc-cuu-2.png");
+
+        // Tệp sai định dạng thì cả giao dịch hủy: ca vẫn Đang xử lý, không tạo hồ sơ thú
+        long other = postJson("/api/staff/rescue-reports/" + reportId(submitReport()) + "/cases", MANAGER,
+            map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
+        call(multipart("/api/staff/rescue-cases/" + other + "/succeed")
+            .file(new MockMultipartFile("data", "", MediaType.APPLICATION_JSON_VALUE, data.getBytes()))
+            .file(new MockMultipartFile("photos", "virus.exe", "application/octet-stream", new byte[]{1})),
+            STAFF, 415);
+        assertThat(getJson("/api/staff/rescue-cases/" + other, STAFF, 200).get("status").asText()).isEqualTo("IN_PROGRESS");
+    }
 }

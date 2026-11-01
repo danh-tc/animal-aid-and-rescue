@@ -20,8 +20,8 @@ import { Toolbar } from "@/components/toolbar/Toolbar";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { useUrlState } from "@/hooks/useUrlState";
 import { daysUntil, formatDate, petName, todayIso } from "@/lib/format";
-import { HANDOVER_STATUS } from "@/lib/labels";
-import type { FollowUpOutcome, FollowUpResult, ScheduledFollowUp } from "@/types/api";
+import { CONTACT_METHOD, HANDOVER_STATUS } from "@/lib/labels";
+import type { ContactMethod, FollowUpOutcome, FollowUpResult, ScheduledFollowUp } from "@/types/api";
 import "./follow-up-board.scss";
 
 type Range = "week" | "all";
@@ -59,6 +59,7 @@ export default function FollowUpsPage() {
   const toast = useToast();
   const [target, setTarget] = useState<ScheduledFollowUp | null>(null);
   const [result, setResult] = useState<FollowUpResult | null>(null);
+  const [method, setMethod] = useState<ContactMethod>("PHONE");
   const [criteria, setCriteria] = useState(ALL_OK);
   const [reason, setReason] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -66,6 +67,8 @@ export default function FollowUpsPage() {
   function openFor(item: ScheduledFollowUp) {
     setTarget(item);
     setResult(null);
+    // Mục 2.1.5: lần 1 gọi điện, lần 2 trở đi thăm nhà hoặc gọi video
+    setMethod(item.followUp.sequenceNo === 1 ? "PHONE" : "HOME_VISIT");
     setCriteria(ALL_OK);
     setReason("");
     setFiles([]);
@@ -79,7 +82,7 @@ export default function FollowUpsPage() {
     const id = target.followUp.id;
     // Mục 5.2: multipart gồm phần "data" (5 tiêu chí, kết quả, lý do) và "photos" (ảnh hậu kiểm)
     const data = new FormData();
-    data.append("data", new Blob([JSON.stringify({ result, ...criteria, reason: reason.trim() || null })], {
+    data.append("data", new Blob([JSON.stringify({ result, contactMethod: method, ...criteria, reason: reason.trim() || null })], {
       type: "application/json",
     }));
     files.forEach((f) => data.append("photos", f));
@@ -171,6 +174,13 @@ export default function FollowUpsPage() {
         onSubmit={submit}
         size="lg"
       >
+        <ChoiceGroup
+          legend="Hình thức liên hệ"
+          required
+          value={method}
+          onChange={setMethod}
+          choices={(Object.keys(CONTACT_METHOD) as ContactMethod[]).map((m) => ({ value: m, label: CONTACT_METHOD[m] }))}
+        />
         <fieldset className="follow-up-board__criteria">
           <legend className="choice-group__legend">Tiêu chí</legend>
           {CRITERIA.map((c) => (

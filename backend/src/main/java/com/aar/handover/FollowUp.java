@@ -56,6 +56,10 @@ public class FollowUp {
 
     private String reason;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contact_method")
+    private ContactMethod contactMethod;
+
     @Column(name = "performed_by")
     private Long performedBy;
 
@@ -73,9 +77,10 @@ public class FollowUp {
         this.status = FollowUpStatus.SCHEDULED;
     }
 
-    public void recordResult(FollowUpResult result, boolean healthOk, boolean housingOk, boolean commitmentOk,
-                             boolean petPresent, boolean ownerReachable, String reason, Long by) {
+    public void recordResult(FollowUpResult result, ContactMethod contactMethod, boolean healthOk, boolean housingOk,
+                             boolean commitmentOk, boolean petPresent, boolean ownerReachable, String reason, Long by) {
         this.status = FollowUpStatus.DONE;
+        this.contactMethod = contactMethod;
         this.result = result;
         this.healthOk = healthOk;
         this.housingOk = housingOk;
@@ -98,6 +103,7 @@ public class FollowUp {
     public LocalDate getDueDate() { return dueDate; }
     public FollowUpStatus getStatus() { return status; }
     public FollowUpResult getResult() { return result; }
+    public ContactMethod getContactMethod() { return contactMethod; }
     public Boolean getHealthOk() { return healthOk; }
     public Boolean getHousingOk() { return housingOk; }
     public Boolean getCommitmentOk() { return commitmentOk; }

@@ -29,6 +29,7 @@ export type HandoverStatus = EnumOf<Schemas["HandoverView"]["status"]>;
 export type FollowUpStatus = EnumOf<Schemas["FollowUpView"]["status"]>;
 export type FollowUpResult = EnumOf<Schemas["FollowUpView"]["result"]>;
 export type EndEventType = EnumOf<Schemas["EndEventView"]["eventType"]>;
+export type ContactMethod = EnumOf<Schemas["FollowUpView"]["contactMethod"]>;
 
 export interface PageResponse<T> {
   items: T[];
@@ -345,6 +346,8 @@ export interface FollowUpView {
   dueDate: string;
   status: FollowUpStatus;
   result: FollowUpResult | null;
+  /** Hình thức liên hệ, có khi lần hậu kiểm đã thực hiện */
+  contactMethod: ContactMethod | null;
   healthOk: boolean | null;
   housingOk: boolean | null;
   commitmentOk: boolean | null;
@@ -383,6 +386,7 @@ export interface ScheduledFollowUp {
 
 export interface FollowUpResultRequest {
   result: FollowUpResult;
+  contactMethod: ContactMethod;
   healthOk: boolean;
   housingOk: boolean;
   commitmentOk: boolean;

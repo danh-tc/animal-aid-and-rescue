@@ -157,7 +157,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["succeed"];
+        post: operations["succeedWithPhotos"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1264,6 +1264,8 @@ export interface components {
         FollowUpResultRequest: {
             /** @enum {string} */
             result: "PASS" | "WATCH" | "FAIL";
+            /** @enum {string} */
+            contactMethod: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
             healthOk: boolean;
             housingOk: boolean;
             commitmentOk: boolean;
@@ -1291,6 +1293,8 @@ export interface components {
             status?: "SCHEDULED" | "DONE" | "CANCELLED";
             /** @enum {string} */
             result?: "PASS" | "WATCH" | "FAIL";
+            /** @enum {string} */
+            contactMethod?: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
             healthOk?: boolean;
             housingOk?: boolean;
             commitmentOk?: boolean;
@@ -2158,7 +2162,7 @@ export interface operations {
             };
         };
     };
-    succeed: {
+    succeedWithPhotos: {
         parameters: {
             query?: never;
             header?: never;
@@ -2169,6 +2173,10 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "multipart/form-data": {
+                    data: components["schemas"]["SucceedRequest"];
+                    photos?: string[];
+                };
                 "application/json": components["schemas"]["SucceedRequest"];
             };
         };

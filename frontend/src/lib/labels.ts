@@ -4,6 +4,7 @@ import type {
   CareActivity,
   CareMode,
   CaseStatus,
+  ContactMethod,
   FollowUpResult,
   FollowUpStatus,
   HandoverStatus,
@@ -52,6 +53,12 @@ export const END_EVENT: Record<EndEventType, Labeled> = {
   DECEASED: { label: "Qua đời", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "warning" },
   TRANSFERRED: { label: "Chuyển cơ sở", tone: "info" },
+};
+
+export const CONTACT_METHOD: Record<ContactMethod, string> = {
+  PHONE: "Gọi điện",
+  HOME_VISIT: "Thăm nhà",
+  VIDEO_CALL: "Gọi video",
 };
 
 export const PRIORITY: Record<Priority, Labeled> = {

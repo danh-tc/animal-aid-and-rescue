@@ -142,7 +142,7 @@ public class HandoverService {
         if (req.result() != FollowUpResult.PASS && reason == null) {
             throw BusinessException.badRequest("REASON_REQUIRED", "Kết quả Cần theo dõi hoặc Không đạt phải ghi lý do");
         }
-        followUp.recordResult(req.result(), req.healthOk(), req.housingOk(), req.commitmentOk(), req.petPresent(),
+        followUp.recordResult(req.result(), req.contactMethod(), req.healthOk(), req.housingOk(), req.commitmentOk(), req.petPresent(),
             req.ownerReachable(), reason, by);
         followUps.flush();
         storage.store(AttachmentOwner.FOLLOW_UP, followUp.getId(), photos);

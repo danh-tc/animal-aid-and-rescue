@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/badge/Badge";
 import { Button, LinkButton } from "@/components/button/Button";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
+import { FilePicker, filesValid } from "@/components/file-picker/FilePicker";
 import { Field } from "@/components/form-field/Field";
 import { Notice } from "@/components/notice/Notice";
 import { PageHeader } from "@/components/page-header/PageHeader";
@@ -40,6 +41,7 @@ export default function CaseDetailPage() {
   const [pet, setPet] = useState(EMPTY_PET);
   const [intake, setIntake] = useState(EMPTY_INTAKE);
   const [result, setResult] = useState<SucceedResult | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
 
   if (loading && !c) return <Skeleton card lines={6} />;
   if (!c) return <Notice tone="error">{error}</Notice>;
@@ -68,7 +70,13 @@ export default function CaseDetailPage() {
         initialAssessment: intake.assessment.trim() || null,
       },
     };
-    const res = await mutate<SucceedResult>(`/api/staff/rescue-cases/${id}/succeed`, { body });
+    if (!filesValid(photos)) throw new Error("Có ảnh lớn hơn 5MB.");
+    // S-1 của UC-07: hồ sơ thú (loài, đặc điểm, ảnh) và lượt tiếp nhận tạo trong cùng một yêu cầu
+    const data = new FormData();
+    data.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
+    photos.forEach((p) => data.append("photos", p));
+    const res = await mutate<SucceedResult>(`/api/staff/rescue-cases/${id}/succeed`, { body: data });
+    setPhotos([]);
     toast.success(`Đã tạo hồ sơ thú ${res.petCode}.`);
     setResult(res);
     setDialog(null);
@@ -229,6 +237,7 @@ export default function CaseDetailPage() {
             <textarea rows={2} maxLength={2000} value={pet.description} onChange={(e) => setPet({ ...pet, description: e.target.value })} />
           </Field>
         </div>
+        <FilePicker label="Ảnh thú" files={photos} onChange={setPhotos} hint="Không bắt buộc. JPG, PNG hoặc WEBP, tối đa 5 ảnh, mỗi ảnh không quá 5MB." />
         <h3 className="detail-page__form-section">Tiếp nhận</h3>
         <div className="detail-page__form-grid">
           <Field label="Mức ưu tiên" required>

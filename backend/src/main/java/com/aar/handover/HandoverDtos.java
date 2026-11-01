@@ -27,13 +27,14 @@ public final class HandoverDtos {
     }
 
     public record FollowUpView(Long id, Long handoverId, int sequenceNo, boolean additional, LocalDate dueDate,
-                               FollowUpStatus status, FollowUpResult result, Boolean healthOk, Boolean housingOk,
+                               FollowUpStatus status, FollowUpResult result, ContactMethod contactMethod,
+                               Boolean healthOk, Boolean housingOk,
                                Boolean commitmentOk, Boolean petPresent, Boolean ownerReachable, String reason,
                                Long performedBy, OffsetDateTime performedAt) {
 
         static FollowUpView of(FollowUp f) {
             return new FollowUpView(f.getId(), f.getHandoverId(), f.getSequenceNo(), f.isAdditional(), f.getDueDate(),
-                f.getStatus(), f.getResult(), f.getHealthOk(), f.getHousingOk(), f.getCommitmentOk(),
+                f.getStatus(), f.getResult(), f.getContactMethod(), f.getHealthOk(), f.getHousingOk(), f.getCommitmentOk(),
                 f.getPetPresent(), f.getOwnerReachable(), f.getReason(), f.getPerformedBy(), f.getPerformedAt());
         }
     }
@@ -49,9 +50,10 @@ public final class HandoverDtos {
                                     String ownerName, String ownerPhone, String ownerAddress) {
     }
 
-    /** 5 tiêu chí (QĐ-12). Cần theo dõi và Không đạt bắt buộc ghi lý do (RB-09). */
+    /** 5 tiêu chí (QĐ-12) và hình thức liên hệ (mục 2.1.5). Cần theo dõi và Không đạt bắt buộc ghi lý do (RB-09). */
     public record FollowUpResultRequest(
         @NotNull FollowUpResult result,
+        @NotNull ContactMethod contactMethod,
         @NotNull Boolean healthOk,
         @NotNull Boolean housingOk,
         @NotNull Boolean commitmentOk,

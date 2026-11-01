@@ -110,12 +110,12 @@ INSERT INTO handovers (id, application_id, pet_id, staff_id, handed_over_at, don
   (1, 4, 6, 3, now() - interval '30 days', 500000, 'Bàn giao tại trung tâm', 'IN_PROGRESS'),
   (2, 6, 7, 2, now() - interval '60 days', 0,      NULL,                     'RETURNED');
 
-INSERT INTO follow_ups (handover_id, sequence_no, is_additional, due_date, status, result,
+INSERT INTO follow_ups (handover_id, sequence_no, is_additional, due_date, status, result, contact_method,
                         health_ok, housing_ok, commitment_ok, pet_present, owner_reachable, reason, performed_by, performed_at) VALUES
-  (1, 1, FALSE, current_date - 16, 'DONE',      'PASS',  TRUE, TRUE, TRUE, TRUE, TRUE, NULL, 3, now() - interval '16 days'),
-  (1, 2, FALSE, current_date + 30, 'SCHEDULED', NULL,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-  (2, 1, FALSE, current_date - 46, 'DONE',      'WATCH', TRUE, FALSE, TRUE, TRUE, TRUE, 'Sân chưa có rào, chó hay chạy ra đường', 2, now() - interval '46 days'),
-  (2, 2, FALSE, current_date,      'CANCELLED', NULL,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  (1, 1, FALSE, current_date - 16, 'DONE',      'PASS',  'PHONE', TRUE, TRUE, TRUE, TRUE, TRUE, NULL, 3, now() - interval '16 days'),
+  (1, 2, FALSE, current_date + 30, 'SCHEDULED', NULL,    NULL,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+  (2, 1, FALSE, current_date - 46, 'DONE',      'WATCH', 'PHONE', TRUE, FALSE, TRUE, TRUE, TRUE, 'Sân chưa có rào, chó hay chạy ra đường', 2, now() - interval '46 days'),
+  (2, 2, FALSE, current_date,      'CANCELLED', NULL,    NULL,    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO intakes (id, pet_id, source, rescue_case_id, returned_handover_id, intake_at, reason, priority, initial_assessment, created_by) VALUES
   (9, 7, 'RETURN', NULL, 2, now() - interval '2 days', 'Chủ nuôi chuyển nhà, không nuôi tiếp', 'STABLE', 'Khỏe, hơi sợ người', 2);

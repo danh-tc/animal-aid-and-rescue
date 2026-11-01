@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/skeleton/Skeleton";
 import { Timeline } from "@/components/timeline/Timeline";
 import { useApi } from "@/hooks/useApi";
 import { daysUntil, formatDate, formatDateTime, petName } from "@/lib/format";
-import { FOLLOW_UP_RESULT, FOLLOW_UP_STATUS, HANDOVER_STATUS } from "@/lib/labels";
+import { CONTACT_METHOD, FOLLOW_UP_RESULT, FOLLOW_UP_STATUS, HANDOVER_STATUS } from "@/lib/labels";
 import type { FollowUpView, HandoverView } from "@/types/api";
 import "./my-adoptions.scss";
 
@@ -29,7 +29,8 @@ function followUpTitle(f: FollowUpView) {
 }
 
 function followUpBody(f: FollowUpView) {
-  if (f.status === "DONE") return `Thực hiện ${formatDateTime(f.performedAt)}${f.reason ? `. ${f.reason}` : ""}`;
+  if (f.status === "DONE")
+    return `${f.contactMethod ? `${CONTACT_METHOD[f.contactMethod]}, ` : "Thực hiện "}${formatDateTime(f.performedAt)}${f.reason ? `. ${f.reason}` : ""}`;
   if (f.status === "CANCELLED") return "Đã hủy";
   const days = daysUntil(f.dueDate);
   if (days < 0) return `Đã quá hạn ${-days} ngày, nhân viên sẽ liên hệ sớm.`;

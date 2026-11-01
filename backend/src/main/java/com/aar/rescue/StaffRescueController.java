@@ -16,14 +16,17 @@ import com.aar.rescue.RescueDtos.SucceedResult;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /** S02 (báo cáo cứu hộ) và S03 (ca cứu hộ). */
 @RestController
@@ -87,7 +90,15 @@ public class StaffRescueController {
         return cases.assign(id, req.staffId(), me);
     }
 
-    @PostMapping("/rescue-cases/{id}/succeed")
+    /** S-1 của UC-07 kèm ảnh: phần "data" là JSON hồ sơ thú và lượt tiếp nhận, phần "photos" là ảnh thú. */
+    @PostMapping(value = "/rescue-cases/{id}/succeed", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public SucceedResult succeedWithPhotos(@PathVariable Long id, @Valid @RequestPart("data") SucceedRequest req,
+                                           @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
+                                           @CurrentUser AuthUser me) {
+        return cases.succeed(id, req, photos, me.id());
+    }
+
+    @PostMapping(value = "/rescue-cases/{id}/succeed", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SucceedResult succeed(@PathVariable Long id, @Valid @RequestBody SucceedRequest req,
                                  @CurrentUser AuthUser me) {
         return cases.succeed(id, req, me.id());
