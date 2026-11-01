@@ -18,7 +18,8 @@ services:
       timeout: 3s
       retries: 10
 
-  # NFR-06: sao lưu hằng ngày bằng pg_dump vào ./backups, giữ BACKUP_KEEP_DAYS ngày gần nhất.
+  # NFR-06: sao lưu hằng ngày vào ./backups, giữ BACKUP_KEEP_DAYS ngày gần nhất. Mỗi lần gồm
+  # database (pg_dump) và thư mục ảnh, tệp đính kèm (UPLOADS_DIR, khớp STORAGE_DIR của backend).
   # Khôi phục: scripts/restore.sh backups/<tệp>.dump
   backup:
     image: postgres:16-alpine
@@ -36,6 +37,7 @@ services:
       BACKUP_KEEP_DAYS: "7"
     volumes:
       - ./backups:/backups
+      - ${UPLOADS_DIR:-./backend/data/uploads}:/uploads:ro
       - ./scripts/backup-loop.sh:/backup-loop.sh:ro
     entrypoint: ["/bin/sh", "/backup-loop.sh"]
 

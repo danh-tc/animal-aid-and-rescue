@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface PetRepository extends JpaRepository<Pet, Long> {
 
+    java.util.Optional<Pet> findByCode(String code);
+
     Page<Pet> findByStatus(PetStatus status, Pageable pageable);
 
     Page<Pet> findByStatusAndSpecies(PetStatus status, Species species, Pageable pageable);

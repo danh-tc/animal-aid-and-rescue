@@ -134,15 +134,31 @@ Toàn bộ phạm vi Đợt 2 ở báo cáo mục 5.1, cùng các chỗ trước
 | Sinh client TypeScript từ springdoc | mục 5.1 | `npm run gen:api` (backend đang chạy) => `src/types/openapi.ts`, `src/types/contract.ts` báo lỗi biên dịch khi API đổi |
 | Sao lưu hằng ngày và khôi phục | NFR-06 | xem bên dưới |
 
-Test backend: 139 test (`mvn test`). Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
+Test backend: 140 test (`mvn test`). Đã chạy thử toàn bộ luồng MVP và Đợt 2 bằng Playwright trên dữ liệu mẫu.
 
 ### Sao lưu và khôi phục (NFR-06)
+
+Mỗi lần sao lưu gồm hai tệp cùng mốc thời gian: `aar-<thời gian>.dump` (database) và `aar-<thời gian>-uploads.tar.gz` (ảnh, phiếu khám). Thư mục ảnh lấy từ `UPLOADS_DIR`, mặc định `backend/data/uploads`, khớp `STORAGE_DIR` khi chạy backend trong thư mục `backend`.
 
 ```bash
 docker compose up -d            # gồm cả container backup: sao lưu lúc khởi động và 02:00 mỗi ngày, giữ 7 ngày, lưu ở backups/
 ./scripts/backup.sh             # sao lưu ngay
-./scripts/restore.sh backups/aar-YYYYMMDD-HHMMSS.dump   # khôi phục, hỏi xác nhận trước khi ghi đè
+./scripts/restore.sh backups/aar-YYYYMMDD-HHMMSS.dump   # khôi phục database và ảnh, hỏi xác nhận trước khi ghi đè
 ```
+
+Khi khôi phục, thư mục ảnh hiện tại được đổi tên thành `<UPLOADS_DIR>.truoc-khoi-phuc-<thời gian>`, không bị xóa.
+
+### Ảnh chó mèo cho dữ liệu demo
+
+- Chạy backend với profile `dev` thì 8 thú trong dữ liệu mẫu tự có ảnh thật, chọn khớp màu lông trong hồ sơ (Mực chó đen, Vàng shiba, Đốm dalmatian, Mướp mèo vằn, Tí mèo tam thể...). Ảnh nằm ở `backend/src/main/resources/dev-photos`, chỉ gắn khi thú chưa có ảnh.
+- Thú tạo thêm sau này chưa có ảnh thì chạy script, chạy lại nhiều lần không bị trùng:
+
+```bash
+node scripts/seed-photos.mjs              # lấy ảnh có sẵn trong repo
+node scripts/seed-photos.mjs --online     # lấy ảnh ngẫu nhiên từ Dog CEO và The Cat API (cần Internet)
+```
+
+Nguồn ảnh ghi trong `dev-photos/manifest.json`: Dog CEO (Stanford Dogs Dataset) và Kaggle Dogs vs. Cats. Chỉ dùng cho demo đồ án, không dùng cho sản phẩm thật.
 
 ### Đăng nhập nhanh bằng Google
 

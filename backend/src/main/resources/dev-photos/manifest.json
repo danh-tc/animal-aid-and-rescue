@@ -1,0 +1,111 @@
+{
+  "pets": {
+    "TH-2026-0001": [
+      "muc-1.jpg",
+      "muc-2.jpg",
+      "muc-3.jpg"
+    ],
+    "TH-2026-0003": [
+      "vang-1.jpg",
+      "vang-2.jpg",
+      "vang-3.jpg"
+    ],
+    "TH-2026-0005": [
+      "dom-1.jpg"
+    ],
+    "TH-2026-0007": [
+      "lu-1.jpg",
+      "lu-2.jpg",
+      "lu-3.jpg"
+    ],
+    "TH-2026-0002": [
+      "bong-1.jpg",
+      "bong-2.jpg",
+      "bong-3.jpg"
+    ],
+    "TH-2026-0004": [
+      "muop-1.jpg",
+      "muop-2.jpg",
+      "muop-3.jpg"
+    ],
+    "TH-2026-0006": [
+      "miu-1.jpg",
+      "miu-2.jpg"
+    ],
+    "TH-2026-0008": [
+      "ti-1.jpg",
+      "ti-2.jpg"
+    ]
+  },
+  "pool": {
+    "DOG": [
+      "pool-dog-1.jpg",
+      "pool-dog-2.jpg",
+      "pool-dog-3.jpg",
+      "pool-dog-4.jpg",
+      "pool-dog-5.jpg",
+      "pool-dog-6.jpg",
+      "pool-dog-7.jpg",
+      "pool-dog-8.jpg"
+    ],
+    "CAT": [
+      "pool-cat-1.jpg",
+      "pool-cat-2.jpg",
+      "pool-cat-3.jpg",
+      "pool-cat-4.jpg",
+      "pool-cat-5.jpg",
+      "pool-cat-6.jpg",
+      "pool-cat-7.jpg",
+      "pool-cat-8.jpg"
+    ]
+  },
+  "credits": [
+    {
+      "files": [
+        "muc-1.jpg",
+        "muc-2.jpg",
+        "muc-3.jpg",
+        "vang-1.jpg",
+        "vang-2.jpg",
+        "vang-3.jpg",
+        "dom-1.jpg",
+        "lu-1.jpg",
+        "lu-2.jpg",
+        "lu-3.jpg",
+        "pool-dog-1.jpg",
+        "pool-dog-2.jpg",
+        "pool-dog-3.jpg",
+        "pool-dog-4.jpg",
+        "pool-dog-5.jpg",
+        "pool-dog-6.jpg",
+        "pool-dog-7.jpg",
+        "pool-dog-8.jpg"
+      ],
+      "source": "Dog CEO (github.com/jigsawpieces/dog-api-images), ảnh từ Stanford Dogs Dataset"
+    },
+    {
+      "files": [
+        "bong-1.jpg",
+        "bong-2.jpg",
+        "bong-3.jpg",
+        "muop-1.jpg",
+        "muop-2.jpg",
+        "muop-3.jpg",
+        "miu-1.jpg",
+        "miu-2.jpg",
+        "ti-1.jpg",
+        "ti-2.jpg",
+        "pool-cat-1.jpg",
+        "pool-cat-2.jpg",
+        "pool-cat-3.jpg",
+        "pool-cat-4.jpg",
+        "pool-cat-5.jpg",
+        "pool-cat-6.jpg",
+        "pool-cat-7.jpg",
+        "pool-cat-8.jpg"
+      ],
+      "source": "Kaggle Dogs vs. Cats (Asirra, Microsoft Research) qua github.com/laxmimerit/dog-cat-full-dataset"
+    }
+  ],
+  "note": "Ảnh chỉ dùng cho dữ liệu demo của đồ án (profile dev), không dùng cho sản phẩm thật."
+}
