@@ -1,24 +1,45 @@
 @use "abstracts" as *;
 
 body {
+  min-height: 100dvh;
   font-family: $font-family-base;
   font-size: $font-size-base;
   line-height: 1.6;
   color: $color-text;
   background: $color-bg;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
+  @include heading;
   line-height: 1.25;
   margin: 0 0 $space-3;
 }
 
+h1 {
+  font-size: $font-size-xl;
+}
+
+h2 {
+  font-size: $font-size-lg;
+}
+
+h3 {
+  font-size: $font-size-md;
+}
+
 a {
-  color: $color-primary;
+  color: $color-primary-text;
+  text-underline-offset: 3px;
 }
 
 :focus-visible {
   @include focus-ring;
+}
+
+::selection {
+  background: $color-primary-soft;
 }

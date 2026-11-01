@@ -1,0 +1,74 @@
+@use "abstracts" as *;
+
+.tabs {
+  display: flex;
+  gap: $space-1;
+  margin-bottom: $space-5;
+  border-bottom: 1px solid $color-border;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__tab {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: $space-2;
+    min-height: $control-height;
+    padding: $space-2 $space-4;
+    border: 0;
+    background: transparent;
+    color: $color-muted;
+    font-weight: $font-weight-semibold;
+    white-space: nowrap;
+    transition: color $duration-fast $ease-out;
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: $space-3;
+      bottom: -1px;
+      left: $space-3;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+      background: transparent;
+      transition: background-color $duration-base $ease-out;
+    }
+
+    &:hover {
+      color: $color-text;
+    }
+
+    &:focus-visible {
+      outline-offset: -2px;
+    }
+
+    &--active {
+      color: $color-primary-text;
+
+      &::after {
+        background: $color-primary;
+      }
+    }
+  }
+
+  &__count {
+    min-width: 22px;
+    padding: 0 6px;
+    border-radius: $radius-pill;
+    background: $color-surface-2;
+    color: $color-muted;
+    font-size: $font-size-xs;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  &__panel:focus-visible {
+    outline-offset: 4px;
+    border-radius: $radius-sm;
+  }
+}

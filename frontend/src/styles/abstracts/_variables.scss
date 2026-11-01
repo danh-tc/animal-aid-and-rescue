@@ -1,38 +1,106 @@
-// Màu, khoảng cách, bo góc dùng chung. Không viết mã màu trực tiếp trong file component.
+// Token dùng chung. Giá trị thật nằm ở base/_tokens.scss dưới dạng CSS custom property
+// để đổi được giữa giao diện sáng và tối. Component chỉ dùng các biến dưới đây,
+// không viết mã màu trực tiếp.
+//
+// Hệ màu theo ui-ux-pro-max cho nhóm "pet adoption, nonprofit": xanh ngọc tạo cảm giác
+// tin cậy, cam ấm dùng riêng cho lời kêu gọi hành động. Mọi cặp chữ/nền đạt WCAG AA 4.5:1.
 
-$color-bg: #f8f5ef;
-$color-surface: #ffffff;
-$color-text: #1d2a2c;
-$color-muted: #5a6a6d;
-$color-border: #e4ddd1;
-$color-primary: #2d6a5f;
-$color-primary-dark: #22524a;
-$color-primary-soft: #e3efe9;
-$color-accent: #d9823b;
-$color-accent-soft: #fbeedf;
-$color-danger: #b42318;
-$color-danger-soft: #fdecea;
+// Màu
+$color-bg: var(--color-bg);
+$color-surface: var(--color-surface);
+$color-surface-2: var(--color-surface-2);
+$color-text: var(--color-text);
+$color-muted: var(--color-muted);
+$color-border: var(--color-border);
+$color-border-strong: var(--color-border-strong);
 
-$font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$color-primary: var(--color-primary);
+$color-primary-hover: var(--color-primary-hover);
+$color-on-primary: var(--color-on-primary);
+$color-primary-soft: var(--color-primary-soft);
+$color-primary-text: var(--color-primary-text);
+
+$color-accent: var(--color-accent);
+$color-accent-hover: var(--color-accent-hover);
+$color-on-accent: var(--color-on-accent);
+$color-accent-soft: var(--color-accent-soft);
+$color-accent-text: var(--color-accent-text);
+
+$color-success: var(--color-success);
+$color-success-soft: var(--color-success-soft);
+$color-warning: var(--color-warning);
+$color-warning-soft: var(--color-warning-soft);
+$color-danger: var(--color-danger);
+$color-danger-hover: var(--color-danger-hover);
+$color-on-danger: var(--color-on-danger);
+$color-danger-soft: var(--color-danger-soft);
+$color-info: var(--color-info);
+$color-info-soft: var(--color-info-soft);
+$color-neutral-soft: var(--color-neutral-soft);
+
+$color-scrim: var(--color-scrim);
+$color-focus: var(--color-focus);
+
+// Chữ
+$font-family-base: var(--font-body), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+$font-family-heading: var(--font-heading), var(--font-body), system-ui, sans-serif;
+$font-size-xs: 0.75rem;
 $font-size-sm: 0.875rem;
 $font-size-base: 1rem;
+$font-size-md: 1.125rem;
 $font-size-lg: 1.25rem;
 $font-size-xl: 1.75rem;
 $font-size-xxl: 2.5rem;
+$font-size-display: 3.25rem;
 
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Khoảng cách, nhịp 4/8px
 $space-1: 0.25rem;
 $space-2: 0.5rem;
 $space-3: 0.75rem;
 $space-4: 1rem;
+$space-5: 1.25rem;
 $space-6: 1.5rem;
 $space-8: 2rem;
+$space-10: 2.5rem;
 $space-12: 3rem;
+$space-16: 4rem;
 
-$radius-sm: 6px;
+// Bo góc
+$radius-sm: 8px;
 $radius-md: 12px;
+$radius-lg: 20px;
 $radius-pill: 999px;
 
-$shadow-card: 0 1px 2px rgba(29, 42, 44, 0.06), 0 4px 16px rgba(29, 42, 44, 0.06);
+// Đổ bóng: thang 3 bậc, mềm, kiểu clay nhẹ
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);
 
-$container-width: 1120px;
+// Chuyển động: dùng chung một nhịp
+$duration-fast: 150ms;
+$duration-base: 200ms;
+$duration-slow: 300ms;
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+// Lớp chồng
+$z-sticky: 20;
+$z-drawer: 40;
+$z-dialog: 100;
+$z-toast: 1000;
+
+// Bố cục
+$container-width: 1200px;
+$sidebar-width: 256px;
+$header-height: 64px;
+$control-height: 44px;
+$control-height-sm: 36px;
+
+$breakpoint-sm: 480px;
 $breakpoint-md: 768px;
+$breakpoint-lg: 1024px;

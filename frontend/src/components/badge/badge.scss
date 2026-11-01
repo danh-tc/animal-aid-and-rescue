@@ -1,0 +1,55 @@
+@use "abstracts" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px $space-3;
+  border-radius: $radius-pill;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 1.6;
+  white-space: nowrap;
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &--neutral {
+    background: $color-neutral-soft;
+    color: $color-muted;
+  }
+
+  &--info {
+    background: $color-info-soft;
+    color: $color-info;
+  }
+
+  &--success {
+    background: $color-success-soft;
+    color: $color-success;
+  }
+
+  &--warning {
+    background: $color-warning-soft;
+    color: $color-warning;
+  }
+
+  &--danger {
+    background: $color-danger-soft;
+    color: $color-danger;
+  }
+
+  &--primary {
+    background: $color-primary-soft;
+    color: $color-primary-text;
+  }
+
+  &--accent {
+    background: $color-accent-soft;
+    color: $color-accent-text;
+  }
+}

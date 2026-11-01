@@ -10,7 +10,17 @@ body {
   padding: 0;
 }
 
-img {
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+}
+
+img,
+svg {
   display: block;
   max-width: 100%;
 }
@@ -20,4 +30,32 @@ input,
 select,
 textarea {
   font: inherit;
+  color: inherit;
+}
+
+button,
+[role="button"],
+a,
+label[for],
+select,
+summary {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

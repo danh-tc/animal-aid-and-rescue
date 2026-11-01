@@ -1,0 +1,16 @@
+@use "abstracts" as *;
+
+// Xếp chồng theo chiều dọc với khoảng cách đều, dùng cho nội dung trang.
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &--lg {
+    gap: $space-6;
+  }
+
+  &--sm {
+    gap: $space-2;
+  }
+}

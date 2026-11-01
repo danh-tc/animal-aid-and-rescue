@@ -1,0 +1,70 @@
+@use "abstracts" as *;
+
+.attachment-list {
+  display: grid;
+  gap: $space-3;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__empty {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    height: 100%;
+    padding: $space-2;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    color: $color-text;
+    text-decoration: none;
+    transition: border-color $duration-fast $ease-out;
+
+    &:hover {
+      border-color: $color-primary;
+    }
+
+    &--pending {
+      opacity: 0.7;
+    }
+  }
+
+  &__thumb {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: $radius-sm;
+    background: $color-surface-2;
+    color: $color-muted;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &__name {
+    overflow: hidden;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    color: $color-muted;
+    font-size: $font-size-xs;
+  }
+}

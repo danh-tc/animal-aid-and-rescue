@@ -1,33 +1,52 @@
+import { Cat, Dog } from "lucide-react";
+import Link from "next/link";
+import { publicPhotoUrl } from "@/lib/api";
+import { ageLabel, petName } from "@/lib/format";
+import { SPECIES } from "@/lib/labels";
 import type { PublicPet } from "@/types/api";
 import "./pet-card.scss";
 
-const SPECIES_LABEL = { DOG: "Chó", CAT: "Mèo" } as const;
-const SEX_LABEL = { MALE: "Đực", FEMALE: "Cái", UNKNOWN: "Chưa rõ giới tính" } as const;
-
-function ageLabel(birthDate: string | null): string | null {
-  if (!birthDate) return null;
-  const months = Math.floor((Date.now() - Date.parse(birthDate)) / (1000 * 60 * 60 * 24 * 30.4));
-  if (months < 12) return `Khoảng ${Math.max(months, 1)} tháng tuổi`;
-  return `Khoảng ${Math.floor(months / 12)} tuổi`;
-}
-
 export function PetCard({ pet }: { pet: PublicPet }) {
   const age = ageLabel(pet.estimatedBirthDate);
+  const name = petName(pet.name);
+  const Fallback = pet.species === "DOG" ? Dog : Cat;
+  const photo = pet.photoIds[0];
+
   return (
     <article className={`pet-card pet-card--${pet.species.toLowerCase()}`}>
-      <div className="pet-card__media" aria-hidden="true">
-        {pet.species === "DOG" ? "🐶" : "🐱"}
+      <div className="pet-card__media">
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- ảnh từ API Spring
+          <img
+            className="pet-card__image"
+            src={publicPhotoUrl(pet.id, photo)}
+            alt={`Ảnh của ${name}`}
+            width={400}
+            height={300}
+            loading="lazy"
+          />
+        ) : (
+          <Fallback className="pet-card__fallback" aria-hidden="true" />
+        )}
+        <span className="pet-card__species">{SPECIES[pet.species]}</span>
       </div>
       <div className="pet-card__body">
-        <h3 className="pet-card__name">{pet.name ?? "Chưa đặt tên"}</h3>
-        <span className="pet-card__code">{pet.code}</span>
+        <h3 className="pet-card__name">
+          <Link href={`/pets/${pet.id}`} className="pet-card__link">
+            {name}
+          </Link>
+        </h3>
         <ul className="pet-card__tags">
-          <li className="pet-card__tag">{SPECIES_LABEL[pet.species]}</li>
-          <li className="pet-card__tag">{SEX_LABEL[pet.sex]}</li>
+          {pet.sex !== "UNKNOWN" && (
+<li className="pet-card__tag">{pet.sex === "MALE" ? "Đực" : "Cái"}</li>
+          )}
           {age && <li className="pet-card__tag">{age}</li>}
           {pet.color && <li className="pet-card__tag">{pet.color}</li>}
         </ul>
         {pet.description && <p className="pet-card__description">{pet.description}</p>}
+        <span className="pet-card__more" aria-hidden="true">
+          Xem chi tiết
+        </span>
       </div>
     </article>
   );

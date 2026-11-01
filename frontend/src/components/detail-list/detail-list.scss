@@ -1,0 +1,33 @@
+@use "abstracts" as *;
+
+.detail-list {
+  display: grid;
+  gap: $space-4 $space-6;
+  grid-template-columns: 1fr;
+
+  @include from-sm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &__item {
+    min-width: 0;
+
+    &--wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__term {
+    color: $color-muted;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__value {
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+}

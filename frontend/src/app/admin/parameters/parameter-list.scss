@@ -1,0 +1,56 @@
+@use "abstracts" as *;
+
+.parameter-list {
+  @include surface;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item + &__item {
+    border-top: 1px solid $color-border;
+  }
+
+  &__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3 $space-6;
+    padding: $space-4 $space-5;
+  }
+
+  &__text {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+
+  &__key {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    overflow-wrap: anywhere;
+  }
+
+  &__description {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__error {
+    color: $color-danger;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__input {
+    @include control;
+    width: 120px;
+    font-variant-numeric: tabular-nums;
+  }
+}

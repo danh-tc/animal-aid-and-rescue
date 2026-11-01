@@ -1,0 +1,75 @@
+@use "abstracts" as *;
+
+.dashboard {
+  &__stats {
+    display: grid;
+    gap: $space-4;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+    margin-bottom: $space-6;
+  }
+
+  &__columns {
+    display: grid;
+    gap: $space-5;
+
+    @include from-lg {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0 (-$space-3);
+    padding: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $space-3;
+    border-radius: $radius-md;
+    color: $color-text;
+    text-decoration: none;
+    transition: background-color $duration-fast $ease-out;
+
+    &:hover {
+      background: $color-surface-2;
+    }
+  }
+
+  &__item + &__item {
+    border-top: 1px solid $color-border;
+  }
+
+  &__item-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__item-text {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    overflow: hidden;
+    font-size: $font-size-sm;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__item-meta {
+    color: $color-muted;
+    font-size: $font-size-xs;
+  }
+}

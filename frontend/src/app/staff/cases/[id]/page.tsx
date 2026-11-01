@@ -1,0 +1,245 @@
+"use client";
+
+import { CheckCircle2, UserCheck, XCircle } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { StatusBadge } from "@/components/badge/Badge";
+import { Button, LinkButton } from "@/components/button/Button";
+import { DetailList } from "@/components/detail-list/DetailList";
+import { Dialog } from "@/components/dialog/Dialog";
+import { Field } from "@/components/form-field/Field";
+import { Notice } from "@/components/notice/Notice";
+import { PageHeader } from "@/components/page-header/PageHeader";
+import { Panel } from "@/components/panel/Panel";
+import { Skeleton } from "@/components/skeleton/Skeleton";
+import { useToast } from "@/components/toast/Toast";
+import { useApi, useMutation } from "@/hooks/useApi";
+import { useStaffMembers } from "@/hooks/useStaffMembers";
+import { formatDateTime, todayIso } from "@/lib/format";
+import { CASE_STATUS, PRIORITY, REPORT_STATUS } from "@/lib/labels";
+import type { CaseDetail, Priority, Sex, Species, SucceedRequest, SucceedResult } from "@/types/api";
+import "../../detail-page.scss";
+
+const EMPTY_PET = { name: "", species: "DOG" as Species, sex: "UNKNOWN" as Sex, birth: "", color: "", description: "" };
+const EMPTY_INTAKE = { reason: "", priority: "NEED_CHECK" as Priority, assessment: "" };
+
+/** S03: Chi tiết ca cứu hộ: phân công, thành công (tạo hồ sơ thú), thất bại */
+export default function CaseDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { data: c, error, loading, reload } = useApi<CaseDetail>(`/api/staff/rescue-cases/${id}`);
+  const { members, nameOf } = useStaffMembers();
+  const mutate = useMutation();
+  const toast = useToast();
+  const [dialog, setDialog] = useState<"assign" | "succeed" | "fail" | null>(null);
+  const [assignee, setAssignee] = useState("");
+  const [reason, setReason] = useState("");
+  const [pet, setPet] = useState(EMPTY_PET);
+  const [intake, setIntake] = useState(EMPTY_INTAKE);
+  const [result, setResult] = useState<SucceedResult | null>(null);
+
+  if (loading && !c) return <Skeleton card lines={6} />;
+  if (!c) return <Notice tone="error">{error}</Notice>;
+
+  async function assign() {
+    if (!assignee) throw new Error("Chọn nhân viên phụ trách.");
+    await mutate(`/api/staff/rescue-cases/${id}/assign`, { body: { staffId: Number(assignee) } });
+    toast.success("Đã phân công ca cứu hộ.");
+    setDialog(null);
+    reload();
+  }
+
+  async function succeed() {
+    const body: SucceedRequest = {
+      pet: {
+        name: pet.name.trim() || null,
+        species: pet.species,
+        sex: pet.sex,
+        estimatedBirthDate: pet.birth || null,
+        color: pet.color.trim() || null,
+        description: pet.description.trim() || null,
+      },
+      intake: {
+        reason: intake.reason.trim() || null,
+        priority: intake.priority,
+        initialAssessment: intake.assessment.trim() || null,
+      },
+    };
+    const res = await mutate<SucceedResult>(`/api/staff/rescue-cases/${id}/succeed`, { body });
+    toast.success(`Đã tạo hồ sơ thú ${res.petCode}.`);
+    setResult(res);
+    setDialog(null);
+    reload();
+  }
+
+  async function fail() {
+    await mutate(`/api/staff/rescue-cases/${id}/fail`, { body: { reason: reason.trim() } });
+    toast.success("Đã ghi nhận ca cứu hộ thất bại.");
+    setDialog(null);
+    reload();
+  }
+
+  return (
+    <>
+      <PageHeader
+        back={{ href: "/staff/cases", label: "Ca cứu hộ" }}
+        title={`Ca cứu hộ #${c.id}`}
+        meta={
+          <>
+            <StatusBadge map={CASE_STATUS} value={c.status} />
+            <span>Tạo lúc {formatDateTime(c.createdAt)}</span>
+          </>
+        }
+        actions={
+          <>
+            {c.status === "NEW" && (
+              <Button icon={<UserCheck aria-hidden="true" />} onClick={() => setDialog("assign")}>
+                Phân công
+              </Button>
+            )}
+            {c.status === "IN_PROGRESS" && (
+              <>
+                <Button variant="ghost" icon={<XCircle aria-hidden="true" />} onClick={() => setDialog("fail")}>
+                  Thất bại
+                </Button>
+                <Button icon={<CheckCircle2 aria-hidden="true" />} onClick={() => setDialog("succeed")}>
+                  Cứu thành công
+                </Button>
+              </>
+            )}
+          </>
+        }
+      />
+
+      <div className="detail-page">
+        <div className="detail-page__main">
+          {result?.urgentVetRequestSuggested && (
+            <Notice
+              tone="warning"
+              title="Thú ở mức Khẩn cấp"
+              action={<LinkButton href={`/staff/pets/${result.petId}?tab=vet`} size="sm">Tạo yêu cầu thú y</LinkButton>}
+            >
+              Nên tạo yêu cầu thú y ngay cho {result.petCode}.
+            </Notice>
+          )}
+          <Panel title="Thông tin ca">
+            <DetailList
+              items={[
+                { label: "Vị trí", value: c.locationText, wide: true },
+                { label: "Phụ trách", value: nameOf(c.assignedStaffId) },
+                { label: "Người tạo", value: nameOf(c.createdBy) },
+                { label: "Đóng lúc", value: formatDateTime(c.closedAt) },
+                ...(c.failureReason ? [{ label: "Lý do thất bại", value: c.failureReason, wide: true }] : []),
+              ]}
+            />
+          </Panel>
+        </div>
+        <aside className="detail-page__side">
+          {c.petId && (
+            <Panel title="Hồ sơ thú">
+              <LinkButton href={`/staff/pets/${c.petId}`} variant="secondary" block>
+                Mở hồ sơ {c.petCode}
+              </LinkButton>
+            </Panel>
+          )}
+          <Panel title="Báo cáo nguồn">
+            <ul className="detail-page__links">
+              {c.reports.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/staff/reports/${r.id}`} className="detail-page__link">
+                    <span>{r.code}</span>
+                    <StatusBadge map={REPORT_STATUS} value={r.status} />
+                    <span className="detail-page__link-meta">{r.reporterName} · {r.reporterPhone}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        </aside>
+      </div>
+
+      <Dialog open={dialog === "assign"} onClose={() => setDialog(null)} title="Phân công ca cứu hộ" submitLabel="Phân công" onSubmit={assign}>
+        <Field label="Nhân viên phụ trách" required>
+          <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
+            <option value="">Chọn nhân viên</option>
+            {members.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.fullName}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </Dialog>
+
+      <Dialog
+        open={dialog === "fail"}
+        onClose={() => setDialog(null)}
+        title="Ghi nhận cứu thất bại"
+        submitLabel="Xác nhận"
+        submitVariant="danger"
+        onSubmit={fail}
+      >
+        <Field label="Lý do" required hint="Ví dụ: không tìm thấy con vật tại địa điểm.">
+          <textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} required />
+        </Field>
+      </Dialog>
+
+      <Dialog
+        open={dialog === "succeed"}
+        onClose={() => setDialog(null)}
+        title="Cứu thành công, tạo hồ sơ thú"
+        description="Hồ sơ thú và lượt tiếp nhận được tạo cùng lúc. Thú vào khu cách ly."
+        submitLabel="Tạo hồ sơ"
+        onSubmit={succeed}
+        size="lg"
+      >
+        <h3 className="detail-page__form-section">Thông tin thú</h3>
+        <div className="detail-page__form-grid">
+          <Field label="Loài" required>
+            <select value={pet.species} onChange={(e) => setPet({ ...pet, species: e.target.value as Species })}>
+              <option value="DOG">Chó</option>
+              <option value="CAT">Mèo</option>
+            </select>
+          </Field>
+          <Field label="Giới tính">
+            <select value={pet.sex} onChange={(e) => setPet({ ...pet, sex: e.target.value as Sex })}>
+              <option value="UNKNOWN">Chưa rõ</option>
+              <option value="MALE">Đực</option>
+              <option value="FEMALE">Cái</option>
+            </select>
+          </Field>
+          <Field label="Tên gọi" hint="Để trống nếu chưa đặt tên.">
+            <input maxLength={100} value={pet.name} onChange={(e) => setPet({ ...pet, name: e.target.value })} />
+          </Field>
+          <Field label="Ngày sinh ước tính">
+            <input type="date" max={todayIso()} value={pet.birth} onChange={(e) => setPet({ ...pet, birth: e.target.value })} />
+          </Field>
+          <Field label="Màu lông" className="detail-page__full">
+            <input maxLength={100} value={pet.color} onChange={(e) => setPet({ ...pet, color: e.target.value })} />
+          </Field>
+          <Field label="Mô tả" className="detail-page__full">
+            <textarea rows={2} maxLength={2000} value={pet.description} onChange={(e) => setPet({ ...pet, description: e.target.value })} />
+          </Field>
+        </div>
+        <h3 className="detail-page__form-section">Tiếp nhận</h3>
+        <div className="detail-page__form-grid">
+          <Field label="Mức ưu tiên" required>
+            <select value={intake.priority} onChange={(e) => setIntake({ ...intake, priority: e.target.value as Priority })}>
+              {(Object.keys(PRIORITY) as Priority[]).map((p) => (
+                <option key={p} value={p}>
+                  {PRIORITY[p].label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Lý do tiếp nhận">
+            <input maxLength={1000} value={intake.reason} onChange={(e) => setIntake({ ...intake, reason: e.target.value })} />
+          </Field>
+          <Field label="Đánh giá ban đầu" className="detail-page__full">
+            <textarea rows={2} maxLength={2000} value={intake.assessment} onChange={(e) => setIntake({ ...intake, assessment: e.target.value })} />
+          </Field>
+        </div>
+      </Dialog>
+    </>
+  );
+}

@@ -99,6 +99,24 @@ Toàn bộ API MVP ở báo cáo mục 5.2, mỗi thao tác đổi trạng thái
 
 Ghi chú khi nâng cấp database đã có: migration `V3` thêm tham số `MIN_STERILIZATION_AGE_WEEKS`, Flyway tự chạy khi khởi động.
 
+## Đã có sau sprint 2 (MVP frontend)
+
+Giao diện cho toàn bộ màn hình MVP ở báo cáo mục 5.3, gọi API thật qua `lib/api.ts`. Hệ thiết kế chọn theo [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) cho nhóm "pet adoption, nonprofit": xanh ngọc tạo tin cậy, cam ấm chỉ dùng cho lời kêu gọi hành động, font Nunito / Nunito Sans (có bộ chữ tiếng Việt), icon SVG lucide. Vẫn là SCSS thuần theo BEM, không Tailwind.
+
+| Nhóm | Đường dẫn | Màn hình |
+| --- | --- | --- |
+| Công khai | `/`, `/pets/[id]`, `/rescue`, `/login`, `/register` | P01, P02, P03, P05 |
+| Người nhận nuôi | `/pets/[id]/apply`, `/me/applications`, `/me/adoptions` | A01, A02, A03 |
+| Nhân viên | `/staff`, `/staff/reports`, `/staff/cases`, `/staff/pets`, `/staff/vet-requests`, `/staff/applications`, `/staff/follow-ups` | S01 đến S10 (S08 bàn giao trong chi tiết đơn, S10 nhận lại trong tab Bàn giao của hồ sơ thú) |
+| Quản lý | `/admin/users`, `/admin/clinics`, `/admin/parameters` | M02, M03, M04 |
+
+- **Bảo vệ route theo vai trò** hai lớp: `src/proxy.ts` chuyển hướng sớm theo cookie `aar_role`, `RequireRole` kiểm tra lại phía client. Quyền thật vẫn do backend kiểm tra JWT.
+- **Giao diện sáng và tối** theo cài đặt hệ điều hành, token màu nằm ở `styles/base/_tokens.scss`, các cặp chữ/nền đạt WCAG AA.
+- **Không cuộn ngang ở 375px**: bảng tự chuyển thành thẻ trên điện thoại, sidebar nhân viên thành ngăn kéo dưới 1024px.
+- **Trợ năng**: liên kết bỏ qua điều hướng, nhãn cho mọi ô nhập, lỗi gắn `aria-describedby`, hộp thoại `<dialog>` gốc, tab dùng phím mũi tên, tôn trọng `prefers-reduced-motion`.
+
+Đã chạy thử toàn bộ luồng trên dữ liệu mẫu bằng Playwright: báo cứu hộ kèm ảnh, tạo 2 ca, cứu thành công, tạo và hoàn tất yêu cầu thú y, checklist, đăng ký và nộp đơn, duyệt, bàn giao, hậu kiểm Cần theo dõi (tự thêm lần bổ sung), nhận lại thú, sửa tham số, tạo nhân viên. Không có lỗi console.
+
 ## Lộ trình
 
 | Đợt | Phạm vi |

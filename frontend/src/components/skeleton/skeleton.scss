@@ -1,0 +1,40 @@
+@use "abstracts" as *;
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-4;
+
+  &--card {
+    @include surface;
+  }
+
+  &__line {
+    display: block;
+    height: 14px;
+    border-radius: $radius-pill;
+    background: linear-gradient(90deg, $color-surface-2 0%, $color-border 50%, $color-surface-2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+
+    &:first-child {
+      width: 40%;
+      height: 18px;
+    }
+
+    &:last-child:not(:first-child) {
+      width: 70%;
+    }
+  }
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}

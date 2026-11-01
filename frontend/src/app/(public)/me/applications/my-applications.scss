@@ -1,0 +1,42 @@
+@use "abstracts" as *;
+
+.my-applications {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    @include surface;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    padding: $space-5;
+  }
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+  }
+
+  &__pet {
+    margin: 0;
+    font-size: $font-size-lg;
+  }
+
+  &__meta,
+  &__detail,
+  &__note {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
