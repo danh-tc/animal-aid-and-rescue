@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { Field } from "@/components/form-field/Field";
-import { AuthDivider, AuthShell } from "@/components/auth-shell/AuthShell";
+import { AuthShell } from "@/components/auth-shell/AuthShell";
 import { GoogleSignIn } from "@/components/google-sign-in/GoogleSignIn";
 import { Notice } from "@/components/notice/Notice";
 import { PasswordInput } from "@/components/password-input/PasswordInput";
@@ -95,8 +95,7 @@ function RegisterForm() {
       }
     >
       {error && <Notice tone="error">{error}</Notice>}
-      <GoogleSignIn mode="signup" onError={setError} />
-      <AuthDivider label="hoặc đăng ký bằng email" />
+      <GoogleSignIn mode="signup" onError={setError} dividerLabel="hoặc đăng ký bằng email" />
       <form className="stack" onSubmit={handleSubmit} noValidate>
         <Field label="Họ và tên" required error={errors.fullName}>
           <input

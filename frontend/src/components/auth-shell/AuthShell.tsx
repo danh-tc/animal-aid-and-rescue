@@ -13,7 +13,7 @@ interface AuthShellProps {
 const BENEFITS = [
   "Nộp đơn nhận nuôi chỉ trong vài phút",
   "Theo dõi trạng thái đơn và lịch hậu kiểm",
-  "Đăng nhập nhanh bằng tài khoản Google",
+  "Một tài khoản cho mọi lần nhận nuôi",
 ];
 
 /** Bố cục chia đôi: cột thương hiệu nền màu đặc (ẩn trên điện thoại) và cột form. */

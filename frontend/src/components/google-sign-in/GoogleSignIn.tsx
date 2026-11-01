@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Spinner } from "@/components/spinner/Spinner";
+import { AuthDivider } from "@/components/auth-shell/AuthShell";
 import { useToast } from "@/components/toast/Toast";
 import { apiFetch, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -74,11 +74,23 @@ interface GoogleAuthResponse extends AuthResponse {
  * Nút "Đăng nhập với Google" chính thức (Google Identity Services). Google trả ID token,
  * backend xác thực chữ ký rồi cấp JWT của hệ thống. Lần đầu dùng thì tạo tài khoản Người nhận nuôi.
  */
-export function GoogleSignIn({ mode, onError }: { mode: "signin" | "signup"; onError: (message: string) => void }) {
+interface GoogleSignInProps {
+  mode: "signin" | "signup";
+  onError: (message: string) => void;
+  /** Nhãn đường kẻ ngăn cách với form email, chỉ hiện khi nút Google hiện. */
+  dividerLabel: string;
+}
+
+/** Ghi lý do không hiện nút Google ra console để nhóm phát triển kiểm tra, người dùng không thấy gì. */
+function logHidden(reason: string, detail?: unknown) {
+  console.warn(`[GoogleSignIn] Ẩn nút đăng nhập Google: ${reason}`, detail ?? "");
+}
+
+export function GoogleSignIn({ mode, onError, dividerLabel }: GoogleSignInProps) {
   const { signIn } = useAuth();
   const toast = useToast();
   const holder = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<"loading" | "ready" | "disabled" | "failed" | "busy">("loading");
+  const [state, setState] = useState<"loading" | "ready" | "hidden" | "busy">("loading");
 
   useEffect(() => {
     let cancelled = false;
@@ -87,7 +99,13 @@ export function GoogleSignIn({ mode, onError }: { mode: "signin" | "signup"; onE
         const config = await apiFetch<AuthConfig>("/api/public/auth/config");
         if (cancelled) return;
         if (!config.googleEnabled || !config.googleClientId) {
-          setState("disabled");
+          logHidden("backend chưa đặt biến GOOGLE_CLIENT_ID (GET /api/public/auth/config trả googleEnabled=false)");
+          setState("hidden");
+          return;
+        }
+        if (!/^[\w-]+\.apps\.googleusercontent\.com$/.test(config.googleClientId)) {
+          logHidden("GOOGLE_CLIENT_ID không đúng định dạng <số>-<chuỗi>.apps.googleusercontent.com", config.googleClientId);
+          setState("hidden");
           return;
         }
         await loadScript();
@@ -121,8 +139,11 @@ export function GoogleSignIn({ mode, onError }: { mode: "signin" | "signup"; onE
           locale: "vi",
         });
         setState("ready");
-      } catch {
-        if (!cancelled) setState("failed");
+      } catch (e) {
+        if (!cancelled) {
+          logHidden("không tải được cấu hình hoặc thư viện Google Identity Services", e);
+          setState("hidden");
+        }
       }
     })();
     return () => {
@@ -130,24 +151,14 @@ export function GoogleSignIn({ mode, onError }: { mode: "signin" | "signup"; onE
     };
   }, [mode, signIn, toast, onError]);
 
-  if (state === "disabled") {
-    // Chỉ nhắc ở môi trường dev để nhóm biết cần đặt GOOGLE_CLIENT_ID, người dùng thật không thấy
-    return process.env.NODE_ENV === "production" ? null : (
-      <p className="google-sign-in__hint">Đăng nhập Google chưa bật: đặt biến GOOGLE_CLIENT_ID cho backend.</p>
-    );
-  }
+  if (state === "hidden") return null;
 
+  // Chỉ hiện khi nút đã sẵn sàng, tránh khung trống hay đường kẻ thừa khi Google bị tắt
   return (
-    <div className="google-sign-in" aria-busy={state === "loading" || state === "busy"}>
+    <div className={`google-sign-in${state === "loading" ? " google-sign-in--pending" : ""}`} aria-busy={state === "busy"}>
       <div ref={holder} className="google-sign-in__button" />
-      {(state === "loading" || state === "busy") && (
-        <span className="google-sign-in__status">
-          <Spinner /> {state === "busy" ? "Đang đăng nhập..." : "Đang tải Google..."}
-        </span>
-      )}
-      {state === "failed" && (
-        <p className="google-sign-in__hint">Không tải được Google, kiểm tra kết nối hoặc dùng email và mật khẩu.</p>
-      )}
+      {state === "busy" && <p className="google-sign-in__status">Đang đăng nhập bằng Google...</p>}
+      <AuthDivider label={dividerLabel} />
     </div>
   );
 }

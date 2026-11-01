@@ -150,7 +150,7 @@ docker compose up -d            # gồm cả container backup: sao lưu lúc kh�
 2. Authorized JavaScript origins thêm `http://localhost:3000` (và tên miền thật khi triển khai).
 3. Chạy backend với biến môi trường `GOOGLE_CLIENT_ID=<client id>`. Frontend tự đọc qua `GET /api/public/auth/config`, không cần cấu hình thêm.
 
-Chưa đặt biến này thì nút Google ẩn đi, đăng nhập bằng mật khẩu vẫn dùng bình thường. Email Google đã có tài khoản thì đăng nhập vào tài khoản đó (kể cả nhân viên), chưa có thì tạo tài khoản Người nhận nuôi.
+Chưa đặt biến này, Client ID sai định dạng hoặc không tải được thư viện Google thì nút Google và đường kẻ "hoặc" ẩn hẳn, đăng nhập bằng mật khẩu vẫn dùng bình thường. Lý do được ghi ra console của trình duyệt với tiền tố `[GoogleSignIn]`. Email Google đã có tài khoản thì đăng nhập vào tài khoản đó (kể cả nhân viên), chưa có thì tạo tài khoản Người nhận nuôi.
 
 ### Phân quyền phân công ca cứu hộ
 

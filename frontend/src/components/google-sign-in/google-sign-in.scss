@@ -4,8 +4,14 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: $space-2;
-  min-height: $control-height;
+  gap: $space-5;
+
+  // Đang tải: vẫn giữ bề rộng để Google vẽ nút đúng cỡ, nhưng chưa hiện và không chiếm chỗ
+  &--pending {
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
 
   &__button {
     display: flex;
@@ -21,14 +27,5 @@
     gap: $space-2;
     color: $color-muted;
     font-size: $font-size-sm;
-  }
-
-  &__hint {
-    padding: $space-3;
-    border: 1px dashed $color-border-strong;
-    border-radius: $radius-md;
-    color: $color-muted;
-    font-size: $font-size-sm;
-    text-align: center;
   }
 }
