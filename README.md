@@ -32,6 +32,14 @@ npm install
 npm run dev
 ```
 
+Hoặc chạy cả 3 bước trên bằng một lệnh (tự tắt bản đang chạy rồi bật lại, chờ đến khi sẵn sàng):
+
+```bash
+./scripts/dev.sh          # hiện log của backend và frontend, Ctrl+C để tắt hết
+./scripts/dev.sh --bg     # chạy nền, log ở .dev-logs/
+./scripts/dev.sh stop     # tắt backend và frontend, Postgres vẫn chạy
+```
+
 - Tài liệu API (Swagger): http://localhost:8080/swagger-ui.html
 - Kiểm thử backend: `mvn test`. Test tích hợp chạy trên PostgreSQL thật qua Testcontainers, cần Docker đang chạy (không có Docker thì test này tự bỏ qua).
 
