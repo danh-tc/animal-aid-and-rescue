@@ -143,7 +143,7 @@ export default function ReportDetailPage() {
         <aside className="detail-page__side">
           {isNew && (
             <Panel
-              title="Ca đang mở ở gần"
+              title="Ca đang mở để kiểm tra trùng"
               description={
                 r.openCases.length === 0
                   ? "Không có ca nào đang mở."
