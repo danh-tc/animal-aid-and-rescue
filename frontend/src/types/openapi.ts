@@ -308,6 +308,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/staff/handovers/{id}/close-recall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["closeRecall"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/staff/follow-ups/{id}/result": {
         parameters: {
             query?: never;
@@ -382,6 +398,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["handoverDate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/staff/applications/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -493,7 +525,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cancel_1"];
+        post: operations["cancel_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1102,18 +1134,9 @@ export interface components {
             aftercareInstructions?: string;
             healthOk: boolean;
         };
-        ReasonRequest: {
-            reason: string;
-        };
         VetRequestCancel: {
             reason: string;
             incurredCost?: number;
-        };
-        StaffCancelRequest: {
-            reason: string;
-        };
-        CloseRecallRequest: {
-            reason: string;
         };
         AttachmentView: {
             /** Format: int64 */
@@ -1138,6 +1161,9 @@ export interface components {
             status?: "NEW" | "PROCESSED" | "DUPLICATE" | "INVALID";
             /** Format: date-time */
             createdAt?: string;
+        };
+        ReasonRequest: {
+            reason: string;
         };
         CreateCasesRequest: {
             /** Format: int32 */
@@ -1295,23 +1321,8 @@ export interface components {
             /** Format: date-time */
             loggedAt?: string;
         };
-        FollowUpResultRequest: {
-            /** @enum {string} */
-            result: "PASS" | "WATCH" | "FAIL";
-            /** @enum {string} */
-            contactMethod: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
-            healthOk: boolean;
-            housingOk: boolean;
-            commitmentOk: boolean;
-            petPresent: boolean;
-            ownerReachable: boolean;
-            reason?: string;
-        };
-        FollowUpOutcome: {
-            followUp?: components["schemas"]["FollowUpView"];
-            /** @enum {string} */
-            handoverStatus?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
-            additionalFollowUp?: components["schemas"]["FollowUpView"];
+        CloseRecallRequest: {
+            reason: string;
         };
         FollowUpView: {
             /** Format: int64 */
@@ -1339,6 +1350,45 @@ export interface components {
             performedBy?: number;
             /** Format: date-time */
             performedAt?: string;
+        };
+        HandoverView: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            applicationId?: number;
+            /** Format: int64 */
+            petId?: number;
+            petCode?: string;
+            petName?: string;
+            /** Format: int64 */
+            ownerId?: number;
+            ownerName?: string;
+            ownerPhone?: string;
+            /** Format: date-time */
+            handedOverAt?: string;
+            donationAmount?: number;
+            note?: string;
+            /** @enum {string} */
+            status?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
+            followUps?: components["schemas"]["FollowUpView"][];
+        };
+        FollowUpResultRequest: {
+            /** @enum {string} */
+            result: "PASS" | "WATCH" | "FAIL";
+            /** @enum {string} */
+            contactMethod: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
+            healthOk: boolean;
+            housingOk: boolean;
+            commitmentOk: boolean;
+            petPresent: boolean;
+            ownerReachable: boolean;
+            reason?: string;
+        };
+        FollowUpOutcome: {
+            followUp?: components["schemas"]["FollowUpView"];
+            /** @enum {string} */
+            handoverStatus?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
+            additionalFollowUp?: components["schemas"]["FollowUpView"];
         };
         RejectRequest: {
             note: string;
@@ -1381,30 +1431,12 @@ export interface components {
             note?: string;
             donationAmount?: number;
         };
-        HandoverView: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: int64 */
-            applicationId?: number;
-            /** Format: int64 */
-            petId?: number;
-            petCode?: string;
-            petName?: string;
-            /** Format: int64 */
-            ownerId?: number;
-            ownerName?: string;
-            ownerPhone?: string;
-            /** Format: date-time */
-            handedOverAt?: string;
-            donationAmount?: number;
-            note?: string;
-            /** @enum {string} */
-            status?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
-            followUps?: components["schemas"]["FollowUpView"][];
-        };
         HandoverDateRequest: {
             /** Format: date */
             handoverDate: string;
+        };
+        StaffCancelRequest: {
+            reason: string;
         };
         ReviewRequest: {
             note?: string;
@@ -1892,15 +1924,6 @@ export interface components {
             caseUnassignedAlertHours?: number;
             unassignedCases?: components["schemas"]["UnassignedCase"][];
         };
-        UnassignedCase: {
-            /** Format: int64 */
-            caseId?: number;
-            locationText?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: int64 */
-            hoursWaiting?: number;
-        };
         OverdueFollowUp: {
             /** Format: int64 */
             followUpId?: number;
@@ -1945,6 +1968,15 @@ export interface components {
             submittedAt?: string;
             /** Format: int64 */
             daysWaiting?: number;
+        };
+        UnassignedCase: {
+            /** Format: int64 */
+            caseId?: number;
+            locationText?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: int64 */
+            hoursWaiting?: number;
         };
         ClinicCost: {
             /** Format: int64 */
@@ -2580,6 +2612,32 @@ export interface operations {
             };
         };
     };
+    closeRecall: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseRecallRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HandoverView"];
+                };
+            };
+        };
+    };
     resultWithPhotos: {
         parameters: {
             query?: never;
@@ -2724,6 +2782,32 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["HandoverDateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApplicationView"];
+                };
+            };
+        };
+    };
+    cancel_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffCancelRequest"];
             };
         };
         responses: {
@@ -2908,7 +2992,7 @@ export interface operations {
             };
         };
     };
-    cancel_1: {
+    cancel_2: {
         parameters: {
             query?: never;
             header?: never;
