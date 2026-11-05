@@ -113,6 +113,7 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 ## Nếu bị hỏi thêm
 
 - Kiểm thử tự động: `cd backend && mvn verify` (test tích hợp chạy trên PostgreSQL thật qua Testcontainers, cần Docker).
+- Chạy tự động 4 kịch bản qua API (trên dữ liệu mẫu vừa nạp lại): `node scripts/demo-check.mjs`.
 - Đo hiệu năng NFR-04: `node scripts/perf-check.mjs`.
 - Sao lưu và khôi phục NFR-06: `./scripts/backup.sh`, `./scripts/restore.sh backups/<tệp>.dump`.
 - Tài liệu API: `http://localhost:8080/swagger-ui.html`.
