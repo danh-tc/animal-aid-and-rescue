@@ -95,11 +95,11 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 
 1. `staff1@aar.local` mở đơn của **Đốm** (Đã duyệt) → **Bàn giao**: hộp thoại hiện tổng chi phí điều trị, số tiền đã được ủng hộ và phần còn thiếu. Nhập khoản ủng hộ, xác nhận. Đốm chuyển Đã nhận nuôi, hệ thống tạo 2 lịch hậu kiểm (14 và 60 ngày).
 2. **Hậu kiểm** → **Tất cả đã lên lịch** → lần hậu kiểm của **Miu** → **Ghi kết quả**, hình thức **Thăm nhà**:
-   - Bỏ tích một tiêu chí: lựa chọn **Đạt** biến mất (Đạt phải đủ 5 tiêu chí).
+   - Nhân viên tự chọn kết quả theo 5 tiêu chí, hệ thống chỉ kiểm lý do và hình thức liên hệ.
    - Chọn **Cần theo dõi**, ghi nhận xét: hệ thống thêm một lần hậu kiểm bổ sung.
    - Mở lần bổ sung: chỉ còn **Đạt** hoặc **Không đạt** (QĐ-12).
 3. Mở hồ sơ Miu, tab **Bàn giao** → **Tiếp nhận trả lại**: tạo lượt tiếp nhận trả lại, Miu về khu cách ly, lịch hậu kiểm còn lại bị hủy, lịch sử nhận nuôi vẫn giữ (QĐ-13).
-4. Mở hồ sơ **Na**, tab **Bàn giao**: thông báo "Hậu kiểm không đạt, đang chờ thu hồi". Với `staff1@aar.local` không có nút đóng. Đăng nhập `manager@aar.local`: có nút **Đóng thu hồi**, ghi lý do, bàn giao chuyển Đã đóng, Na giữ Đã nhận nuôi (QĐ-18). Báo cáo **Ngoại lệ** có cột "Được đóng thu hồi từ".
+4. Mở hồ sơ **Na**, tab **Bàn giao**: thông báo "Hậu kiểm không đạt, đang chờ thu hồi". Đăng nhập `manager@aar.local` → **Hậu kiểm** (S09): khung **Bàn giao chờ thu hồi** có Na, bấm **Đóng thu hồi**, ghi lý do. Bàn giao chuyển Đã đóng, Na giữ Đã nhận nuôi (QĐ-18). Nhân viên không thấy khung này.
 5. Đăng nhập `adopter3@aar.local` → **Thú đã nhận**: thấy Đốm và lịch hậu kiểm.
 
 ## Phần bổ sung

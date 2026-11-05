@@ -34,17 +34,11 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         assertThat(notApproved.get("code").asText()).isEqualTo("APPLICATION_NOT_APPROVED");
     }
 
-    /** QĐ-12, RB-23: lần bổ sung chỉ Đạt hoặc Không đạt, Đạt phải đủ 5 tiêu chí, kết quả bổ sung thay lần gốc. */
+    /** QĐ-12, RB-23: lần bổ sung chỉ Đạt hoặc Không đạt. Nhân viên tự chọn kết quả, kết quả bổ sung thay lần gốc. */
     @Test
     void additionalFollowUpOnlyPassOrFail() throws Exception {
         JsonNode handover = handedOver(ADOPTER2);
         long first = handover.get("followUps").get(0).get("id").asLong();
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> passMissing = (Map<String, Object>) criteria("PASS", null);
-        passMissing.put("housingOk", false);
-        JsonNode badPass = postJson("/api/staff/follow-ups/" + first + "/result", STAFF, passMissing, 400);
-        assertThat(badPass.get("code").asText()).isEqualTo("PASS_REQUIRES_ALL_CRITERIA");
 
         JsonNode watch = postJson("/api/staff/follow-ups/" + first + "/result", STAFF,
             criteria("WATCH", "Chưa liên lạc được chủ"), 200);
@@ -54,13 +48,10 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
             criteria("WATCH", "Vẫn chưa ổn"), 400);
         assertThat(watchAgain.get("code").asText()).isEqualTo("ADDITIONAL_RESULT_INVALID");
 
-        // Lần bổ sung vẫn không liên lạc được: không đủ 5 tiêu chí nên chỉ còn Không đạt
+        // Lần bổ sung vẫn không liên lạc được chủ: nhân viên ghi Không đạt
         @SuppressWarnings("unchecked")
-        Map<String, Object> unreachable = (Map<String, Object>) criteria("PASS", null);
+        Map<String, Object> unreachable = (Map<String, Object>) criteria("FAIL", "Lần bổ sung vẫn không liên lạc được chủ");
         unreachable.put("ownerReachable", false);
-        postJson("/api/staff/follow-ups/" + extra + "/result", STAFF, unreachable, 400);
-        unreachable.put("result", "FAIL");
-        unreachable.put("reason", "Lần bổ sung vẫn không liên lạc được chủ");
         JsonNode fail = postJson("/api/staff/follow-ups/" + extra + "/result", STAFF, unreachable, 200);
         assertThat(fail.get("handoverStatus").asText()).isEqualTo("RECALL_PENDING");
     }
@@ -137,6 +128,21 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         JsonNode check = putJson("/api/staff/pets/" + petId + "/eligibility", STAFF,
             map("vaccinated", true, "dewormed", true, "sterilized", true, "temperamentOk", true), 200);
         assertThat(check.get("status").asText()).isEqualTo("IN_CARE");
+    }
+
+    /** RB-22: tọa độ nếu có phải hợp lệ và có đủ cả hai. */
+    @Test
+    void reportCoordinatesMustBeComplete() throws Exception {
+        Map<String, Object> base = map("reporterName", "Người báo", "reporterPhone", randomPhone(),
+            "locationText", "Quận 1", "description", "Chó đi lạc");
+        Map<String, Object> half = new java.util.LinkedHashMap<>(base);
+        half.put("latitude", 10.77);
+        JsonNode bad = postJson("/api/public/rescue-reports", null, half, 400);
+        assertThat(bad.get("code").asText()).isEqualTo("INVALID_COORDINATES");
+        Map<String, Object> full = new java.util.LinkedHashMap<>(base);
+        full.put("latitude", 10.77);
+        full.put("longitude", 106.70);
+        postJson("/api/public/rescue-reports", null, full, 201);
     }
 
     /** QĐ-17: ca ở Mới quá số giờ cho phép vào báo cáo ngoại lệ để nhắc Quản lý. */

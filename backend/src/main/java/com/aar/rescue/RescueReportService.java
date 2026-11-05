@@ -66,6 +66,10 @@ public class RescueReportService {
     }
 
     public ReportReceipt submit(ReportRequest req, List<MultipartFile> photos) {
+        // RB-22: có đủ cả vĩ độ và kinh độ hoặc không có cả hai (CHECK ck_report_coordinates chặn thêm ở CSDL)
+        if ((req.latitude() == null) != (req.longitude() == null)) {
+            throw BusinessException.badRequest("INVALID_COORDINATES", "Vị trí phải có đủ cả vĩ độ và kinh độ");
+        }
         int limit = params.getInt(SystemParameterService.REPORT_RATE_LIMIT_PER_HOUR);
         long recent = reports.countByReporterPhoneAndCreatedAtAfter(req.reporterPhone(), OffsetDateTime.now().minusHours(1));
         if (recent >= limit) {

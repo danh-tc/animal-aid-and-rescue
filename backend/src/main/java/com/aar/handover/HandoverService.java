@@ -145,18 +145,11 @@ public class HandoverService {
         if (req.result() != FollowUpResult.PASS && reason == null) {
             throw BusinessException.badRequest("REASON_REQUIRED", "Kết quả Cần theo dõi hoặc Không đạt phải ghi lý do");
         }
+        // Mục 2.1.5: nhân viên tự chọn kết quả, hệ thống không tự tính từ 5 tiêu chí mà chỉ kiểm ràng buộc.
         // QĐ-12, RB-23: lần bổ sung chỉ được Đạt hoặc Không đạt, nên mỗi lần hậu kiểm có tối đa một lần bổ sung.
-        // Lần bổ sung vẫn không liên lạc được chủ thì không đạt đủ 5 tiêu chí, chỉ còn chọn được Không đạt.
         if (followUp.isAdditional() && req.result() == FollowUpResult.WATCH) {
             throw BusinessException.badRequest("ADDITIONAL_RESULT_INVALID",
                 "Lần hậu kiểm bổ sung chỉ được chọn Đạt hoặc Không đạt");
-        }
-        // Mục 2.1.5: Đạt khi đạt cả 5 tiêu chí. Nhân viên tự chọn kết quả, hệ thống chỉ chặn chọn Đạt khi thiếu tiêu chí.
-        boolean allCriteria = req.healthOk() && req.housingOk() && req.commitmentOk() && req.petPresent()
-            && req.ownerReachable();
-        if (req.result() == FollowUpResult.PASS && !allCriteria) {
-            throw BusinessException.badRequest("PASS_REQUIRES_ALL_CRITERIA",
-                "Kết quả Đạt cần đạt cả 5 tiêu chí, hãy chọn Cần theo dõi hoặc Không đạt");
         }
         followUp.recordResult(req.result(), req.contactMethod(), req.healthOk(), req.housingOk(), req.commitmentOk(), req.petPresent(),
             req.ownerReachable(), reason, by);

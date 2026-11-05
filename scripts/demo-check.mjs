@@ -144,8 +144,6 @@ async function main() {
   const criteria = { contactMethod: "HOME_VISIT", healthOk: true, housingOk: true, commitmentOk: true, petPresent: true, ownerReachable: true };
   if (miu) {
     const id = miu.followUp.id;
-    await expect("Chọn Đạt khi thiếu tiêu chí bị chặn", "POST", `/api/staff/follow-ups/${id}/result`,
-      { as: "staff", body: { ...criteria, housingOk: false, result: "PASS" } }, 400);
     const watch = await expect("Ghi Cần theo dõi", "POST", `/api/staff/follow-ups/${id}/result`,
       { as: "staff", body: { ...criteria, housingOk: false, result: "WATCH", reason: "Chỗ ở chật" } }, 200);
     const extra = watch?.additionalFollowUp?.id;

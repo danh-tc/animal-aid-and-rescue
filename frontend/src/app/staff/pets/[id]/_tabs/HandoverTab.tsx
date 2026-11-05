@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, PawPrint, Undo2 } from "lucide-react";
+import { PawPrint, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { StatusBadge } from "@/components/badge/Badge";
@@ -15,7 +15,6 @@ import { Skeleton } from "@/components/skeleton/Skeleton";
 import { Timeline } from "@/components/timeline/Timeline";
 import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
-import { useAuth } from "@/lib/auth-context";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { CONTACT_METHOD, FOLLOW_UP_RESULT, FOLLOW_UP_STATUS, HANDOVER_STATUS, PRIORITY } from "@/lib/labels";
 import type { HandoverView, PetDetail, Priority, ReturnResult } from "@/types/api";
@@ -29,10 +28,6 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
   const mutate = useMutation();
   const toast = useToast();
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
-  const isManager = user?.role === "MANAGER";
-  const [closing, setClosing] = useState(false);
-  const [closeReason, setCloseReason] = useState("");
   const [form, setForm] = useState({ reason: "", priority: "NEED_CHECK" as Priority, assessment: "" });
   const current = data?.find((h) => RETURNABLE.includes(h.status));
   const canReturn = pet.status === "ADOPTED" && !!current;
@@ -49,40 +44,11 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
     onChanged();
   }
 
-  /** QĐ-18: sau thời gian chờ mà vẫn không thu hồi được, Quản lý đóng thu hồi. Thú giữ trạng thái Đã nhận nuôi. */
-  async function closeRecall() {
-    if (!current) return;
-    if (!closeReason.trim()) throw new Error("Ghi lý do đóng thu hồi.");
-    await mutate<HandoverView>(`/api/staff/handovers/${current.id}/close-recall`, { body: { reason: closeReason.trim() } });
-    toast.success("Đã đóng thu hồi. Thú giữ trạng thái Đã nhận nuôi.");
-    setClosing(false);
-    reload();
-    onChanged();
-  }
-
   return (
     <div className="stack stack--lg">
       {current?.status === "RECALL_PENDING" && (
-        <Notice
-          tone="warning"
-          title="Hậu kiểm không đạt, đang chờ thu hồi"
-          action={
-            isManager ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Archive aria-hidden="true" />}
-                onClick={() => {
-                  setCloseReason("");
-                  setClosing(true);
-                }}
-              >
-                Đóng thu hồi
-              </Button>
-            ) : undefined
-          }
-        >
-          Liên hệ chủ nuôi để thu hồi rồi bấm Tiếp nhận trả lại. Quá thời gian chờ (tham số hệ thống, mặc định 30 ngày) vẫn không thu hồi được thì Quản lý đóng thu hồi.
+        <Notice tone="warning" title="Hậu kiểm không đạt, đang chờ thu hồi">
+          Liên hệ chủ nuôi để thu hồi rồi bấm Tiếp nhận trả lại. Quá thời gian chờ vẫn không thu hồi được thì Quản lý đóng thu hồi ở màn hình Hậu kiểm.
         </Notice>
       )}
       <Panel
@@ -163,19 +129,6 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
         </Field>
       </Dialog>
 
-      <Dialog
-        open={closing}
-        onClose={() => setClosing(false)}
-        title="Đóng thu hồi?"
-        description="Chỉ đóng khi đã quá thời gian chờ mà vẫn không thu hồi được. Bàn giao chuyển Đã đóng, thú giữ Đã nhận nuôi, người nhận nuôi bị cảnh báo khi nộp đơn sau."
-        submitLabel="Đóng thu hồi"
-        submitVariant="danger"
-        onSubmit={closeRecall}
-      >
-        <Field label="Lý do" required>
-          <textarea rows={3} maxLength={1000} value={closeReason} onChange={(e) => setCloseReason(e.target.value)} required />
-        </Field>
-      </Dialog>
     </div>
   );
 }
