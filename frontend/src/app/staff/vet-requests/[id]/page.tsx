@@ -44,7 +44,7 @@ export default function VetRequestDetailPage() {
 
   function notify(res: VetRequestResult, message: string) {
     const extra = res.cancelledApplications > 0 ? ` Đã hủy ${res.cancelledApplications} đơn nhận nuôi.` : "";
-    toast.success(`${message} Thú hiện ${PET_STATUS[res.petStatus].label.toLowerCase()}.${extra}`);
+    toast.success(`${message} Thú hiện ở trạng thái ${PET_STATUS[res.petStatus].label.toLowerCase()}.${extra}`);
   }
 
   async function start() {
@@ -53,7 +53,7 @@ export default function VetRequestDetailPage() {
       notify(await mutate<VetRequestResult>(`/api/staff/vet-requests/${id}/start`), "Đã bắt đầu điều trị.");
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Không thực hiện được");
+      toast.error(e instanceof Error ? e.message : "Không thực hiện được thao tác.");
     } finally {
       setBusy(false);
     }
@@ -61,7 +61,7 @@ export default function VetRequestDetailPage() {
 
   async function complete() {
     const cost = Number(done.cost);
-    if (done.cost === "" || !(cost >= 0) || !Number.isInteger(cost)) throw new Error("Nhập tổng chi phí là số nguyên VND, không âm.");
+    if (done.cost === "" || !(cost >= 0) || !Number.isInteger(cost)) throw new Error("Tổng chi phí phải là số nguyên không âm (VND).");
     if (!healthOk) throw new Error("Chọn kết luận sức khỏe sau lần khám.");
     if (!filesValid(completeFiles)) throw new Error("Có tệp lớn hơn 5MB.");
     // Mục 5.2: multipart gồm phần "data" (JSON kết quả) và "files" (phiếu khám) trong cùng một yêu cầu
@@ -85,7 +85,7 @@ export default function VetRequestDetailPage() {
 
   async function cancel() {
     const cost = incurredCost.trim() === "" ? 0 : Number(incurredCost);
-    if (!Number.isInteger(cost) || cost < 0) throw new Error("Chi phí đã phát sinh phải là số không âm.");
+    if (!Number.isInteger(cost) || cost < 0) throw new Error("Chi phí đã phát sinh phải là số nguyên không âm.");
     const res = await mutate<VetRequestResult>(`/api/staff/vet-requests/${id}/cancel`, {
       body: { reason: reason.trim(), incurredCost: cost },
     });
@@ -212,7 +212,7 @@ export default function VetRequestDetailPage() {
           value={healthOk}
           onChange={setHealthOk}
           choices={[
-            { value: "yes", label: "Sức khỏe ổn", hint: "Đạt mục 1 của checklist nhận nuôi" },
+            { value: "yes", label: "Sức khỏe ổn", hint: "Đạt mục sức khỏe trong checklist nhận nuôi" },
             { value: "no", label: "Chưa ổn", hint: "Cần theo dõi hoặc tái khám" },
           ]}
         />
@@ -229,7 +229,7 @@ export default function VetRequestDetailPage() {
         <Field label="Lý do" required>
           <textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} required />
         </Field>
-        <Field label="Chi phí đã phát sinh (đồng)" hint="Để trống nếu chưa phát sinh. Số tiền này vẫn tính vào tổng chi phí điều trị.">
+        <Field label="Chi phí đã phát sinh (VND)" hint="Để trống nếu chưa phát sinh. Số tiền này vẫn tính vào tổng chi phí điều trị.">
           <input type="number" min={0} step={1000} inputMode="numeric" value={incurredCost} onChange={(e) => setIncurredCost(e.target.value)} />
         </Field>
       </Dialog>

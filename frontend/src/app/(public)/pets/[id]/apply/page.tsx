@@ -45,7 +45,7 @@ function ApplyForm() {
   if (!pet) {
     return (
       <Notice tone="error" title="Không mở được đơn" action={<Link href="/">Xem các bé khác</Link>}>
-        {loadError ?? "Bé này không còn mở nhận nuôi."}
+        {loadError ?? "Bé này hiện không còn nhận đơn nhận nuôi."}
       </Notice>
     );
   }
@@ -108,7 +108,7 @@ function ApplyForm() {
           <div className="stack">
             <Notice tone="info">
               Tài khoản của bạn chưa có {needPhone && needAddress ? "số điện thoại và địa chỉ" : needPhone ? "số điện thoại" : "địa chỉ"}.
-              Nhân viên cần thông tin này để liên hệ khi xét duyệt và hậu kiểm, hệ thống sẽ lưu lại cho lần sau.
+              Nhân viên cần thông tin này để liên hệ khi xét duyệt và hậu kiểm. Hệ thống sẽ lưu lại cho các lần nộp đơn sau.
             </Notice>
             {needPhone && (
               <Field label="Số điện thoại" required error={errors.phone}>

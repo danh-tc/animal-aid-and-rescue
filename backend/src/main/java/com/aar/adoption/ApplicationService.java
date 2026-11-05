@@ -211,7 +211,7 @@ public class ApplicationService {
         }
         if (app.getStatus() != ApplicationStatus.PENDING) {
             throw BusinessException.conflict("APPLICATION_NOT_PENDING",
-                "Đơn không còn ở trạng thái chờ xét duyệt (" + app.getStatus() + ")");
+                "Đơn không còn ở trạng thái Chờ xét duyệt");
         }
         transition(app, "APPROVED", by, blankToNull(note));
         app.recordReview(blankToNull(note), by);

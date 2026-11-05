@@ -46,7 +46,7 @@ export function VetTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => vo
   return (
     <Panel
       title="Yêu cầu thú y"
-      description="Mở yêu cầu thì thú chuyển sang Đang điều trị. Đóng yêu cầu cuối cùng thì thú về Đang chăm sóc."
+      description="Khi tạo yêu cầu, thú chuyển sang Đang điều trị. Khi yêu cầu cuối cùng đóng lại, thú về Đang chăm sóc."
       actions={
         canCreate && (
           <Button size="sm" icon={<Plus aria-hidden="true" />} onClick={() => setOpen(true)}>
@@ -80,7 +80,7 @@ export function VetTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => vo
       <Dialog open={open} onClose={() => setOpen(false)} title="Tạo yêu cầu thú y" submitLabel="Tạo yêu cầu" onSubmit={create}>
         {warnApplications && (
           <Notice tone="warning">
-            Thú đang mở nhận nuôi. Tạo yêu cầu thú y sẽ chuyển thú sang Đang điều trị và hủy các đơn đang chờ hoặc đã duyệt.
+            Thú đang được mở cho nhận nuôi. Tạo yêu cầu thú y sẽ chuyển thú sang Đang điều trị và hủy các đơn đang chờ hoặc đã duyệt.
           </Notice>
         )}
         <Field label="Cơ sở thú y" required>
@@ -106,7 +106,7 @@ export function VetTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => vo
               ))}
             </select>
           </Field>
-          <Field label="Hình thức" required hint="Nội trú: vị trí của thú đổi thành cơ sở thú y.">
+          <Field label="Hình thức" required hint="Nếu chọn nội trú, vị trí hiện tại của thú sẽ đổi thành cơ sở thú y.">
             <select value={form.careMode} onChange={(e) => setForm({ ...form, careMode: e.target.value as CareMode })}>
               <option value="OUTPATIENT">{CARE_MODE.OUTPATIENT}</option>
               <option value="INPATIENT">{CARE_MODE.INPATIENT}</option>

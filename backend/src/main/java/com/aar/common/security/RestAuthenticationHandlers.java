@@ -26,7 +26,7 @@ public class RestAuthenticationHandlers implements AuthenticationEntryPoint, Acc
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex)
             throws IOException {
-        write(response, HttpStatus.UNAUTHORIZED, ApiError.of("UNAUTHORIZED", "Cần đăng nhập"));
+        write(response, HttpStatus.UNAUTHORIZED, ApiError.of("UNAUTHORIZED", "Bạn cần đăng nhập để tiếp tục"));
     }
 
     @Override

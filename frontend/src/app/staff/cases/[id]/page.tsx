@@ -205,7 +205,7 @@ export default function CaseDetailPage() {
       <Dialog
         open={dialog === "fail"}
         onClose={() => setDialog(null)}
-        title="Ghi nhận cứu thất bại"
+        title="Ghi nhận ca cứu hộ thất bại"
         submitLabel="Xác nhận"
         submitVariant="danger"
         onSubmit={fail}
@@ -219,7 +219,7 @@ export default function CaseDetailPage() {
         open={dialog === "succeed"}
         onClose={() => setDialog(null)}
         title="Cứu thành công"
-        description="Tạo lượt tiếp nhận cho thú, thú vào khu cách ly."
+        description="Hệ thống tạo lượt tiếp nhận và đưa thú vào khu cách ly."
         submitLabel={kind === "lost" ? "Ghi nhận tìm lại" : "Tạo hồ sơ"}
         onSubmit={succeed}
         size="lg"

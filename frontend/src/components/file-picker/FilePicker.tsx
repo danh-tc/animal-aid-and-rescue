@@ -77,7 +77,7 @@ export function FilePicker({
       )}
       {tooBig.length > 0 && (
         <p className="file-picker__error" role="alert">
-          Có tệp lớn hơn 5MB, hãy bỏ tệp đó hoặc chọn ảnh nhỏ hơn.
+          Có tệp lớn hơn 5MB, hãy bỏ tệp đó hoặc chọn tệp nhỏ hơn.
         </p>
       )}
     </div>

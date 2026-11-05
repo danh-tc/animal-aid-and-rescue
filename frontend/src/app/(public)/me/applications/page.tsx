@@ -111,7 +111,7 @@ export default function MyApplicationsPage() {
         title="Hủy đơn nhận nuôi?"
         description={
           cancelling?.status === "APPROVED"
-            ? "Đơn đã được duyệt. Hủy đơn thì bé sẽ mở lại cho người khác nhận nuôi."
+            ? "Đơn đã được duyệt. Nếu hủy, bé sẽ được mở lại cho người khác nhận nuôi."
             : "Bạn có thể nộp lại đơn sau nếu bé vẫn chờ nhận nuôi."
         }
         submitLabel="Hủy đơn"

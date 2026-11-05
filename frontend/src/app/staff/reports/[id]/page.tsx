@@ -53,7 +53,7 @@ export default function ReportDetailPage() {
 
   async function createCases() {
     const n = Number.parseInt(count, 10);
-    if (!(n >= 1 && n <= 20)) throw new Error("Số thú từ 1 đến 20");
+    if (!(n >= 1 && n <= 20)) throw new Error("Số con vật phải từ 1 đến 20.");
     const created = await mutate<CaseSummary[]>(`/api/staff/rescue-reports/${id}/cases`, {
       body: { numberOfAnimals: n, assignedStaffId: isManager && assignee ? Number(assignee) : null },
     });
@@ -147,7 +147,7 @@ export default function ReportDetailPage() {
               description={
                 r.openCases.length === 0
                   ? "Không có ca nào đang mở."
-                  : "Kiểm tra trùng trước khi tạo ca mới. Trùng thì gộp vào ca có sẵn."
+                  : "Đối chiếu trước khi tạo ca mới. Nếu trùng, gộp báo cáo vào ca đã có."
               }
             >
               <ul className="detail-page__links">
@@ -187,7 +187,7 @@ export default function ReportDetailPage() {
         open={dialog === "cases"}
         onClose={() => setDialog(null)}
         title="Tạo ca cứu hộ"
-        description="Mỗi con vật một ca. Báo cáo có nhiều con thì tạo nhiều ca cùng lúc."
+        description="Mỗi con vật là một ca. Báo cáo có nhiều con thì nhập số con để tạo nhiều ca cùng lúc."
         submitLabel="Tạo ca"
         onSubmit={createCases}
       >

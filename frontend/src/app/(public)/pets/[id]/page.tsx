@@ -95,7 +95,7 @@ export default async function PetDetailPage({ params }: Props) {
               </li>
               <li>
                 <ShieldCheck aria-hidden="true" />
-                Đã qua thời gian cách ly, tính cách hiền
+                Đã hết thời gian cách ly, tính cách hiền lành
               </li>
               <li>
                 <ShieldCheck aria-hidden="true" />

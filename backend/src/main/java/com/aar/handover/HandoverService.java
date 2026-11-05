@@ -136,7 +136,7 @@ public class HandoverService {
         Handover handover = handovers.findById(followUp.getHandoverId()).orElseThrow();
         petLifecycle.lock(handover.getPetId());
         if (followUp.getStatus() != FollowUpStatus.SCHEDULED) {
-            throw BusinessException.conflict("FOLLOW_UP_NOT_SCHEDULED", "Lần hậu kiểm này đã được ghi hoặc đã hủy");
+            throw BusinessException.conflict("FOLLOW_UP_NOT_SCHEDULED", "Lần hậu kiểm này đã có kết quả hoặc đã bị hủy");
         }
         if (handover.getStatus() != HandoverStatus.IN_PROGRESS) {
             throw BusinessException.conflict("FOLLOW_UP_CLOSED", "Bàn giao không còn trong thời gian hậu kiểm");
@@ -201,7 +201,7 @@ public class HandoverService {
         if (OffsetDateTime.now().isBefore(allowedAt)) {
             long left = Math.max(1, java.time.Duration.between(OffsetDateTime.now(), allowedAt).toDays() + 1);
             throw BusinessException.conflict("RECALL_CLOSE_TOO_EARLY",
-                "Chỉ được đóng thu hồi sau " + days + " ngày ở Chờ thu hồi, còn khoảng " + left + " ngày");
+                "Chỉ đóng thu hồi được sau " + days + " ngày kể từ lần hậu kiểm Không đạt, còn khoảng " + left + " ngày nữa");
         }
         transition(handover, "RECALL_CLOSED", by.id(), reason.trim());
         return view(handover);

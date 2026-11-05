@@ -22,7 +22,7 @@ const STEPS = [
   { icon: Search, title: "Chọn bé phù hợp", text: "Xem hồ sơ, ảnh và tính cách của các bé đã sẵn sàng." },
   { icon: ClipboardCheck, title: "Nộp đơn nhận nuôi", text: "Điền thông tin chỗ ở và kinh nghiệm nuôi thú cưng." },
   { icon: HeartHandshake, title: "Duyệt và bàn giao", text: "Nhân viên liên hệ, xét duyệt và hẹn ngày đón bé về." },
-  { icon: HousePlus, title: "Đồng hành sau nhận nuôi", text: "Trung tâm hậu kiểm để chắc bé được chăm sóc tốt." },
+  { icon: HousePlus, title: "Đồng hành sau nhận nuôi", text: "Trung tâm theo dõi sau bàn giao để chắc chắn bé được chăm sóc tốt." },
 ];
 
 interface HomeProps {
@@ -83,15 +83,15 @@ export default async function HomePage({ searchParams }: HomeProps) {
             <ul className="hero__facts">
               <li className="hero__fact">
                 <Stethoscope aria-hidden="true" />
-                <span>Khám thú y, tiêm phòng và tẩy giun trước khi mở nhận nuôi</span>
+                <span>Khám thú y, tiêm phòng và tẩy giun trước khi cho nhận nuôi</span>
               </li>
               <li className="hero__fact">
                 <ShieldCheck aria-hidden="true" />
-                <span>Kiểm tra 6 tiêu chí sức khỏe và tính cách</span>
+                <span>Đánh giá đủ 6 điều kiện về sức khỏe, tuổi và tính cách</span>
               </li>
               <li className="hero__fact">
                 <HousePlus aria-hidden="true" />
-                <span>Hậu kiểm sau bàn giao để bé được an toàn</span>
+                <span>Thăm hỏi định kỳ sau khi bé về nhà mới</span>
               </li>
             </ul>
           </aside>

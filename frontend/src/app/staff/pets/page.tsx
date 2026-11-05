@@ -21,9 +21,9 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "IN_TREATMENT", label: "Đang điều trị" },
   { value: "AVAILABLE", label: "Sẵn sàng" },
   { value: "PENDING_HANDOVER", label: "Chờ bàn giao" },
-  { value: "ADOPTED", label: "Đã có chủ" },
+  { value: "ADOPTED", label: "Đã nhận nuôi" },
   { value: "LOST", label: "Thất lạc" },
-  { value: "DECEASED", label: "Đã mất" },
+  { value: "DECEASED", label: "Qua đời" },
 ];
 
 /** S04: Danh sách thú, lọc theo trạng thái, loài, tìm theo tên hoặc mã */

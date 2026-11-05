@@ -68,7 +68,7 @@ public class EndEventService {
         EndEventType type = req.eventType();
         String detail = blankToNull(req.detail());
         if (type == EndEventType.LOST && detail == null) {
-            throw BusinessException.badRequest("DETAIL_REQUIRED", "Thất lạc phải ghi nơi và hoàn cảnh mất");
+            throw BusinessException.badRequest("DETAIL_REQUIRED", "Thất lạc phải ghi nơi và hoàn cảnh thú bị thất lạc");
         }
 
         Optional<Handover> activeHandover = Optional.empty();
@@ -76,7 +76,7 @@ public class EndEventService {
             activeHandover = handovers.findFirstByPetIdAndStatusInOrderByHandedOverAtDesc(petId, FOLLOW_UP_PERIOD);
             if (activeHandover.isEmpty()) {
                 throw BusinessException.conflict("FOLLOW_UP_PERIOD_ENDED",
-                    "Chỉ ghi nhận khi thú còn trong thời gian hậu kiểm (QĐ-16)");
+                    "Thú đã nhận nuôi chỉ ghi nhận được khi còn trong thời gian hậu kiểm");
             }
         }
 

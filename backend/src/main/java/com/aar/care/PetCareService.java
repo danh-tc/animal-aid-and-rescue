@@ -100,7 +100,7 @@ public class PetCareService {
             PetArea old = pet.getArea();
             pet.changeArea(req.area());
             careLogs.save(new CareLog(petId, by, CareActivity.AREA_CHANGE, null,
-                "Chuyển khu vực " + (old == null ? "-" : old) + " => " + req.area()));
+                "Chuyển từ " + areaName(old) + " sang " + areaName(req.area())));
         }
         if (req.currentLocation() != null) {
             pet.changeLocation(blankToNull(req.currentLocation()));
@@ -119,10 +119,10 @@ public class PetCareService {
         Pet pet = find(petId);
         requireAtCenter(pet);
         if (req.activityType() == CareActivity.WEIGHT && req.weightKg() == null) {
-            throw BusinessException.badRequest("WEIGHT_REQUIRED", "Ghi cân nặng phải có số kg");
+            throw BusinessException.badRequest("WEIGHT_REQUIRED", "Hoạt động Cân nặng phải nhập số kg");
         }
         if (req.activityType() == CareActivity.AREA_CHANGE) {
-            throw BusinessException.badRequest("USE_PET_UPDATE", "Đổi khu vực qua cập nhật hồ sơ thú, hệ thống tự ghi nhật ký");
+            throw BusinessException.badRequest("USE_PET_UPDATE", "Đổi khu ở phần Sửa thông tin thú, hệ thống sẽ tự ghi nhật ký");
         }
         return CareLogView.of(careLogs.save(new CareLog(petId, by, req.activityType(),
             req.activityType() == CareActivity.WEIGHT ? req.weightKg() : null, blankToNull(req.note()))));
@@ -173,6 +173,11 @@ public class PetCareService {
             .map(h -> new HistoryView(h.getFromStatus(), h.getToStatus(), h.getEvent(), h.getNote(),
                 h.getChangedBy(), h.getChangedAt()))
             .toList();
+    }
+
+    private static String areaName(PetArea area) {
+        if (area == null) return "chưa xếp khu";
+        return area == PetArea.QUARANTINE ? "khu cách ly" : "khu chung";
     }
 
     private void requireAtCenter(Pet pet) {

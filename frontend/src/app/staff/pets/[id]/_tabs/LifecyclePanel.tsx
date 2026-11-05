@@ -32,11 +32,11 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
 
   async function record() {
     if (!type) throw new Error("Chọn loại sự kiện.");
-    if (type === "LOST" && !form.detail.trim()) throw new Error("Ghi nơi và hoàn cảnh mất.");
+    if (type === "LOST" && !form.detail.trim()) throw new Error("Ghi nơi và hoàn cảnh thú bị thất lạc.");
     const incurredCosts = openVet.map((v) => {
       const raw = (costs[v.id] ?? "").trim();
       const amount = raw === "" ? 0 : Number(raw);
-      if (!Number.isInteger(amount) || amount < 0) throw new Error(`Chi phí của yêu cầu #${v.id} phải là số không âm.`);
+      if (!Number.isInteger(amount) || amount < 0) throw new Error(`Chi phí của yêu cầu #${v.id} phải là số nguyên không âm.`);
       return { vetRequestId: v.id, amount };
     });
     const res = await mutate<EndEventResult>(`/api/staff/pets/${pet.id}/end-events`, {
@@ -107,7 +107,7 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
               được tính vào tổng chi phí điều trị của thú.
             </Notice>
             {openVet.map((v) => (
-              <Field key={v.id} label={`Chi phí đã phát sinh, yêu cầu #${v.id} ${v.clinicName} (đồng)`}>
+              <Field key={v.id} label={`Chi phí đã phát sinh, yêu cầu #${v.id} ${v.clinicName} (VND)`}>
                 <input
                   type="number"
                   min={0}
@@ -122,7 +122,7 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
         )}
         {adopted && (
           <Notice tone="info">
-            Thú đã nhận nuôi chỉ ghi được khi còn trong thời gian hậu kiểm. Lịch hậu kiểm còn lại sẽ bị hủy.
+            Với thú đã được nhận nuôi, chỉ ghi được sự kiện khi còn trong thời gian hậu kiểm. Các lịch hậu kiểm còn lại sẽ bị hủy.
           </Notice>
         )}
         <ChoiceGroup
@@ -135,10 +135,10 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
             { value: "LOST", label: "Thất lạc", hint: "Tìm lại được thì tạo lượt tiếp nhận mới" },
           ]}
         />
-        <Field label="Thời điểm" hint="Để trống nếu là bây giờ.">
+        <Field label="Thời điểm" hint="Để trống nếu là thời điểm hiện tại.">
           <input type="datetime-local" value={form.occurredAt} onChange={(e) => setForm({ ...form, occurredAt: e.target.value })} />
         </Field>
-        <Field label={type === "LOST" ? "Nơi và hoàn cảnh mất" : "Chi tiết"} required={type === "LOST"}>
+        <Field label={type === "LOST" ? "Nơi và hoàn cảnh thất lạc" : "Chi tiết"} required={type === "LOST"}>
           <textarea rows={3} maxLength={2000} value={form.detail} onChange={(e) => setForm({ ...form, detail: e.target.value })} />
         </Field>
       </Dialog>
@@ -147,11 +147,11 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
         open={open === "found"}
         onClose={() => setOpen(null)}
         title="Tìm lại thú thất lạc"
-        description="Tạo lượt tiếp nhận mới trên hồ sơ cũ. Thú vào khu cách ly, trạng thái Đang chăm sóc."
+        description="Tạo lượt tiếp nhận mới trên hồ sơ cũ. Thú vào khu cách ly với trạng thái Đang chăm sóc."
         submitLabel="Tiếp nhận"
         onSubmit={markFound}
       >
-        <Field label="Lý do, nơi tìm thấy" required>
+        <Field label="Nơi và hoàn cảnh tìm thấy" required>
           <textarea rows={3} maxLength={1000} value={found.reason} onChange={(e) => setFound({ ...found, reason: e.target.value })} required />
         </Field>
         <Field label="Mức ưu tiên" required>

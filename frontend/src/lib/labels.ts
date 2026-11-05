@@ -37,7 +37,7 @@ export const HOUSING: Record<HousingType, string> = { HOUSE: "Nhà riêng", APAR
 export const CARE_MODE: Record<CareMode, string> = { OUTPATIENT: "Khám ngoại trú", INPATIENT: "Nội trú tại cơ sở" };
 export const INTAKE_SOURCE: Record<IntakeSource, string> = {
   RESCUE: "Cứu hộ",
-  RETURN: "Trả lại / thu hồi",
+  RETURN: "Trả lại hoặc thu hồi",
   FOUND: "Tìm lại sau thất lạc",
 };
 export const CARE_ACTIVITY: Record<CareActivity, string> = {
@@ -71,8 +71,8 @@ export const PET_STATUS: Record<PetStatus, Labeled> = {
   IN_TREATMENT: { label: "Đang điều trị", tone: "warning" },
   AVAILABLE: { label: "Sẵn sàng nhận nuôi", tone: "success" },
   PENDING_HANDOVER: { label: "Chờ bàn giao", tone: "accent" },
-  ADOPTED: { label: "Đã có chủ", tone: "primary" },
-  DECEASED: { label: "Đã mất", tone: "neutral" },
+  ADOPTED: { label: "Đã nhận nuôi", tone: "primary" },
+  DECEASED: { label: "Qua đời", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "neutral" },
 };
 
@@ -98,7 +98,7 @@ export const VET_STATUS: Record<VetRequestStatus, Labeled> = {
 };
 
 export const APPLICATION_STATUS: Record<ApplicationStatus, Labeled> = {
-  PENDING: { label: "Chờ duyệt", tone: "accent" },
+  PENDING: { label: "Chờ xét duyệt", tone: "accent" },
   APPROVED: { label: "Đã duyệt", tone: "success" },
   REJECTED: { label: "Từ chối", tone: "danger" },
   CANCELLED: { label: "Đã hủy", tone: "neutral" },
@@ -136,8 +136,8 @@ export const PET_EVENT: Record<string, string> = {
   HANDOVER_CANCELLED: "Hủy bàn giao",
   HANDED_OVER: "Bàn giao cho chủ nuôi",
   RETURNED: "Nhận lại thú",
-  FOUND: "Tìm thấy",
-  DECEASED: "Đã mất",
+  FOUND: "Tìm lại sau thất lạc",
+  DECEASED: "Qua đời",
   LOST: "Thất lạc",
 };
 

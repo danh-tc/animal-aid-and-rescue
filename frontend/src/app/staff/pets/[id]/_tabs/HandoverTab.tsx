@@ -48,7 +48,7 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
     <div className="stack stack--lg">
       {current?.status === "RECALL_PENDING" && (
         <Notice tone="warning" title="Hậu kiểm không đạt, đang chờ thu hồi">
-          Liên hệ chủ nuôi để thu hồi rồi bấm Tiếp nhận trả lại. Quá thời gian chờ vẫn không thu hồi được thì Quản lý đóng thu hồi ở màn hình Hậu kiểm.
+          Liên hệ chủ nuôi để thu hồi thú rồi bấm Tiếp nhận trả lại. Nếu quá thời gian chờ mà vẫn không thu hồi được, Quản lý đóng thu hồi ở màn hình Hậu kiểm.
         </Notice>
       )}
       <Panel
@@ -108,7 +108,7 @@ export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () 
         open={open}
         onClose={() => setOpen(false)}
         title="Tiếp nhận thú trả lại"
-        description="Thú quay về trung tâm ở khu cách ly. Các lịch hậu kiểm còn lại sẽ bị hủy."
+        description="Thú quay về trung tâm và vào khu cách ly. Các lịch hậu kiểm còn lại sẽ bị hủy."
         submitLabel="Tiếp nhận"
         onSubmit={submitReturn}
       >

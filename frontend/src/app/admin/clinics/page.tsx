@@ -60,7 +60,7 @@ export default function ClinicsPage() {
           { key: "name", header: "Tên", render: (c) => c.name },
           { key: "address", header: "Địa chỉ", render: (c) => c.address ?? "—" },
           { key: "phone", header: "Điện thoại", render: (c) => c.phone ?? "—" },
-          { key: "active", header: "Trạng thái", render: (c) => (c.active ? <Badge tone="success">Đang hợp tác</Badge> : <Badge tone="neutral">Ngừng</Badge>) },
+          { key: "active", header: "Trạng thái", render: (c) => (c.active ? <Badge tone="success">Đang hợp tác</Badge> : <Badge tone="neutral">Ngừng hợp tác</Badge>) },
           {
             key: "actions",
             header: "Thao tác",

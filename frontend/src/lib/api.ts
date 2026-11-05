@@ -24,7 +24,7 @@ function messageForStatus(status: number): string {
   if (status === 403) return "Bạn không có quyền thực hiện thao tác này";
   if (status === 404) return "Không tìm thấy dữ liệu";
   if (status >= 500) return "Máy chủ đang gặp sự cố, vui lòng thử lại sau";
-  return `Yêu cầu thất bại (${status})`;
+  return `Không thực hiện được yêu cầu (mã lỗi ${status})`;
 }
 
 /** Lỗi hiển thị cho người dùng, kể cả khi không kết nối được máy chủ. */

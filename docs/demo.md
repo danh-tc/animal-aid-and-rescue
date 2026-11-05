@@ -54,7 +54,7 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 | Na (mèo xám) | Đã nhận nuôi, hậu kiểm Không đạt 35 ngày trước, chờ thu hồi | Kịch bản 4, đóng thu hồi (QĐ-18) |
 | Lu (chó nâu) | Đang chăm sóc sau khi Thu Hà trả lại | Cảnh báo ở đơn của Thu Hà |
 | Mướp (mèo vằn) | Sẵn sàng | Phần bổ sung |
-| Tí (mèo tam thể) | Đã mất | Trạng thái kết thúc, hồ sơ vẫn giữ |
+| Tí (mèo tam thể) | Qua đời | Trạng thái kết thúc, hồ sơ vẫn giữ |
 
 ## Kịch bản 1. Cứu hộ (UC-07)
 

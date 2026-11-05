@@ -21,7 +21,7 @@ export default function ParametersPage() {
     <>
       <PageHeader
         title="Tham số hệ thống"
-        description="Ngưỡng dùng trong checklist, hậu kiểm và giới hạn báo cáo. Giá trị là số nguyên dương."
+        description="Các ngưỡng dùng cho checklist nhận nuôi, hậu kiểm và giới hạn báo cáo cứu hộ. Giá trị là số nguyên dương."
       />
       {error && <Notice tone="error">{error}</Notice>}
       {loading && !data && <Skeleton card lines={6} />}

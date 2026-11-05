@@ -56,7 +56,7 @@ public class VetRequestService {
         Pet pet = petLifecycle.lock(petId);
         if (!pet.getStatus().atCenter()) {
             throw BusinessException.conflict("PET_NOT_AT_CENTER",
-                "Chỉ tạo yêu cầu thú y cho thú đang ở trung tâm (trạng thái hiện tại: " + pet.getStatus() + ")");
+                "Chỉ tạo yêu cầu thú y cho thú đang ở trung tâm");
         }
         VetClinic clinic = clinics.findById(req.clinicId()).filter(VetClinic::isActive)
             .orElseThrow(() -> BusinessException.badRequest("INVALID_CLINIC", "Cơ sở thú y không tồn tại hoặc đã ngừng hợp tác"));

@@ -82,7 +82,7 @@ export default function FollowUpsPage() {
   // QĐ-12: nhân viên tự chọn kết quả. Lần bổ sung chỉ được Đạt hoặc Không đạt, thay cho kết quả của lần gốc.
   const isAdditional = target?.followUp.additional ?? false;
   const resultChoices: { value: FollowUpResult; label: string; hint?: string }[] = [
-    { value: "PASS", label: "Đạt", hint: "Đạt cả 5 tiêu chí" },
+    { value: "PASS", label: "Đạt", hint: "Bé ổn, không cần theo dõi thêm" },
     ...(isAdditional ? [] : [{ value: "WATCH" as const, label: "Cần theo dõi", hint: "Thêm một lần hậu kiểm bổ sung" }]),
     { value: "FAIL", label: "Không đạt", hint: "Chuyển sang chờ thu hồi" },
   ];
@@ -91,7 +91,7 @@ export default function FollowUpsPage() {
     if (!target) return;
     if (!result) throw new Error("Chọn kết quả hậu kiểm.");
     if (!resultChoices.some((c) => c.value === result)) throw new Error("Kết quả đã chọn không còn hợp lệ, hãy chọn lại.");
-    if (result !== "PASS" && !reason.trim()) throw new Error("Cần theo dõi hoặc Không đạt phải ghi lý do.");
+    if (result !== "PASS" && !reason.trim()) throw new Error("Chọn Cần theo dõi hoặc Không đạt thì phải ghi nhận xét.");
     if (!filesValid(files)) throw new Error("Có tệp lớn hơn 5MB.");
     const id = target.followUp.id;
     // Mục 5.2: multipart gồm phần "data" (5 tiêu chí, kết quả, lý do) và "photos" (ảnh hậu kiểm)
@@ -215,7 +215,7 @@ export default function FollowUpsPage() {
         />
         {isAdditional && (
           <p className="form-field__hint">
-            Đây là lần bổ sung: chỉ chọn Đạt hoặc Không đạt. Vẫn không liên lạc được chủ nuôi thì chọn Không đạt.
+            Đây là lần hậu kiểm bổ sung nên chỉ chọn Đạt hoặc Không đạt. Nếu vẫn không liên lạc được chủ nuôi, chọn Không đạt.
           </p>
         )}
         <Field label="Nhận xét" required={result === "WATCH" || result === "FAIL"} hint="Bắt buộc khi Cần theo dõi hoặc Không đạt.">
@@ -252,7 +252,7 @@ function RecallPanel() {
   }
 
   return (
-    <Panel title="Bàn giao chờ thu hồi" description="Hậu kiểm Không đạt. Liên hệ chủ nuôi để thu hồi, quá thời gian chờ thì Quản lý đóng thu hồi." flush>
+    <Panel title="Bàn giao chờ thu hồi" description="Các bàn giao có hậu kiểm Không đạt. Liên hệ chủ nuôi để thu hồi thú, nếu quá thời gian chờ vẫn không thu hồi được thì Quản lý đóng thu hồi." flush>
       {error && <Notice tone="error">{error}</Notice>}
       {data && data.recallPending.length === 0 && <EmptyState icon={ClipboardCheck} title="Không có bàn giao chờ thu hồi" />}
       {data && data.recallPending.length > 0 && (
@@ -267,7 +267,7 @@ function RecallPanel() {
               render: (r) => <Link href={`/staff/pets/${r.petId}?tab=handovers`}>{petName(r.petName, r.petCode)}</Link>,
             },
             { key: "owner", header: "Chủ nuôi", render: (r) => `${r.ownerName}${r.ownerPhone ? ` · ${r.ownerPhone}` : ""}` },
-            { key: "failed", header: "Không đạt ngày", render: (r) => (r.failedAt ? formatDate(r.failedAt) : "—"), hideOnMobile: true },
+            { key: "failed", header: "Ngày Không đạt", render: (r) => (r.failedAt ? formatDate(r.failedAt) : "—"), hideOnMobile: true },
             {
               key: "action",
               header: "Đóng thu hồi",
@@ -285,7 +285,7 @@ function RecallPanel() {
                     Đóng thu hồi
                   </Button>
                 ) : (
-                  `Từ ${r.closableFrom ? formatDate(r.closableFrom) : "—"}`
+                  `Đóng được từ ${r.closableFrom ? formatDate(r.closableFrom) : "—"}`
                 );
               },
             },
@@ -296,7 +296,7 @@ function RecallPanel() {
         open={target !== null}
         onClose={() => setTarget(null)}
         title="Đóng thu hồi?"
-        description="Bàn giao chuyển Đã đóng, thú giữ Đã nhận nuôi. Người nhận nuôi được cảnh báo khi nộp đơn sau."
+        description="Bàn giao chuyển sang Đã đóng, thú vẫn ở trạng thái Đã nhận nuôi. Nếu người này nộp đơn sau, nhân viên sẽ thấy cảnh báo."
         submitLabel="Đóng thu hồi"
         submitVariant="danger"
         onSubmit={closeRecall}

@@ -74,7 +74,7 @@ public class RescueReportService {
         long recent = reports.countByReporterPhoneAndCreatedAtAfter(req.reporterPhone(), OffsetDateTime.now().minusHours(1));
         if (recent >= limit) {
             throw BusinessException.tooManyRequests("RATE_LIMITED",
-                "Số điện thoại này đã gửi " + limit + " báo cáo trong một giờ, vui lòng thử lại sau");
+                "Số điện thoại này đã gửi " + limit + " báo cáo trong 1 giờ qua, vui lòng thử lại sau");
         }
         ReportStatus initial = ReportStatus.valueOf(state.initialStatus(EntityType.RESCUE_REPORT, "SUBMITTED"));
         RescueReport report = reports.save(new RescueReport(uniqueCode(), req.reporterName().trim(),

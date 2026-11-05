@@ -14,7 +14,7 @@ import type { ApplicationStatus, ApplicationView, PageResponse } from "@/types/a
 
 type Filter = ApplicationStatus | "ALL";
 const OPTIONS: { value: Filter; label: string }[] = [
-  { value: "PENDING", label: "Chờ duyệt" },
+  { value: "PENDING", label: "Chờ xét duyệt" },
   { value: "APPROVED", label: "Đã duyệt, chờ bàn giao" },
   { value: "HANDED_OVER", label: "Đã bàn giao" },
   { value: "REJECTED", label: "Từ chối" },

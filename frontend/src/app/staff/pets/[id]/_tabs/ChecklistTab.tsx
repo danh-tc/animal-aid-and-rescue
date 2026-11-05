@@ -50,7 +50,7 @@ export function ChecklistTab({ pet, onChanged }: { pet: PetDetail; onChanged: ()
           description={
             pet.eligibilityCheckedAt
               ? `Kiểm tra lần cuối ${formatDateTime(pet.eligibilityCheckedAt)}`
-              : "Đủ 6 mục thì thú tự chuyển sang Sẵn sàng nhận nuôi."
+              : "Khi đạt đủ 6 mục, thú tự chuyển sang Sẵn sàng nhận nuôi."
           }
         >
           {pet.checklist.allPassed && pet.status === "AVAILABLE" && (
@@ -75,7 +75,7 @@ export function ChecklistTab({ pet, onChanged }: { pet: PetDetail; onChanged: ()
             <CheckField label="Đã tẩy giun, ký sinh trùng" checked={form.dewormed} disabled={!editable} onChange={(v) => setForm({ ...form, dewormed: v })} />
             <CheckField
               label="Đã triệt sản"
-              hint="Chưa đủ tuổi triệt sản thì mục này vẫn đạt."
+              hint="Nếu thú chưa đủ tuổi triệt sản, mục này vẫn được tính là đạt."
               checked={form.sterilized}
               disabled={!editable}
               onChange={(v) => setForm({ ...form, sterilized: v })}

@@ -39,15 +39,15 @@ export default function StaffDashboardPage() {
       {s && s.overdueUnassignedCases > 0 && (
         <Notice
           tone="warning"
-          title={`${s.overdueUnassignedCases} ca cứu hộ chưa được phân công quá hạn`}
+          title={`${s.overdueUnassignedCases} ca cứu hộ quá hạn mà chưa được phân công`}
           action={<Link href="/staff/cases?status=NEW">Xem ca</Link>}
         >
-          {user?.role === "MANAGER" ? "Hãy phân công người đi cứu." : "Chỉ Quản lý phân công được, hãy báo Quản lý."}
+          {user?.role === "MANAGER" ? "Hãy phân công người đi cứu." : "Chỉ Quản lý mới phân công được, hãy báo cho Quản lý."}
         </Notice>
       )}
       {s && s.recallPending > 0 && (
         <Notice tone="warning" title={`${s.recallPending} bàn giao đang chờ thu hồi`}>
-          Liên hệ chủ nuôi để thu hồi thú. Danh sách ở báo cáo ngoại lệ của Quản lý và tab Bàn giao trong hồ sơ thú.
+          Liên hệ chủ nuôi để thu hồi thú. Xem ở tab Bàn giao trong hồ sơ thú. Quản lý xem danh sách đầy đủ ở màn hình Hậu kiểm.
         </Notice>
       )}
 
@@ -69,7 +69,7 @@ export default function StaffDashboardPage() {
           tone="warning"
         />
         <StatCard
-          label="Yêu cầu thú y mở"
+          label="Yêu cầu thú y đang mở"
           value={s?.openVetRequests ?? null}
           href="/staff/vet-requests"
           icon={Stethoscope}
@@ -107,7 +107,7 @@ export default function StaffDashboardPage() {
                     {petName(a.pet.name, a.pet.code)} <StatusBadge map={APPLICATION_STATUS} value={a.status} />
                   </span>
                   <span className="dashboard__item-text">{a.applicant.fullName}</span>
-                  <span className="dashboard__item-meta">Nộp {formatDateTime(a.submittedAt)}</span>
+                  <span className="dashboard__item-meta">Nộp lúc {formatDateTime(a.submittedAt)}</span>
                 </Link>
               </li>
             ))}

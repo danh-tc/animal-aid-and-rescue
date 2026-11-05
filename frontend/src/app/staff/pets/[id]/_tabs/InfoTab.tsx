@@ -119,7 +119,7 @@ export function InfoTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => v
           <Field label="Màu lông">
             <input maxLength={100} value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
           </Field>
-          <Field label="Khu" hint="Đổi khu sẽ tự ghi vào nhật ký chăm sóc.">
+          <Field label="Khu" hint="Khi đổi khu, hệ thống tự ghi vào nhật ký chăm sóc.">
             <select value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value as PetArea })}>
               <option value="QUARANTINE">Khu cách ly</option>
               <option value="GENERAL">Khu chung</option>
