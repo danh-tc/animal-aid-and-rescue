@@ -114,6 +114,12 @@ public final class CareDtos {
         @NotNull Boolean healthOk) {
     }
 
+    /** Ngoại lệ S-2a của UC-09: hủy yêu cầu, ghi lý do và chi phí đã phát sinh (QĐ-14, mặc định 0). */
+    public record VetRequestCancel(
+        @NotBlank @Size(max = 1000) String reason,
+        @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal incurredCost) {
+    }
+
     public record VetRequestView(Long id, Long petId, Long clinicId, String clinicName, String reason,
                                  Priority priority, CareMode careMode, VetRequestStatus status,
                                  String diagnosisSummary, String treatmentSummary, BigDecimal totalCost,

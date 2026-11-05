@@ -36,6 +36,20 @@ export default function StaffDashboardPage() {
     <div className="dashboard">
       <PageHeader title={`Xin chào, ${user?.fullName ?? ""}`} description="Những việc cần xử lý hôm nay." />
       {stats.error && <Notice tone="error">{stats.error}</Notice>}
+      {s && s.overdueUnassignedCases > 0 && (
+        <Notice
+          tone="warning"
+          title={`${s.overdueUnassignedCases} ca cứu hộ chưa được phân công quá hạn`}
+          action={<Link href="/staff/cases?status=NEW">Xem ca</Link>}
+        >
+          {user?.role === "MANAGER" ? "Hãy phân công người đi cứu." : "Chỉ Quản lý phân công được, hãy báo Quản lý."}
+        </Notice>
+      )}
+      {s && s.recallPending > 0 && (
+        <Notice tone="warning" title={`${s.recallPending} bàn giao đang chờ thu hồi`}>
+          Liên hệ chủ nuôi để thu hồi thú. Danh sách ở báo cáo ngoại lệ của Quản lý và tab Bàn giao trong hồ sơ thú.
+        </Notice>
+      )}
 
       <div className="dashboard__stats">
         <StatCard label="Báo cáo mới" value={s?.newReports ?? null} href="/staff/reports?status=NEW" icon={FileText} tone="accent" />

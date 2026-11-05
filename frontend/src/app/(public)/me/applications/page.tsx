@@ -76,7 +76,6 @@ export default function MyApplicationsPage() {
               </div>
               <p className="my-applications__detail">
                 Nhà ở: {HOUSING[a.housingType]} · {a.hasPetExperience ? "Đã từng nuôi" : "Chưa từng nuôi"}
-                {a.sterilizationPledge && " · Đã cam kết triệt sản"}
               </p>
               {a.status === "APPROVED" && (
                 <Notice tone="success" title="Đơn đã được duyệt">

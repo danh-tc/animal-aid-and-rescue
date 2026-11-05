@@ -94,15 +94,15 @@ INSERT INTO vet_requests (id, pet_id, clinic_id, reason, priority, care_mode, st
   (7, 8, 1, 'Suy kiệt, mất nước',            'URGENT',     'INPATIENT',  'COMPLETED', 'Suy thận cấp', 'Truyền dịch', 800000, NULL, 3, now() - interval '20 days', now() - interval '18 days', FALSE);
 
 -- Đơn nhận nuôi: Vàng có hai đơn đang chờ để demo xử lý đồng thời
-INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation, sterilization_pledge,
+INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation,
                                    status, review_note, reviewed_by, reviewed_at, submitted_at) VALUES
-  (1, 3, 4, 'HOUSE',     TRUE,  'Nhà có sân rộng',           FALSE, 'PENDING',     NULL, NULL, NULL, now() - interval '2 days'),
-  (2, 3, 5, 'APARTMENT', FALSE, 'Muốn có bạn đồng hành',     FALSE, 'PENDING',     NULL, NULL, NULL, now() - interval '1 day'),
-  (3, 5, 6, 'HOUSE',     TRUE,  'Từng nuôi chó 10 năm',      FALSE, 'APPROVED',    'Điều kiện tốt', 2, now() - interval '3 days', now() - interval '6 days'),
-  (4, 6, 5, 'APARTMENT', TRUE,  'Nhà có một mèo cái',        FALSE, 'HANDED_OVER', 'Phù hợp', 3, now() - interval '35 days', now() - interval '40 days'),
-  (5, 6, 6, 'OTHER',     FALSE, 'Thích mèo trắng',           FALSE, 'CANCELLED',   NULL, NULL, NULL, now() - interval '38 days'),
-  (6, 7, 4, 'HOUSE',     TRUE,  'Muốn nuôi chó giữ nhà',     FALSE, 'HANDED_OVER', 'Phù hợp', 2, now() - interval '62 days', now() - interval '65 days'),
-  (7, 4, 5, 'APARTMENT', FALSE, 'Muốn nuôi mèo',             FALSE, 'REJECTED',    'Chung cư không cho nuôi thú', 2, now() - interval '10 days', now() - interval '12 days');
+  (1, 3, 4, 'HOUSE',     TRUE,  'Nhà có sân rộng',           'PENDING',     NULL, NULL, NULL, now() - interval '2 days'),
+  (2, 3, 5, 'APARTMENT', FALSE, 'Muốn có bạn đồng hành',     'PENDING',     NULL, NULL, NULL, now() - interval '1 day'),
+  (3, 5, 6, 'HOUSE',     TRUE,  'Từng nuôi chó 10 năm',      'APPROVED',    'Điều kiện tốt', 2, now() - interval '3 days', now() - interval '6 days'),
+  (4, 6, 5, 'APARTMENT', TRUE,  'Nhà có một mèo cái',        'HANDED_OVER', 'Phù hợp', 3, now() - interval '35 days', now() - interval '40 days'),
+  (5, 6, 6, 'OTHER',     FALSE, 'Thích mèo trắng',           'CANCELLED',   NULL, NULL, NULL, now() - interval '38 days'),
+  (6, 7, 4, 'HOUSE',     TRUE,  'Muốn nuôi chó giữ nhà',     'HANDED_OVER', 'Phù hợp', 2, now() - interval '62 days', now() - interval '65 days'),
+  (7, 4, 5, 'APARTMENT', FALSE, 'Muốn nuôi mèo',             'REJECTED',    'Chung cư không cho nuôi thú', 2, now() - interval '10 days', now() - interval '12 days');
 UPDATE adoption_applications SET cancel_reason = 'Hệ thống tự đóng: thú đã có đơn khác được duyệt' WHERE id = 5;
 -- Đơn đã duyệt của Đốm có lịch hẹn bàn giao (mục 2.1.4 bước 3)
 UPDATE adoption_applications SET handover_date = current_date + 2 WHERE id = 3;

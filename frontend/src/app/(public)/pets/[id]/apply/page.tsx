@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
-import { CheckField, Field } from "@/components/form-field/Field";
+import { Field } from "@/components/form-field/Field";
 import { FormCard } from "@/components/form-card/FormCard";
 import { Notice } from "@/components/notice/Notice";
 import { RequireRole } from "@/components/require-role/RequireRole";
@@ -37,7 +37,6 @@ function ApplyForm() {
   const [housing, setHousing] = useState<HousingType | null>(null);
   const [experience, setExperience] = useState<"yes" | "no" | null>(null);
   const [motivation, setMotivation] = useState("");
-  const [pledge, setPledge] = useState(false);
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +51,6 @@ function ApplyForm() {
   }
 
   const name = petName(pet.name, pet.code);
-  const needPledge = !pet.sterilized;
   const needPhone = !me.phone;
   const needAddress = !me.address;
   const phoneValid = /^[0-9+]{9,15}$/.test(phone.trim());
@@ -61,13 +59,12 @@ function ApplyForm() {
     address: touched && needAddress && !address.trim() ? "Nhập địa chỉ nơi bé sẽ sống." : null,
     housing: touched && !housing ? "Chọn loại nhà ở hiện tại." : null,
     experience: touched && !experience ? "Cho biết bạn đã từng nuôi chó mèo chưa." : null,
-    pledge: touched && needPledge && !pledge ? "Bé chưa triệt sản, bạn cần cam kết để nộp đơn." : null,
   };
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setTouched(true);
-    if (!housing || !experience || (needPledge && !pledge) || !pet) return;
+    if (!housing || !experience || !pet) return;
     if ((needPhone && !phoneValid) || (needAddress && !address.trim())) return;
     setSubmitting(true);
     setError(null);
@@ -78,7 +75,6 @@ function ApplyForm() {
           housingType: housing,
           hasPetExperience: experience === "yes",
           motivation: motivation.trim() || null,
-          sterilizationPledge: needPledge ? pledge : null,
           phone: needPhone ? phone.trim() : null,
           address: needAddress ? address.trim() : null,
         },
@@ -149,21 +145,6 @@ function ApplyForm() {
         <Field label="Vì sao bạn muốn nhận nuôi bé?" hint="Không bắt buộc. Chia sẻ về gia đình, thời gian chăm sóc, không gian sống.">
           <textarea rows={4} maxLength={2000} value={motivation} onChange={(e) => setMotivation(e.target.value)} />
         </Field>
-        {needPledge && (
-          <div className="stack stack--sm">
-            <CheckField
-              checked={pledge}
-              onChange={setPledge}
-              label="Tôi cam kết đưa bé đi triệt sản khi bé đủ tuổi"
-              hint="Bé chưa triệt sản vì chưa đủ tuổi. Trung tâm sẽ nhắc lại trong các lần hậu kiểm."
-            />
-            {errors.pledge && (
-              <p className="form-field__error" role="alert">
-                {errors.pledge}
-              </p>
-            )}
-          </div>
-        )}
         <Button type="submit" size="lg" block loading={submitting}>
           Gửi đơn nhận nuôi
         </Button>

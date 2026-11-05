@@ -28,7 +28,7 @@ type Range = "week" | "all";
 const CRITERIA = [
   { key: "healthOk", label: "Sức khỏe của bé tốt" },
   { key: "housingOk", label: "Chỗ ở đúng như trong đơn" },
-  { key: "commitmentOk", label: "Chủ nuôi giữ cam kết (tiêm phòng, triệt sản)" },
+  { key: "commitmentOk", label: "Tiêm nhắc đúng lịch" },
   { key: "petPresent", label: "Bé vẫn ở với chủ nuôi" },
   { key: "ownerReachable", label: "Liên lạc được với chủ nuôi" },
 ] as const;
@@ -74,9 +74,19 @@ export default function FollowUpsPage() {
     setFiles([]);
   }
 
+  // QĐ-12: Đạt khi đủ 5 tiêu chí. Lần bổ sung chỉ được Đạt hoặc Không đạt, thay cho kết quả của lần gốc.
+  const isAdditional = target?.followUp.additional ?? false;
+  const allCriteria = Object.values(criteria).every(Boolean);
+  const resultChoices: { value: FollowUpResult; label: string; hint?: string }[] = [
+    ...(allCriteria ? [{ value: "PASS" as const, label: "Đạt" }] : []),
+    ...(isAdditional ? [] : [{ value: "WATCH" as const, label: "Cần theo dõi", hint: "Thêm một lần hậu kiểm bổ sung" }]),
+    { value: "FAIL", label: "Không đạt", hint: "Chuyển sang chờ thu hồi" },
+  ];
+
   async function submit() {
     if (!target) return;
     if (!result) throw new Error("Chọn kết quả hậu kiểm.");
+    if (!resultChoices.some((c) => c.value === result)) throw new Error("Kết quả đã chọn không còn hợp lệ, hãy chọn lại.");
     if (result !== "PASS" && !reason.trim()) throw new Error("Cần theo dõi hoặc Không đạt phải ghi lý do.");
     if (!filesValid(files)) throw new Error("Có tệp lớn hơn 5MB.");
     const id = target.followUp.id;
@@ -188,7 +198,10 @@ export default function FollowUpsPage() {
               key={c.key}
               label={c.label}
               checked={criteria[c.key]}
-              onChange={(v) => setCriteria({ ...criteria, [c.key]: v })}
+              onChange={(v) => {
+                setCriteria({ ...criteria, [c.key]: v });
+                if (!v && result === "PASS") setResult(null);
+              }}
             />
           ))}
         </fieldset>
@@ -197,12 +210,13 @@ export default function FollowUpsPage() {
           required
           value={result}
           onChange={setResult}
-          choices={[
-            { value: "PASS", label: "Đạt" },
-            { value: "WATCH", label: "Cần theo dõi", hint: "Thêm một lần hậu kiểm" },
-            { value: "FAIL", label: "Không đạt", hint: "Chuyển sang chờ thu hồi" },
-          ]}
+          choices={resultChoices}
         />
+        {isAdditional && (
+          <p className="form-field__hint">
+            Đây là lần bổ sung: chỉ chọn Đạt hoặc Không đạt. Vẫn không liên lạc được chủ nuôi thì chọn Không đạt.
+          </p>
+        )}
         <Field label="Nhận xét" required={result === "WATCH" || result === "FAIL"} hint="Bắt buộc khi Cần theo dõi hoặc Không đạt.">
           <textarea rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} />
         </Field>

@@ -2,6 +2,7 @@ package com.aar.handover;
 
 import com.aar.common.security.AuthUser;
 import com.aar.common.security.CurrentUser;
+import com.aar.handover.HandoverDtos.CloseRecallRequest;
 import com.aar.handover.HandoverDtos.EndEventRequest;
 import com.aar.handover.HandoverDtos.EndEventResult;
 import com.aar.handover.HandoverDtos.EndEventView;
@@ -74,6 +75,13 @@ public class StaffHandoverController {
         return service.recordResult(id, req, me.id());
     }
 
+    /** QĐ-18: Quản lý đóng thu hồi khi đã quá RECALL_CLOSE_AFTER_DAYS ngày mà vẫn không thu hồi được. */
+    @PostMapping("/handovers/{id}/close-recall")
+    public HandoverView closeRecall(@PathVariable Long id, @Valid @RequestBody CloseRecallRequest req,
+                                    @CurrentUser AuthUser me) {
+        return service.closeRecall(id, req.reason(), me);
+    }
+
     @GetMapping("/pets/{id}/handovers")
     public List<HandoverView> petHandovers(@PathVariable Long id) {
         return service.forPet(id);
@@ -86,7 +94,7 @@ public class StaffHandoverController {
         return service.returnPet(id, req, me.id());
     }
 
-    /** S10: qua đời, thất lạc, chuyển cơ sở (QĐ-15, QĐ-16). */
+    /** S10: qua đời, thất lạc (QĐ-15, QĐ-16). */
     @PostMapping("/pets/{id}/end-events")
     @ResponseStatus(HttpStatus.CREATED)
     public EndEventResult endEvent(@PathVariable Long id, @Valid @RequestBody EndEventRequest req,

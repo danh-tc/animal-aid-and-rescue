@@ -28,7 +28,7 @@ public class PetCostService {
         if (!pets.existsById(petId)) {
             throw BusinessException.notFound("Không tìm thấy thú");
         }
-        BigDecimal cost = sum("SELECT COALESCE(SUM(total_cost), 0) FROM vet_requests WHERE pet_id = ? AND status = 'COMPLETED'", petId);
+        BigDecimal cost = sum("SELECT COALESCE(SUM(total_cost), 0) FROM vet_requests WHERE pet_id = ? AND status IN ('COMPLETED','CANCELLED')", petId);
         BigDecimal donated = sum("SELECT COALESCE(SUM(donation_amount), 0) FROM handovers WHERE pet_id = ?", petId);
         return new PetCosts(petId, cost, donated, cost.subtract(donated).max(BigDecimal.ZERO));
     }

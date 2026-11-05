@@ -19,9 +19,12 @@ import com.aar.pet.PetEndEvent;
 import com.aar.pet.PetEndEventRepository;
 import com.aar.pet.PetLifecycle;
 import com.aar.pet.PetStatus;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,19 +67,12 @@ public class EndEventService {
         Pet pet = petLifecycle.lock(petId);
         EndEventType type = req.eventType();
         String detail = blankToNull(req.detail());
-        String destination = blankToNull(req.destinationOrg());
-        if (type == EndEventType.TRANSFERRED && (destination == null || detail == null)) {
-            throw BusinessException.badRequest("DESTINATION_REQUIRED", "Chuyển cơ sở phải ghi nơi nhận và lý do");
-        }
         if (type == EndEventType.LOST && detail == null) {
             throw BusinessException.badRequest("DETAIL_REQUIRED", "Thất lạc phải ghi nơi và hoàn cảnh mất");
         }
 
         Optional<Handover> activeHandover = Optional.empty();
         if (pet.getStatus() == PetStatus.ADOPTED) {
-            if (type == EndEventType.TRANSFERRED) {
-                throw BusinessException.conflict("INVALID_END_EVENT", "Thú đã nhận nuôi không thể chuyển cơ sở");
-            }
             activeHandover = handovers.findFirstByPetIdAndStatusInOrderByHandedOverAtDesc(petId, FOLLOW_UP_PERIOD);
             if (activeHandover.isEmpty()) {
                 throw BusinessException.conflict("FOLLOW_UP_PERIOD_ENDED",
@@ -86,7 +82,11 @@ public class EndEventService {
 
         String note = label(type) + (detail == null ? "" : ": " + detail);
         // Đóng việc đang mở trước khi đổi trạng thái thú (QĐ-15)
-        int vet = vetRequests.cancelAllOpen(petId, "Hệ thống tự hủy: " + note, by);
+        Map<Long, BigDecimal> costs = new HashMap<>();
+        if (req.incurredCosts() != null) {
+            req.incurredCosts().forEach(c -> costs.put(c.vetRequestId(), c.amount()));
+        }
+        int vet = vetRequests.cancelAllOpen(petId, "Hệ thống tự hủy: " + note, costs, by);
         int apps = applications.cancelOpen(petId, ApplicationCascade.OPEN, "Hệ thống tự đóng: " + note, by);
         int cancelledFollowUps = 0;
         if (activeHandover.isPresent()) {
@@ -100,11 +100,8 @@ public class EndEventService {
 
         petLifecycle.transition(pet, type.name(), by, note);
         pet.changeArea(null);
-        if (type == EndEventType.TRANSFERRED) {
-            pet.changeLocation(destination);
-        }
         OffsetDateTime occurredAt = req.occurredAt() == null ? OffsetDateTime.now() : req.occurredAt();
-        PetEndEvent event = endEvents.save(new PetEndEvent(petId, type, occurredAt, detail, destination, by));
+        PetEndEvent event = endEvents.save(new PetEndEvent(petId, type, occurredAt, detail, by));
         return new EndEventResult(EndEventView.of(event), pet.getStatus(), vet, apps, cancelledFollowUps,
             activeHandover.isPresent());
     }
@@ -132,7 +129,6 @@ public class EndEventService {
         return switch (type) {
             case DECEASED -> "Qua đời";
             case LOST -> "Thất lạc";
-            case TRANSFERRED -> "Chuyển cơ sở";
         };
     }
 

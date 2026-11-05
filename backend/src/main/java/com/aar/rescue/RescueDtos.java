@@ -100,7 +100,11 @@ public final class RescueDtos {
     }
 
     /** S-1 của UC-07: tạo hồ sơ thú và lượt tiếp nhận RESCUE trong cùng giao dịch. */
-    public record SucceedRequest(@NotNull @Valid NewPet pet, @NotNull @Valid NewIntake intake) {
+    /**
+     * S-1 của UC-07. Cứu thú mới thì gửi pet. Nhánh S-1b: nhân viên đối chiếu và xác nhận đây là thú thất lạc
+     * của trung tâm thì gửi lostPetId thay cho pet, hệ thống tạo lượt tìm lại trên hồ sơ cũ (QĐ-16).
+     */
+    public record SucceedRequest(@Valid NewPet pet, Long lostPetId, @NotNull @Valid NewIntake intake) {
     }
 
     public record CaseSummary(Long id, String locationText, CaseStatus status, Long assignedStaffId,

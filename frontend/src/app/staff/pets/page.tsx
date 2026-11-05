@@ -24,7 +24,6 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "ADOPTED", label: "Đã có chủ" },
   { value: "LOST", label: "Thất lạc" },
   { value: "DECEASED", label: "Đã mất" },
-  { value: "TRANSFERRED", label: "Đã chuyển đi" },
 ];
 
 /** S04: Danh sách thú, lọc theo trạng thái, loài, tìm theo tên hoặc mã */

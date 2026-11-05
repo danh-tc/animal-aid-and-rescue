@@ -70,7 +70,13 @@ public class Intake {
 
     /** Tìm lại thú thất lạc (QĐ-16): lượt tiếp nhận mới trên hồ sơ cũ. */
     public static Intake fromFound(Long petId, String reason, Priority priority, String initialAssessment, Long by) {
-        return new Intake(petId, IntakeSource.FOUND, null, null, reason, priority, initialAssessment, by);
+        return fromFound(petId, null, reason, priority, initialAssessment, by);
+    }
+
+    /** Tìm lại qua báo cáo cứu hộ (nhánh S-1b của UC-07): lượt tìm lại tham chiếu ca cứu hộ. */
+    public static Intake fromFound(Long petId, Long rescueCaseId, String reason, Priority priority,
+                                   String initialAssessment, Long by) {
+        return new Intake(petId, IntakeSource.FOUND, rescueCaseId, null, reason, priority, initialAssessment, by);
     }
 
     public static Intake fromReturn(Long petId, Long handoverId, String reason, Priority priority,

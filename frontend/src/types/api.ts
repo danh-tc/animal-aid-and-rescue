@@ -159,8 +159,10 @@ export interface CaseDetail extends CaseSummary {
   petCode: string | null;
 }
 
+/** S-1 của UC-07. Nhánh S-1b: thú thất lạc của trung tâm thì gửi lostPetId thay cho pet. */
 export interface SucceedRequest {
-  pet: {
+  lostPetId?: number | null;
+  pet?: {
     name?: string | null;
     species: Species;
     sex?: Sex | null;
@@ -320,7 +322,6 @@ export interface SubmitApplicationRequest {
   housingType: HousingType;
   hasPetExperience: boolean;
   motivation?: string | null;
-  sterilizationPledge?: boolean | null;
   /** Bắt buộc nếu tài khoản chưa có, được lưu vào tài khoản */
   phone?: string | null;
   address?: string | null;
@@ -333,7 +334,6 @@ export interface ApplicationView {
   housingType: HousingType;
   hasPetExperience: boolean;
   motivation: string | null;
-  sterilizationPledge: boolean;
   status: ApplicationStatus;
   reviewNote: string | null;
   reviewedAt: string | null;
@@ -440,7 +440,6 @@ export interface EndEventView {
   eventType: EndEventType;
   occurredAt: string;
   detail: string | null;
-  destinationOrg: string | null;
   recordedBy: number;
 }
 
@@ -516,6 +515,18 @@ export interface ExceptionReport {
     ownerName: string;
     ownerPhone: string | null;
     handedOverAt: string;
+    /** Thời điểm ghi hậu kiểm Không đạt */
+    failedAt: string | null;
+    /** Từ thời điểm này Quản lý được đóng thu hồi (QĐ-18) */
+    closableFrom: string | null;
+  }[];
+  caseUnassignedAlertHours: number;
+  /** Ca chưa phân công quá hạn (QĐ-17) */
+  unassignedCases: {
+    caseId: number;
+    locationText: string;
+    createdAt: string;
+    hoursWaiting: number;
   }[];
 }
 
@@ -544,6 +555,9 @@ export interface Dashboard {
   pendingApplications: number;
   followUpsDueThisWeek: number;
   openVetRequests: number;
+  /** Ca chưa phân công quá hạn (QĐ-17) */
+  overdueUnassignedCases: number;
+  recallPending: number;
 }
 
 export interface StaffMember {

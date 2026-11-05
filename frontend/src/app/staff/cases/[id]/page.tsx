@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { StatusBadge } from "@/components/badge/Badge";
 import { Button, LinkButton } from "@/components/button/Button";
+import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
 import { DetailList } from "@/components/detail-list/DetailList";
 import { Dialog } from "@/components/dialog/Dialog";
 import { FilePicker, filesValid } from "@/components/file-picker/FilePicker";
@@ -18,9 +19,9 @@ import { useToast } from "@/components/toast/Toast";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { useStaffMembers } from "@/hooks/useStaffMembers";
 import { useAuth } from "@/lib/auth-context";
-import { formatDateTime, todayIso } from "@/lib/format";
+import { formatDateTime, petName, todayIso } from "@/lib/format";
 import { CASE_STATUS, PRIORITY, REPORT_STATUS } from "@/lib/labels";
-import type { CaseDetail, Priority, Sex, Species, SucceedRequest, SucceedResult } from "@/types/api";
+import type { CaseDetail, PageResponse, PetSummary, Priority, Sex, Species, SucceedRequest, SucceedResult } from "@/types/api";
 import "../../detail-page.scss";
 
 const EMPTY_PET = { name: "", species: "DOG" as Species, sex: "UNKNOWN" as Sex, birth: "", color: "", description: "" };
@@ -42,6 +43,13 @@ export default function CaseDetailPage() {
   const [intake, setIntake] = useState(EMPTY_INTAKE);
   const [result, setResult] = useState<SucceedResult | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
+  // Nhánh S-1b của UC-07: thú cứu được là thú thất lạc của trung tâm (nhân viên đã đối chiếu ảnh, đặc điểm)
+  const [kind, setKind] = useState<"new" | "lost">("new");
+  const [lostPetId, setLostPetId] = useState("");
+  const lostPets = useApi<PageResponse<PetSummary>>(dialog === "succeed" ? "/api/staff/pets" : null, {
+    status: "LOST",
+    size: 100,
+  });
 
   if (loading && !c) return <Skeleton card lines={6} />;
   if (!c) return <Notice tone="error">{error}</Notice>;
@@ -55,15 +63,20 @@ export default function CaseDetailPage() {
   }
 
   async function succeed() {
+    if (kind === "lost" && !lostPetId) throw new Error("Chọn hồ sơ thú thất lạc đã đối chiếu.");
     const body: SucceedRequest = {
-      pet: {
-        name: pet.name.trim() || null,
-        species: pet.species,
-        sex: pet.sex,
-        estimatedBirthDate: pet.birth || null,
-        color: pet.color.trim() || null,
-        description: pet.description.trim() || null,
-      },
+      ...(kind === "lost"
+        ? { lostPetId: Number(lostPetId) }
+        : {
+            pet: {
+              name: pet.name.trim() || null,
+              species: pet.species,
+              sex: pet.sex,
+              estimatedBirthDate: pet.birth || null,
+              color: pet.color.trim() || null,
+              description: pet.description.trim() || null,
+            },
+          }),
       intake: {
         reason: intake.reason.trim() || null,
         priority: intake.priority,
@@ -77,7 +90,9 @@ export default function CaseDetailPage() {
     photos.forEach((p) => data.append("photos", p));
     const res = await mutate<SucceedResult>(`/api/staff/rescue-cases/${id}/succeed`, { body: data });
     setPhotos([]);
-    toast.success(`Đã tạo hồ sơ thú ${res.petCode}.`);
+    toast.success(
+      kind === "lost" ? `Đã ghi nhận tìm lại thú ${res.petCode}, thú vào khu cách ly.` : `Đã tạo hồ sơ thú ${res.petCode}.`,
+    );
     setResult(res);
     setDialog(null);
     reload();
@@ -203,40 +218,65 @@ export default function CaseDetailPage() {
       <Dialog
         open={dialog === "succeed"}
         onClose={() => setDialog(null)}
-        title="Cứu thành công, tạo hồ sơ thú"
-        description="Hồ sơ thú và lượt tiếp nhận được tạo cùng lúc. Thú vào khu cách ly."
-        submitLabel="Tạo hồ sơ"
+        title="Cứu thành công"
+        description="Tạo lượt tiếp nhận cho thú, thú vào khu cách ly."
+        submitLabel={kind === "lost" ? "Ghi nhận tìm lại" : "Tạo hồ sơ"}
         onSubmit={succeed}
         size="lg"
       >
-        <h3 className="detail-page__form-section">Thông tin thú</h3>
-        <div className="detail-page__form-grid">
-          <Field label="Loài" required>
-            <select value={pet.species} onChange={(e) => setPet({ ...pet, species: e.target.value as Species })}>
-              <option value="DOG">Chó</option>
-              <option value="CAT">Mèo</option>
+        <ChoiceGroup
+          legend="Thú được cứu"
+          required
+          columns={2}
+          value={kind}
+          onChange={setKind}
+          choices={[
+            { value: "new", label: "Thú mới", hint: "Tạo hồ sơ thú mới" },
+            { value: "lost", label: "Thú thất lạc của trung tâm", hint: "Đã đối chiếu ảnh, đặc điểm và xác nhận đúng con" },
+          ]}
+        />
+        {kind === "lost" && (
+          <Field label="Hồ sơ thú thất lạc" required hint="Hệ thống tạo lượt tìm lại trên hồ sơ cũ, không tạo hồ sơ mới.">
+            <select value={lostPetId} onChange={(e) => setLostPetId(e.target.value)} required>
+              <option value="">Chọn thú</option>
+              {lostPets.data?.items.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {petName(p.name, p.code)} · {p.code}
+                </option>
+              ))}
             </select>
           </Field>
-          <Field label="Giới tính">
-            <select value={pet.sex} onChange={(e) => setPet({ ...pet, sex: e.target.value as Sex })}>
-              <option value="UNKNOWN">Chưa rõ</option>
-              <option value="MALE">Đực</option>
-              <option value="FEMALE">Cái</option>
-            </select>
-          </Field>
-          <Field label="Tên gọi" hint="Để trống nếu chưa đặt tên.">
-            <input maxLength={100} value={pet.name} onChange={(e) => setPet({ ...pet, name: e.target.value })} />
-          </Field>
-          <Field label="Ngày sinh ước tính">
-            <input type="date" max={todayIso()} value={pet.birth} onChange={(e) => setPet({ ...pet, birth: e.target.value })} />
-          </Field>
-          <Field label="Màu lông" className="detail-page__full">
-            <input maxLength={100} value={pet.color} onChange={(e) => setPet({ ...pet, color: e.target.value })} />
-          </Field>
-          <Field label="Mô tả" className="detail-page__full">
-            <textarea rows={2} maxLength={2000} value={pet.description} onChange={(e) => setPet({ ...pet, description: e.target.value })} />
-          </Field>
-        </div>
+        )}
+        {kind === "new" && <h3 className="detail-page__form-section">Thông tin thú</h3>}
+        {kind === "new" && (
+          <div className="detail-page__form-grid">
+            <Field label="Loài" required>
+              <select value={pet.species} onChange={(e) => setPet({ ...pet, species: e.target.value as Species })}>
+                <option value="DOG">Chó</option>
+                <option value="CAT">Mèo</option>
+              </select>
+            </Field>
+            <Field label="Giới tính">
+              <select value={pet.sex} onChange={(e) => setPet({ ...pet, sex: e.target.value as Sex })}>
+                <option value="UNKNOWN">Chưa rõ</option>
+                <option value="MALE">Đực</option>
+                <option value="FEMALE">Cái</option>
+              </select>
+            </Field>
+            <Field label="Tên gọi" hint="Để trống nếu chưa đặt tên.">
+              <input maxLength={100} value={pet.name} onChange={(e) => setPet({ ...pet, name: e.target.value })} />
+            </Field>
+            <Field label="Ngày sinh ước tính">
+              <input type="date" max={todayIso()} value={pet.birth} onChange={(e) => setPet({ ...pet, birth: e.target.value })} />
+            </Field>
+            <Field label="Màu lông" className="detail-page__full">
+              <input maxLength={100} value={pet.color} onChange={(e) => setPet({ ...pet, color: e.target.value })} />
+            </Field>
+            <Field label="Mô tả" className="detail-page__full">
+              <textarea rows={2} maxLength={2000} value={pet.description} onChange={(e) => setPet({ ...pet, description: e.target.value })} />
+            </Field>
+          </div>
+        )}
         <FilePicker label="Ảnh thú" files={photos} onChange={setPhotos} hint="Không bắt buộc. JPG, PNG hoặc WEBP, tối đa 5 ảnh, mỗi ảnh không quá 5MB." />
         <h3 className="detail-page__form-section">Tiếp nhận</h3>
         <div className="detail-page__form-grid">

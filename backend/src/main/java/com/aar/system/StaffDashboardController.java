@@ -14,8 +14,10 @@ public class StaffDashboardController {
         this.jdbc = jdbc;
     }
 
+    /** overdueUnassignedCases: ca ở Mới quá CASE_UNASSIGNED_ALERT_HOURS giờ (QĐ-17). recallPending: bàn giao chờ thu hồi. */
     public record Dashboard(long newReports, long openCases, long pendingApplications,
-                            long followUpsDueThisWeek, long openVetRequests) {
+                            long followUpsDueThisWeek, long openVetRequests, long overdueUnassignedCases,
+                            long recallPending) {
     }
 
     @GetMapping("/api/staff/dashboard")
@@ -25,7 +27,12 @@ public class StaffDashboardController {
             count("SELECT count(*) FROM rescue_cases WHERE status IN ('NEW','IN_PROGRESS')"),
             count("SELECT count(*) FROM adoption_applications WHERE status = 'PENDING'"),
             count("SELECT count(*) FROM follow_ups WHERE status = 'SCHEDULED' AND due_date <= current_date + 7"),
-            count("SELECT count(*) FROM vet_requests WHERE status IN ('PENDING','IN_TREATMENT')"));
+            count("SELECT count(*) FROM vet_requests WHERE status IN ('PENDING','IN_TREATMENT')"),
+            count("""
+                SELECT count(*) FROM rescue_cases
+                WHERE status = 'NEW' AND created_at < now() - make_interval(hours =>
+                    (SELECT param_value::int FROM system_parameters WHERE param_key = 'CASE_UNASSIGNED_ALERT_HOURS'))"""),
+            count("SELECT count(*) FROM handovers WHERE follow_up_status = 'RECALL_PENDING'"));
     }
 
     private long count(String sql) {

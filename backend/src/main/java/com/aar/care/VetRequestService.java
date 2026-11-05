@@ -19,6 +19,7 @@ import com.aar.pet.PetLifecycle;
 import com.aar.pet.PetStatus;
 import com.aar.system.VetClinic;
 import com.aar.system.VetClinicRepository;
+import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -103,11 +104,12 @@ public class VetRequestService {
         return new VetRequestResult(view(request), pet.getStatus(), 0);
     }
 
-    /** Ngoại lệ S-2a của UC-09: phòng khám không nhận điều trị. */
-    public VetRequestResult cancel(Long requestId, String reason, Long by) {
+    /** Ngoại lệ S-2a của UC-09: phòng khám không nhận hoặc dừng điều trị, ghi chi phí đã phát sinh (QĐ-14). */
+    public VetRequestResult cancel(Long requestId, String reason, BigDecimal incurredCost, Long by) {
         VetRequest request = find(requestId);
         Pet pet = petLifecycle.lock(request.getPetId());
-        request.recordCancel(reason.trim());
+        // Ghi lý do và chi phí trước khi đổi trạng thái: CHECK ck_vet_cancelled_cost đòi CANCELLED phải có chi phí
+        request.recordCancel(reason.trim(), incurredCost);
         transition(request, "CANCELLED", by, reason);
         closeTreatmentIfDone(pet, by);
         return new VetRequestResult(view(request), pet.getStatus(), 0);
@@ -116,12 +118,13 @@ public class VetRequestService {
     /**
      * QĐ-15: sự kiện kết thúc hủy mọi yêu cầu thú y đang mở của thú. Không đổi trạng thái thú,
      * người gọi chịu trách nhiệm chuyển thú sang trạng thái kết thúc. Trả về số yêu cầu đã hủy.
+     * incurredCosts: chi phí đã phát sinh do nhân viên nhập theo từng yêu cầu, yêu cầu không có trong map ghi 0.
      */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
-    public int cancelAllOpen(Long petId, String reason, Long by) {
+    public int cancelAllOpen(Long petId, String reason, Map<Long, BigDecimal> incurredCosts, Long by) {
         List<VetRequest> open = requests.findByPetIdAndStatusIn(petId, VetRequestStatus.OPEN);
         for (VetRequest r : open) {
-            r.recordCancel(reason);
+            r.recordCancel(reason, incurredCosts.get(r.getId()));
             transition(r, "CANCELLED", by, reason);
         }
         return open.size();

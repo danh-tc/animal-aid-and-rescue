@@ -41,7 +41,7 @@ class ReportIntegrationTest extends IntegrationTestBase {
         jdbc.update("UPDATE follow_ups SET due_date = current_date - 3 WHERE id = ?", followUpId);
 
         long petId = availablePet(false);
-        long appId = submitApplication(petId, ADOPTER1, false);
+        long appId = submitApplication(petId, ADOPTER1);
         jdbc.update("UPDATE adoption_applications SET submitted_at = now() - interval '10 days' WHERE id = ?", appId);
 
         JsonNode report = getJson("/api/admin/reports/exceptions", MANAGER, 200);

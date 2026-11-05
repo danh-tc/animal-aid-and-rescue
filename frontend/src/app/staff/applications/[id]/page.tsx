@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, Check, Mail, PackageCheck, Phone, X } from "lucide-react";
+import { Ban, CalendarClock, Check, Mail, PackageCheck, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -28,7 +28,7 @@ export default function ApplicationDetailPage() {
   const { data, error, loading, reload } = useApi<ApplicationDetail>(`/api/staff/applications/${id}`);
   const mutate = useMutation();
   const toast = useToast();
-  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | "schedule" | null>(null);
+  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | "schedule" | "cancel" | null>(null);
   const [handoverDate, setHandoverDate] = useState(todayIso(2));
   const [note, setNote] = useState("");
   const [donation, setDonation] = useState("0");
@@ -39,7 +39,7 @@ export default function ApplicationDetailPage() {
   const a = data.application;
   const name = petName(a.pet.name, a.pet.code);
 
-  function openDialog(kind: "approve" | "reject" | "handover" | "schedule") {
+  function openDialog(kind: "approve" | "reject" | "handover" | "schedule" | "cancel") {
     setNote("");
     setHandoverDate(a.handoverDate ?? todayIso(2));
     setDialog(kind);
@@ -65,6 +65,15 @@ export default function ApplicationDetailPage() {
     if (!handoverDate || handoverDate < todayIso()) throw new Error("Chọn ngày hẹn bàn giao từ hôm nay trở đi.");
     await mutate(`/api/staff/applications/${id}/handover-date`, { body: { handoverDate } });
     toast.success(`Đã hẹn bàn giao ngày ${formatDate(handoverDate)}.`);
+    setDialog(null);
+    reload();
+  }
+
+  /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn và ghi lý do, thú về Sẵn sàng. */
+  async function cancelNoShow() {
+    if (!note.trim()) throw new Error("Ghi lý do hủy, ví dụ không đến theo hẹn và không liên lạc được.");
+    await mutate(`/api/staff/applications/${id}/cancel`, { body: { reason: note.trim() } });
+    toast.success(`Đã hủy đơn. ${name} trở lại Sẵn sàng nhận nuôi.`);
     setDialog(null);
     reload();
   }
@@ -117,6 +126,9 @@ export default function ApplicationDetailPage() {
             )}
             {a.status === "APPROVED" && (
               <>
+                <Button variant="ghost" icon={<Ban aria-hidden="true" />} onClick={() => openDialog("cancel")}>
+                  Hủy do không đến
+                </Button>
                 <Button variant="ghost" icon={<CalendarClock aria-hidden="true" />} onClick={() => openDialog("schedule")}>
                   {a.handoverDate ? "Đổi ngày hẹn" : "Hẹn ngày bàn giao"}
                 </Button>
@@ -190,10 +202,6 @@ export default function ApplicationDetailPage() {
               items={[
                 { label: "Nhà ở", value: HOUSING[a.housingType] },
                 { label: "Kinh nghiệm", value: a.hasPetExperience ? "Đã từng nuôi chó mèo" : "Chưa từng nuôi" },
-                {
-                  label: "Cam kết triệt sản",
-                  value: a.sterilizationPledge ? <Badge tone="success">Đã cam kết</Badge> : "Không cần hoặc không có",
-                },
                 { label: "Lý do nhận nuôi", value: a.motivation, wide: true },
                 ...(a.reviewedAt
                   ? [{ label: "Xét duyệt", value: `${formatDateTime(a.reviewedAt)}${a.reviewNote ? `\n${a.reviewNote}` : ""}`, wide: true }]
@@ -263,6 +271,20 @@ export default function ApplicationDetailPage() {
       >
         <Field label="Ngày hẹn bàn giao" required>
           <input type="date" min={todayIso()} value={handoverDate} onChange={(e) => setHandoverDate(e.target.value)} required />
+        </Field>
+      </Dialog>
+
+      <Dialog
+        open={dialog === "cancel"}
+        onClose={() => setDialog(null)}
+        title="Hủy đơn đã duyệt?"
+        description={`Dùng khi người nhận không đến bàn giao theo hẹn và không liên lạc được. ${name} trở lại Sẵn sàng, các đơn đã đóng không mở lại.`}
+        submitLabel="Hủy đơn"
+        submitVariant="danger"
+        onSubmit={cancelNoShow}
+      >
+        <Field label="Lý do" required hint="Ví dụ: hẹn ngày 12/11, gọi 3 lần không nghe máy.">
+          <textarea rows={3} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} required />
         </Field>
       </Dialog>
 

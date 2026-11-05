@@ -54,7 +54,7 @@ class ApplicationRulesIntegrationTest extends IntegrationTestBase {
     @Test
     void handoverDateSetOnApprovalAndChangeable() throws Exception {
         long petId = availablePet(false);
-        long appId = submitApplication(petId, ADOPTER1, false);
+        long appId = submitApplication(petId, ADOPTER1);
         String in3days = LocalDate.now().plusDays(3).toString();
 
         postJson("/api/staff/applications/" + appId + "/handover-date", STAFF, map("handoverDate", in3days), 409);
@@ -97,7 +97,7 @@ class ApplicationRulesIntegrationTest extends IntegrationTestBase {
         assertThat(history.get(0).get("note").asText()).contains("thu hồi");
 
         // Người nhận nuôi trong dữ liệu mẫu (Phạm Thu Hà) từng tự trả lại Lu
-        long app3 = submitApplication(availablePet(false), ADOPTER1, false);
+        long app3 = submitApplication(availablePet(false), ADOPTER1);
         JsonNode seedHistory = getJson("/api/staff/applications/" + app3, STAFF, 200).get("applicantHistory");
         assertThat(seedHistory.findValuesAsText("kind")).contains("RETURNED");
 

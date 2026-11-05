@@ -52,7 +52,6 @@ export const CARE_ACTIVITY: Record<CareActivity, string> = {
 export const END_EVENT: Record<EndEventType, Labeled> = {
   DECEASED: { label: "Qua đời", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "warning" },
-  TRANSFERRED: { label: "Chuyển cơ sở", tone: "info" },
 };
 
 export const CONTACT_METHOD: Record<ContactMethod, string> = {
@@ -75,7 +74,6 @@ export const PET_STATUS: Record<PetStatus, Labeled> = {
   ADOPTED: { label: "Đã có chủ", tone: "primary" },
   DECEASED: { label: "Đã mất", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "neutral" },
-  TRANSFERRED: { label: "Đã chuyển đi", tone: "neutral" },
 };
 
 export const REPORT_STATUS: Record<ReportStatus, Labeled> = {
@@ -141,7 +139,6 @@ export const PET_EVENT: Record<string, string> = {
   FOUND: "Tìm thấy",
   DECEASED: "Đã mất",
   LOST: "Thất lạc",
-  TRANSFERRED: "Chuyển đi",
 };
 
 export function labelOf<K extends string>(map: Record<K, string>, key: K | null | undefined): string {

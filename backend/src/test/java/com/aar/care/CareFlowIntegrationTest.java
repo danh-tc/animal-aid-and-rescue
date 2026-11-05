@@ -52,8 +52,12 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
 
         postJson("/api/staff/vet-requests/" + secondId + "/cancel", STAFF, map("reason", ""), 400);
         JsonNode cancelled = postJson("/api/staff/vet-requests/" + secondId + "/cancel", STAFF,
-            map("reason", "Phòng khám hết vaccine"), 200);
+            map("reason", "Phòng khám dừng điều trị", "incurredCost", 150000), 200);
         assertThat(cancelled.get("petStatus").asText()).isEqualTo("IN_CARE");
+        // QĐ-14: chi phí đã phát sinh của yêu cầu hủy được tính vào tổng chi phí điều trị
+        assertThat(cancelled.get("request").get("totalCost").asLong()).isEqualTo(150000L);
+        assertThat(getJson("/api/staff/pets/" + petId + "/costs", STAFF, 200).get("totalTreatmentCost").asLong())
+            .isEqualTo(900000L);
         assertThat(getJson("/api/staff/pets/" + petId, STAFF, 200).get("currentLocation").asText()).isEqualTo("Trung tâm");
 
         // Yêu cầu đã đóng không đổi được nữa
@@ -105,8 +109,8 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void markingIneligibleCancelsPendingApplications() throws Exception {
         long petId = availablePet(false);
-        long app1 = submitApplication(petId, ADOPTER1, false);
-        long app2 = submitApplication(petId, ADOPTER2, false);
+        long app1 = submitApplication(petId, ADOPTER1);
+        long app2 = submitApplication(petId, ADOPTER2);
         JsonNode result = postJson("/api/staff/pets/" + petId + "/ineligible", STAFF,
             map("reason", "Phát hiện hung dữ với trẻ em"), 200);
         assertThat(result.get("status").asText()).isEqualTo("IN_CARE");
@@ -122,7 +126,7 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void sickAvailablePetGoesToTreatmentAndCancelsApplications() throws Exception {
         long petId = availablePet(false);
-        long app = submitApplication(petId, ADOPTER3, false);
+        long app = submitApplication(petId, ADOPTER3);
         JsonNode result = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
             map("clinicId", 1, "reason", "Bỏ ăn", "priority", "NEED_CHECK", "careMode", "OUTPATIENT"), 201);
         assertThat(result.get("petStatus").asText()).isEqualTo("IN_TREATMENT");

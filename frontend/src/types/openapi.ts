@@ -1044,7 +1044,7 @@ export interface components {
         };
         EligibilityResult: {
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             checklist?: components["schemas"]["Checklist"];
             missing?: string[];
         };
@@ -1065,7 +1065,7 @@ export interface components {
         VetRequestResult: {
             request?: components["schemas"]["VetRequestView"];
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledApplications?: number;
         };
@@ -1103,6 +1103,16 @@ export interface components {
             healthOk: boolean;
         };
         ReasonRequest: {
+            reason: string;
+        };
+        VetRequestCancel: {
+            reason: string;
+            incurredCost?: number;
+        };
+        StaffCancelRequest: {
+            reason: string;
+        };
+        CloseRecallRequest: {
             reason: string;
         };
         AttachmentView: {
@@ -1167,7 +1177,9 @@ export interface components {
             description?: string;
         };
         SucceedRequest: {
-            pet: components["schemas"]["NewPet"];
+            pet?: components["schemas"]["NewPet"];
+            /** Format: int64 */
+            lostPetId?: number;
             intake: components["schemas"]["NewIntake"];
         };
         SucceedResult: {
@@ -1211,7 +1223,7 @@ export interface components {
         };
         IneligibleResult: {
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledApplications?: number;
         };
@@ -1225,22 +1237,27 @@ export interface components {
             /** Format: int64 */
             petId?: number;
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int64 */
             intakeId?: number;
         };
         EndEventRequest: {
             /** @enum {string} */
-            eventType: "DECEASED" | "LOST" | "TRANSFERRED";
+            eventType: "DECEASED" | "LOST";
             /** Format: date-time */
             occurredAt?: string;
             detail?: string;
-            destinationOrg?: string;
+            incurredCosts?: components["schemas"]["IncurredCost"][];
+        };
+        IncurredCost: {
+            /** Format: int64 */
+            vetRequestId: number;
+            amount: number;
         };
         EndEventResult: {
             event?: components["schemas"]["EndEventView"];
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledVetRequests?: number;
             /** Format: int32 */
@@ -1253,11 +1270,10 @@ export interface components {
             /** Format: int64 */
             id?: number;
             /** @enum {string} */
-            eventType?: "DECEASED" | "LOST" | "TRANSFERRED";
+            eventType?: "DECEASED" | "LOST";
             /** Format: date-time */
             occurredAt?: string;
             detail?: string;
-            destinationOrg?: string;
             /** Format: int64 */
             recordedBy?: number;
         };
@@ -1344,7 +1360,6 @@ export interface components {
             housingType?: "HOUSE" | "APARTMENT" | "OTHER";
             hasPetExperience?: boolean;
             motivation?: string;
-            sterilizationPledge?: boolean;
             /** @enum {string} */
             status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "HANDED_OVER";
             reviewNote?: string;
@@ -1452,7 +1467,6 @@ export interface components {
             housingType: "HOUSE" | "APARTMENT" | "OTHER";
             hasPetExperience: boolean;
             motivation?: string;
-            sterilizationPledge?: boolean;
             phone?: string;
             address?: string;
         };
@@ -1516,7 +1530,7 @@ export interface components {
             /** @enum {string} */
             sex?: "MALE" | "FEMALE" | "UNKNOWN";
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** @enum {string} */
             area?: "QUARANTINE" | "GENERAL";
             currentLocation?: string;
@@ -1661,7 +1675,7 @@ export interface components {
             color?: string;
             description?: string;
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** @enum {string} */
             area?: "QUARANTINE" | "GENERAL";
             currentLocation?: string;
@@ -1731,6 +1745,10 @@ export interface components {
             followUpsDueThisWeek?: number;
             /** Format: int64 */
             openVetRequests?: number;
+            /** Format: int64 */
+            overdueUnassignedCases?: number;
+            /** Format: int64 */
+            recallPending?: number;
         };
         PageResponseApplicationView: {
             items?: components["schemas"]["ApplicationView"][];
@@ -1870,6 +1888,18 @@ export interface components {
             overdueFollowUps?: components["schemas"]["OverdueFollowUp"][];
             staleApplications?: components["schemas"]["StaleApplication"][];
             recallPending?: components["schemas"]["RecallPending"][];
+            /** Format: int32 */
+            caseUnassignedAlertHours?: number;
+            unassignedCases?: components["schemas"]["UnassignedCase"][];
+        };
+        UnassignedCase: {
+            /** Format: int64 */
+            caseId?: number;
+            locationText?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: int64 */
+            hoursWaiting?: number;
         };
         OverdueFollowUp: {
             /** Format: int64 */
@@ -1898,6 +1928,10 @@ export interface components {
             ownerPhone?: string;
             /** Format: date-time */
             handedOverAt?: string;
+            /** Format: date-time */
+            failedAt?: string;
+            /** Format: date-time */
+            closableFrom?: string;
         };
         StaleApplication: {
             /** Format: int64 */
@@ -2068,7 +2102,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReasonRequest"];
+                "application/json": components["schemas"]["VetRequestCancel"];
             };
         };
         responses: {
@@ -3273,7 +3307,7 @@ export interface operations {
     pets: {
         parameters: {
             query?: {
-                status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+                status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
                 species?: "DOG" | "CAT";
                 q?: string;
                 page?: number;

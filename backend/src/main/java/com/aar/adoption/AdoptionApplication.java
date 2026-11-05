@@ -35,8 +35,6 @@ public class AdoptionApplication {
 
     private String motivation;
 
-    @Column(name = "sterilization_pledge", nullable = false)
-    private boolean sterilizationPledge;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -68,13 +66,12 @@ public class AdoptionApplication {
     }
 
     public AdoptionApplication(Long petId, Long applicantId, HousingType housingType, boolean hasPetExperience,
-                               String motivation, boolean sterilizationPledge, ApplicationStatus status) {
+                               String motivation, ApplicationStatus status) {
         this.petId = petId;
         this.applicantId = applicantId;
         this.housingType = housingType;
         this.hasPetExperience = hasPetExperience;
         this.motivation = motivation;
-        this.sterilizationPledge = sterilizationPledge;
         this.status = status;
         this.submittedAt = OffsetDateTime.now();
     }
@@ -99,7 +96,6 @@ public class AdoptionApplication {
     public HousingType getHousingType() { return housingType; }
     public boolean isHasPetExperience() { return hasPetExperience; }
     public String getMotivation() { return motivation; }
-    public boolean isSterilizationPledge() { return sterilizationPledge; }
     public ApplicationStatus getStatus() { return status; }
     public String getReviewNote() { return reviewNote; }
     public Long getReviewedBy() { return reviewedBy; }

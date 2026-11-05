@@ -8,6 +8,7 @@ import com.aar.adoption.AdoptionApplication;
 import com.aar.adoption.AdoptionApplicationRepository;
 import com.aar.adoption.ApplicationStatus;
 import com.aar.common.error.BusinessException;
+import com.aar.common.security.AuthUser;
 import com.aar.common.state.EntityType;
 import com.aar.common.state.StateTransitionService;
 import com.aar.handover.HandoverDtos.FollowUpOutcome;
@@ -25,11 +26,13 @@ import com.aar.pet.PetArea;
 import com.aar.pet.PetLifecycle;
 import com.aar.pet.PetRepository;
 import com.aar.pet.PetStatus;
+import com.aar.system.Role;
 import com.aar.system.SystemParameterService;
 import com.aar.system.User;
 import com.aar.system.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,6 +145,19 @@ public class HandoverService {
         if (req.result() != FollowUpResult.PASS && reason == null) {
             throw BusinessException.badRequest("REASON_REQUIRED", "Kết quả Cần theo dõi hoặc Không đạt phải ghi lý do");
         }
+        // QĐ-12, RB-23: lần bổ sung chỉ được Đạt hoặc Không đạt, nên mỗi lần hậu kiểm có tối đa một lần bổ sung.
+        // Lần bổ sung vẫn không liên lạc được chủ thì không đạt đủ 5 tiêu chí, chỉ còn chọn được Không đạt.
+        if (followUp.isAdditional() && req.result() == FollowUpResult.WATCH) {
+            throw BusinessException.badRequest("ADDITIONAL_RESULT_INVALID",
+                "Lần hậu kiểm bổ sung chỉ được chọn Đạt hoặc Không đạt");
+        }
+        // Mục 2.1.5: Đạt khi đạt cả 5 tiêu chí. Nhân viên tự chọn kết quả, hệ thống chỉ chặn chọn Đạt khi thiếu tiêu chí.
+        boolean allCriteria = req.healthOk() && req.housingOk() && req.commitmentOk() && req.petPresent()
+            && req.ownerReachable();
+        if (req.result() == FollowUpResult.PASS && !allCriteria) {
+            throw BusinessException.badRequest("PASS_REQUIRES_ALL_CRITERIA",
+                "Kết quả Đạt cần đạt cả 5 tiêu chí, hãy chọn Cần theo dõi hoặc Không đạt");
+        }
         followUp.recordResult(req.result(), req.contactMethod(), req.healthOk(), req.housingOk(), req.commitmentOk(), req.petPresent(),
             req.ownerReachable(), reason, by);
         followUps.flush();
@@ -167,6 +183,35 @@ public class HandoverService {
         }
         return new FollowUpOutcome(FollowUpView.of(followUp), handover.getStatus(),
             additional == null ? null : FollowUpView.of(additional));
+    }
+
+    /**
+     * Ngoại lệ 5b1 của UC-11, QĐ-18: sau RECALL_CLOSE_AFTER_DAYS ngày ở Chờ thu hồi mà vẫn không thu hồi được,
+     * Quản lý đóng thu hồi và ghi lý do. Bàn giao chuyển Đã đóng, thú giữ Đã nhận nuôi.
+     */
+    public HandoverView closeRecall(Long handoverId, String reason, AuthUser by) {
+        if (by.role() != Role.MANAGER) {
+            throw BusinessException.forbidden("CLOSE_RECALL_MANAGER_ONLY", "Chỉ Quản lý được đóng thu hồi");
+        }
+        Handover handover = handovers.findById(handoverId)
+            .orElseThrow(() -> BusinessException.notFound("Không tìm thấy bàn giao"));
+        petLifecycle.lock(handover.getPetId());
+        if (handover.getStatus() != HandoverStatus.RECALL_PENDING) {
+            throw BusinessException.conflict("NOT_RECALL_PENDING", "Bàn giao không ở trạng thái Chờ thu hồi");
+        }
+        int days = params.getInt(SystemParameterService.RECALL_CLOSE_AFTER_DAYS);
+        OffsetDateTime failedAt = followUps.findByHandoverIdOrderBySequenceNo(handoverId).stream()
+            .filter(f -> f.getResult() == FollowUpResult.FAIL && f.getPerformedAt() != null)
+            .map(FollowUp::getPerformedAt).max(OffsetDateTime::compareTo)
+            .orElseThrow(() -> BusinessException.conflict("NOT_RECALL_PENDING", "Không tìm thấy lần hậu kiểm Không đạt"));
+        OffsetDateTime allowedAt = failedAt.plusDays(days);
+        if (OffsetDateTime.now().isBefore(allowedAt)) {
+            long left = Math.max(1, java.time.Duration.between(OffsetDateTime.now(), allowedAt).toDays() + 1);
+            throw BusinessException.conflict("RECALL_CLOSE_TOO_EARLY",
+                "Chỉ được đóng thu hồi sau " + days + " ngày ở Chờ thu hồi, còn khoảng " + left + " ngày");
+        }
+        transition(handover, "RECALL_CLOSED", by.id(), reason.trim());
+        return view(handover);
     }
 
     /** S-2 của UC-11: trả lại hoặc thu hồi, chấp nhận bất kỳ lúc nào (QĐ-13). */

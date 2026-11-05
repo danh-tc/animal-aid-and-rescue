@@ -75,7 +75,7 @@ export function ChecklistTab({ pet, onChanged }: { pet: PetDetail; onChanged: ()
             <CheckField label="Đã tẩy giun, ký sinh trùng" checked={form.dewormed} disabled={!editable} onChange={(v) => setForm({ ...form, dewormed: v })} />
             <CheckField
               label="Đã triệt sản"
-              hint="Chưa đủ tuổi triệt sản thì vẫn đạt, người nhận nuôi phải cam kết."
+              hint="Chưa đủ tuổi triệt sản thì mục này vẫn đạt."
               checked={form.sterilized}
               disabled={!editable}
               onChange={(v) => setForm({ ...form, sterilized: v })}
