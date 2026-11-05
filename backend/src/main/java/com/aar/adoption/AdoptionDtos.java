@@ -15,7 +15,7 @@ public final class AdoptionDtos {
     }
 
     /**
-     * phone, address: bắt buộc nếu tài khoản chưa có (ví dụ đăng ký bằng Google), được lưu vào tài khoản
+     * phone, address: bắt buộc nếu tài khoản chưa có (ví dụ đăng ký không nhập số điện thoại), được lưu vào tài khoản
      * để nhân viên liên hệ khi xét duyệt và hậu kiểm.
      */
     public record SubmitRequest(

@@ -38,9 +38,6 @@ app:
     # Thư mục lưu tệp đính kèm. Không commit thư mục này
     dir: ${STORAGE_DIR:./data/uploads}
     max-files-per-request: 5
-  google:
-    # OAuth Client ID loại "Web application" trên Google Cloud Console. Để trống thì tắt đăng nhập Google
-    client-id: ${GOOGLE_CLIENT_ID:}
   # Giới hạn tần suất /api/public/** theo IP, mỗi phút
   rate-limit:
     auth-per-minute: 10

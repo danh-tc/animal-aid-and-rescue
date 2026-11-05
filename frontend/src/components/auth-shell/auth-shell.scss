@@ -136,22 +136,6 @@
     color: $color-muted;
   }
 
-  &__divider {
-    display: flex;
-    align-items: center;
-    gap: $space-3;
-    color: $color-muted;
-    font-size: $font-size-sm;
-
-    &::before,
-    &::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: $color-border;
-    }
-  }
-
   &__footer {
     padding-top: $space-5;
     border-top: 1px solid $color-border;
