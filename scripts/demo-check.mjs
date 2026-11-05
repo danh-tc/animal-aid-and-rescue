@@ -150,10 +150,12 @@ async function main() {
       { as: "staff", body: { ...criteria, housingOk: false, result: "WATCH", reason: "Chỗ ở chật" } }, 200);
     const extra = watch?.additionalFollowUp?.id;
     check("Hệ thống thêm lần hậu kiểm bổ sung", !!extra);
+    if (extra) {
     await expect("Lần bổ sung không được chọn Cần theo dõi (QĐ-12)", "POST", `/api/staff/follow-ups/${extra}/result`,
       { as: "staff", body: { ...criteria, result: "WATCH", reason: "Vẫn chưa ổn" } }, 400);
     await expect("Lần bổ sung ghi Đạt", "POST", `/api/staff/follow-ups/${extra}/result`,
       { as: "staff", body: { ...criteria, result: "PASS" } }, 200);
+    }
   }
   const ret = await expect("Chủ trả lại Miu (QĐ-13)", "POST", "/api/staff/pets/6/returns",
     { as: "staff", body: { reason: "Chủ chuyển nhà", priority: "STABLE" } }, 201);
