@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.aar.support.IntegrationTestBase;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.time.LocalDate;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** Đợt 2 của UC-07 và P04: tra cứu báo cáo (RB-15), ca đang mở ở gần, gộp báo cáo trùng (QĐ-01). */
@@ -82,5 +84,37 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         long id = reportId(reportAt(lat, lon));
         return postJson("/api/staff/rescue-reports/" + id + "/cases", MANAGER,
             map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
+    }
+
+    /** UC-02 mở rộng: ca thành công thì người báo thấy giai đoạn công khai của thú, link hồ sơ chỉ khi thú đang tìm nhà. */
+    @Test
+    void lookupShowsPublicStageOfRescuedPet() throws Exception {
+        long petId = rescuedPet("DOG", LocalDate.now().minusYears(1));
+        Map<String, Object> r = jdbc.queryForMap("""
+            SELECT r.code, r.reporter_phone FROM rescue_reports r
+            JOIN report_cases rc ON rc.report_id = r.id
+            JOIN intakes i ON i.rescue_case_id = rc.case_id
+            WHERE i.pet_id = ?""", petId);
+        String url = "/api/public/rescue-reports/lookup?code=" + r.get("code") + "&phone=" + r.get("reporter_phone");
+
+        JsonNode pet = getJson(url, null, 200).get("cases").get(0).get("pet");
+        assertThat(pet.get("stage").asText()).isEqualTo("IN_CARE");
+        assertThat(pet.get("petName").asText()).isEqualTo("Thú test");
+        assertThat(pet.get("petId").isNull()).isTrue();
+
+        jdbc.update("UPDATE pets SET status = 'AVAILABLE' WHERE id = ?", petId);
+        pet = getJson(url, null, 200).get("cases").get(0).get("pet");
+        assertThat(pet.get("stage").asText()).isEqualTo("LOOKING_FOR_HOME");
+        assertThat(pet.get("petId").asLong()).isEqualTo(petId);
+
+        jdbc.update("UPDATE pets SET status = 'ADOPTED' WHERE id = ?", petId);
+        pet = getJson(url, null, 200).get("cases").get(0).get("pet");
+        assertThat(pet.get("stage").asText()).isEqualTo("ADOPTED");
+        assertThat(pet.get("petId").isNull()).isTrue();
+        // Không lộ thông tin người nhận nuôi
+        assertThat(pet.has("ownerName")).isFalse();
+
+        jdbc.update("UPDATE pets SET status = 'DECEASED' WHERE id = ?", petId);
+        assertThat(getJson(url, null, 200).get("cases").get(0).get("pet").get("stage").asText()).isEqualTo("DECEASED");
     }
 }

@@ -23,6 +23,8 @@ export type Contract = [
   Expect<SameKeys<S["AuthResponse"], Api.AuthResponse>>,
   Expect<SameKeys<S["ReportReceipt"], Api.ReportReceipt>>,
   Expect<SameKeys<S["ReportLookup"], Api.ReportLookup>>,
+  Expect<SameKeys<S["CaseProgress"], Api.CaseProgress>>,
+  Expect<SameKeys<S["PetProgress"], Api.PetProgress>>,
   Expect<SameKeys<S["ReportSummary"], Api.ReportSummary>>,
   Expect<SameKeys<S["ReportDetail"], Api.ReportDetail>>,
   Expect<SameKeys<S["OpenCase"], Api.OpenCase>>,

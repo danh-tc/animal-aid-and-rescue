@@ -149,7 +149,23 @@ export interface ReportLookup {
   status: ReportStatus;
   createdAt: string;
   handledAt: string | null;
-  cases: { status: CaseStatus; closedAt: string | null }[];
+  cases: CaseProgress[];
+}
+
+export interface CaseProgress {
+  status: CaseStatus;
+  closedAt: string | null;
+  /** Có khi ca Thành công: giai đoạn công khai của thú được cứu */
+  pet: PetProgress | null;
+}
+
+export type PetStage = EnumOf<Schemas["PetProgress"]["stage"]>;
+
+export interface PetProgress {
+  stage: PetStage;
+  petName: string | null;
+  /** Chỉ có khi thú đang tìm nhà, để mở trang hồ sơ công khai */
+  petId: number | null;
 }
 
 export interface CaseDetail extends CaseSummary {

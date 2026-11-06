@@ -11,6 +11,7 @@ import type {
   HousingType,
   IntakeSource,
   PetArea,
+  PetStage,
   PetStatus,
   Priority,
   ReportStatus,
@@ -144,3 +145,35 @@ export const PET_EVENT: Record<string, string> = {
 export function labelOf<K extends string>(map: Record<K, string>, key: K | null | undefined): string {
   return key ? (map[key] ?? key) : "—";
 }
+
+/**
+ * Giai đoạn công khai của thú cho người báo cứu hộ (trang tra cứu). Lời lẽ nhẹ nhàng,
+ * không nêu chi tiết điều trị hay người nhận nuôi.
+ */
+export const PET_STAGE: Record<PetStage, Labeled & { text: (name: string) => string }> = {
+  IN_CARE: {
+    label: "Đang được chăm sóc",
+    tone: "info",
+    text: (n) => `${n} đang được trung tâm chăm sóc và theo dõi sức khỏe.`,
+  },
+  LOOKING_FOR_HOME: {
+    label: "Đang tìm nhà",
+    tone: "primary",
+    text: (n) => `${n} đã khỏe và đang chờ một mái nhà mới.`,
+  },
+  ADOPTED: {
+    label: "Đã có nhà mới",
+    tone: "success",
+    text: (n) => `${n} đã được một gia đình nhận nuôi. Cảm ơn bạn đã báo để bé có cơ hội này.`,
+  },
+  DECEASED: {
+    label: "Không qua khỏi",
+    tone: "neutral",
+    text: () => "Rất tiếc, dù đã được chăm sóc, bé đã không qua khỏi. Cảm ơn bạn đã quan tâm và báo cho trung tâm.",
+  },
+  LOST: {
+    label: "Đang thất lạc",
+    tone: "warning",
+    text: () => "Bé hiện đang thất lạc. Nếu bạn nhìn thấy bé, hãy gửi báo cáo cứu hộ để trung tâm đón bé về.",
+  },
+};

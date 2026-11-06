@@ -61,6 +61,7 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 Điểm cần cho thấy: tách và gộp báo cáo, chỉ Quản lý phân công, ca thành công tạo hồ sơ, tìm lại thú thất lạc qua ca cứu hộ.
 
 1. **Khách báo cứu hộ** (không đăng nhập): bấm **Báo cứu hộ**, để trống rồi gửi để thấy lỗi dưới từng ô. Điền vị trí "Cầu Ánh Sao, Quận 7", gửi, ghi lại mã BC-. Bấm **tra cứu tiến độ** bằng mã và số điện thoại: trạng thái Mới. Sai số điện thoại thì báo không tìm thấy (RB-15).
+   Tra cứu tiếp `BC-R8N4KD` với số `0911000007`: ca đã Thành công nên có thêm tình trạng hiện tại của con vật, ở đây là **Đang tìm nhà** kèm link hồ sơ Vàng. Thử `BC-W3C7LV` (`0911000009`) để thấy **Đã có nhà mới**, `BC-B4X8QN` (`0911000012`) để thấy lời báo nhẹ nhàng khi bé không qua khỏi. Trang tra cứu không hiện thông tin người nhận nuôi.
 2. Đăng nhập `staff1@aar.local`. Bảng công việc có cảnh báo **ca cứu hộ chưa được phân công quá hạn** (ca #11, QĐ-17) kèm câu "Chỉ Quản lý phân công được".
 3. Mở báo cáo vừa gửi: khung **Ca đang mở để kiểm tra trùng** có ca #4 ở cầu Ánh Sao. Bấm **Gộp vào ca này**: báo cáo chuyển Trùng (ngoại lệ 2a).
 4. Mở `BC-H4T8WX`, **Tạo ca cứu hộ**: Nhân viên không có ô phân công. Mở ca vừa tạo: thông báo "Chờ Quản lý phân công", không có nút Phân công.

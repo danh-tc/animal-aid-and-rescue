@@ -1772,6 +1772,14 @@ export interface components {
             status?: "NEW" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED";
             /** Format: date-time */
             closedAt?: string;
+            pet?: components["schemas"]["PetProgress"];
+        };
+        PetProgress: {
+            /** @enum {string} */
+            stage?: "IN_CARE" | "LOOKING_FOR_HOME" | "ADOPTED" | "DECEASED" | "LOST";
+            petName?: string;
+            /** Format: int64 */
+            petId?: number;
         };
         ReportLookup: {
             code?: string;

@@ -69,8 +69,18 @@ public final class RescueDtos {
                                List<CaseProgress> cases) {
     }
 
-    public record CaseProgress(CaseStatus status, OffsetDateTime closedAt) {
+    /** pet có khi ca Thành công: người báo theo dõi tiếp con vật mình đã báo. */
+    public record CaseProgress(CaseStatus status, OffsetDateTime closedAt, PetProgress pet) {
     }
+
+    /**
+     * Giai đoạn công khai của thú, gộp từ trạng thái nội bộ để không lộ chi tiết điều trị hay người nhận nuôi.
+     * petId chỉ có khi thú đang tìm nhà, để mở trang hồ sơ công khai.
+     */
+    public record PetProgress(PetStage stage, String petName, Long petId) {
+    }
+
+    public enum PetStage { IN_CARE, LOOKING_FOR_HOME, ADOPTED, DECEASED, LOST }
 
     /** Tách báo cáo nhiều thú thành nhiều ca (QĐ-01). assignedStaffId có thì phân công luôn. */
     public record CreateCasesRequest(

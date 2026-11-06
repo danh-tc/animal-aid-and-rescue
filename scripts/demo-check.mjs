@@ -70,6 +70,10 @@ async function main() {
   }
 
   console.log("Kịch bản 1. Cứu hộ (UC-07)");
+  const look = (await call("GET", "/api/public/rescue-reports/lookup?code=BC-R8N4KD&phone=0911000007")).data;
+  const vangStage = look?.cases?.[0]?.pet;
+  check("Người báo thấy con vật mình báo đang tìm nhà, có link hồ sơ (UC-02)",
+    vangStage?.stage === "LOOKING_FOR_HOME" && vangStage?.petId === 3, JSON.stringify(look));
   const dash = (await call("GET", "/api/staff/dashboard", { as: "staff" })).data;
   check("Bảng công việc cảnh báo ca chưa phân công quá hạn (QĐ-17)", dash?.overdueUnassignedCases >= 1,
     JSON.stringify(dash));
