@@ -76,7 +76,6 @@ export default function MyApplicationsPage() {
               </div>
               <p className="my-applications__detail">
                 Nhà ở: {HOUSING[a.housingType]} · {a.hasPetExperience ? "Đã từng nuôi" : "Chưa từng nuôi"}
-                {a.sterilizationPledge && " · Đã cam kết triệt sản"}
               </p>
               {a.status === "APPROVED" && (
                 <Notice tone="success" title="Đơn đã được duyệt">
@@ -112,7 +111,7 @@ export default function MyApplicationsPage() {
         title="Hủy đơn nhận nuôi?"
         description={
           cancelling?.status === "APPROVED"
-            ? "Đơn đã được duyệt. Hủy đơn thì bé sẽ mở lại cho người khác nhận nuôi."
+            ? "Đơn đã được duyệt. Nếu hủy, bé sẽ được mở lại cho người khác nhận nuôi."
             : "Bạn có thể nộp lại đơn sau nếu bé vẫn chờ nhận nuôi."
         }
         submitLabel="Hủy đơn"

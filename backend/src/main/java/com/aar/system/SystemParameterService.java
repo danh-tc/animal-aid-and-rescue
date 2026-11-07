@@ -17,6 +17,8 @@ public class SystemParameterService {
     public static final String REPORT_RATE_LIMIT_PER_HOUR = "REPORT_RATE_LIMIT_PER_HOUR";
     public static final String APPLICATION_ALERT_DAYS = "APPLICATION_ALERT_DAYS";
     public static final String MAX_PENDING_APPLICATIONS = "MAX_PENDING_APPLICATIONS";
+    public static final String RECALL_CLOSE_AFTER_DAYS = "RECALL_CLOSE_AFTER_DAYS";
+    public static final String CASE_UNASSIGNED_ALERT_HOURS = "CASE_UNASSIGNED_ALERT_HOURS";
 
     private final SystemParameterRepository params;
 

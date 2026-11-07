@@ -4,6 +4,7 @@ import com.aar.pet.EndEventType;
 import com.aar.pet.PetEndEvent;
 import com.aar.pet.PetStatus;
 import com.aar.pet.Priority;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -65,6 +66,10 @@ public final class HandoverDtos {
     public record FollowUpOutcome(FollowUpView followUp, HandoverStatus handoverStatus, FollowUpView additionalFollowUp) {
     }
 
+    /** QĐ-18: Quản lý đóng thu hồi, bắt buộc ghi lý do (RB-21). */
+    public record CloseRecallRequest(@NotBlank @Size(max = 1000) String reason) {
+    }
+
     /** S10: tiếp nhận trả lại hoặc thu hồi. */
     public record ReturnRequest(
         @NotBlank @Size(max = 1000) String reason,
@@ -75,19 +80,26 @@ public final class HandoverDtos {
     public record ReturnResult(Long petId, String petStatus, Long intakeId, Long handoverId, int cancelledFollowUps) {
     }
 
-    /** S10: ghi sự kiện kết thúc (mục 2.1.6). Chuyển cơ sở cần nơi nhận và lý do, thất lạc cần nơi mất. */
+    /**
+     * S10: ghi sự kiện kết thúc (mục 2.1.6). Thất lạc cần nơi và hoàn cảnh mất.
+     * incurredCosts: chi phí đã phát sinh của từng yêu cầu thú y đang mở (QĐ-14), yêu cầu không nhập thì ghi 0.
+     */
     public record EndEventRequest(
         @NotNull EndEventType eventType,
         @PastOrPresent OffsetDateTime occurredAt,
         @Size(max = 2000) String detail,
-        @Size(max = 255) String destinationOrg) {
+        @Valid List<IncurredCost> incurredCosts) {
+    }
+
+    public record IncurredCost(
+        @NotNull Long vetRequestId,
+        @NotNull @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal amount) {
     }
 
     public record EndEventView(Long id, EndEventType eventType, OffsetDateTime occurredAt, String detail,
-                               String destinationOrg, Long recordedBy) {
+                               Long recordedBy) {
         static EndEventView of(PetEndEvent e) {
-            return new EndEventView(e.getId(), e.getEventType(), e.getOccurredAt(), e.getDetail(), e.getDestinationOrg(),
-                e.getRecordedBy());
+            return new EndEventView(e.getId(), e.getEventType(), e.getOccurredAt(), e.getDetail(), e.getRecordedBy());
         }
     }
 

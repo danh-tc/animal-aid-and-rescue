@@ -34,6 +34,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTransitionException.class)
     ResponseEntity<ApiError> invalidTransition(InvalidTransitionException ex) {
+        log.warn("Chuyển trạng thái không hợp lệ: {}", ex.detail());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of("INVALID_TRANSITION", ex.getMessage()));
     }
 
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> integrity(DataIntegrityViolationException ex) {
         log.warn("Vi phạm ràng buộc dữ liệu: {}", ex.getMostSpecificCause().getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(ApiError.of("CONSTRAINT_VIOLATION", "Dữ liệu vi phạm ràng buộc, có thể đã bị thay đổi bởi thao tác khác"));
+            .body(ApiError.of("CONSTRAINT_VIOLATION", "Dữ liệu không hợp lệ hoặc vừa bị thay đổi bởi thao tác khác, vui lòng tải lại trang"));
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
@@ -97,6 +98,6 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> unexpected(Exception ex) {
         log.error("Lỗi không mong đợi", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ApiError.of("INTERNAL_ERROR", "Đã có lỗi xảy ra"));
+            .body(ApiError.of("INTERNAL_ERROR", "Đã có lỗi xảy ra, vui lòng thử lại sau"));
     }
 }

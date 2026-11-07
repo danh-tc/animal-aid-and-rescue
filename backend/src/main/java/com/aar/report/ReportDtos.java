@@ -26,7 +26,12 @@ public final class ReportDtos {
 
     /** Báo cáo ngoại lệ: thú quá hạn hậu kiểm, đơn chờ xét quá lâu, bàn giao đang chờ thu hồi. */
     public record ExceptionReport(int applicationAlertDays, List<OverdueFollowUp> overdueFollowUps,
-                                  List<StaleApplication> staleApplications, List<RecallPending> recallPending) {
+                                  List<StaleApplication> staleApplications, List<RecallPending> recallPending,
+                                  int caseUnassignedAlertHours, List<UnassignedCase> unassignedCases) {
+    }
+
+    /** QĐ-17: ca ở Mới quá CASE_UNASSIGNED_ALERT_HOURS giờ, nhắc Quản lý phân công. */
+    public record UnassignedCase(Long caseId, String locationText, OffsetDateTime createdAt, long hoursWaiting) {
     }
 
     public record OverdueFollowUp(Long followUpId, Long petId, String petCode, String petName, int sequenceNo,
@@ -37,8 +42,10 @@ public final class ReportDtos {
                                    String applicantName, OffsetDateTime submittedAt, long daysWaiting) {
     }
 
+    /** failedAt: thời điểm ghi hậu kiểm Không đạt. closableFrom: từ ngày này Quản lý được đóng thu hồi (QĐ-18). */
     public record RecallPending(Long handoverId, Long petId, String petCode, String petName, String ownerName,
-                                String ownerPhone, OffsetDateTime handedOverAt) {
+                                String ownerPhone, OffsetDateTime handedOverAt, OffsetDateTime failedAt,
+                                OffsetDateTime closableFrom) {
     }
 
     /** Báo cáo chi phí và ủng hộ (QĐ-14). */

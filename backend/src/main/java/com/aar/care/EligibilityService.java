@@ -42,12 +42,16 @@ public class EligibilityService {
 
     public Checklist evaluate(Pet pet) {
         long open = vetRequests.countByPetIdAndStatusIn(pet.getId(), VetRequestStatus.OPEN);
-        // Checklist mục 1: không còn yêu cầu mở và lần khám hoàn tất gần nhất kết luận ổn
-        var lastExam = vetRequests.findFirstByPetIdAndStatusOrderByCompletedAtDesc(pet.getId(), VetRequestStatus.COMPLETED);
+        OffsetDateTime lastIntake = intakes.findFirstByPetIdOrderByIntakeAtDesc(pet.getId())
+            .map(Intake::getIntakeAt).orElse(null);
+        // Checklist mục 1 (QĐ-05): không còn yêu cầu mở và lần khám gần nhất TRONG lượt tiếp nhận hiện tại kết luận ổn.
+        // Thú bị trả lại hoặc tìm lại phải khám lại, kết quả khám của lượt trước không được tính.
+        var lastExam = vetRequests.findFirstByPetIdAndStatusOrderByCompletedAtDesc(pet.getId(), VetRequestStatus.COMPLETED)
+            .filter(v -> lastIntake == null || (v.getCompletedAt() != null && v.getCompletedAt().isAfter(lastIntake)));
         boolean lastOk = lastExam.map(v -> Boolean.TRUE.equals(v.getHealthOk())).orElse(false);
         boolean health = open == 0 && lastOk;
         String healthDetail = open > 0 ? "Còn " + open + " yêu cầu thú y đang mở"
-            : lastExam.isEmpty() ? "Chưa qua thú y lần nào (QĐ-05)"
+            : lastExam.isEmpty() ? "Chưa khám thú y trong lượt tiếp nhận hiện tại"
             : lastOk ? null : "Lần khám gần nhất kết luận sức khỏe chưa ổn";
 
         Long ageWeeks = pet.getEstimatedBirthDate() == null ? null
@@ -61,12 +65,10 @@ public class EligibilityService {
         boolean tooYoungToSterilize = ageWeeks != null && ageWeeks < minSterilization;
         boolean sterilizationOk = pet.isSterilized() || tooYoungToSterilize;
         String sterilizationDetail = pet.isSterilized() ? null
-            : tooYoungToSterilize ? "Chưa đủ tuổi triệt sản, đơn nhận nuôi phải kèm cam kết triệt sản"
+            : tooYoungToSterilize ? "Chưa đủ tuổi triệt sản, mục này được tính là đạt"
             : "Đủ tuổi nhưng chưa triệt sản";
 
         int quarantineDays = params.getInt(SystemParameterService.QUARANTINE_DAYS);
-        OffsetDateTime lastIntake = intakes.findFirstByPetIdOrderByIntakeAtDesc(pet.getId())
-            .map(Intake::getIntakeAt).orElse(null);
         boolean quarantineOver = lastIntake != null && !lastIntake.plusDays(quarantineDays).isAfter(OffsetDateTime.now());
         boolean observationOk = quarantineOver && pet.isTemperamentOk();
         String observationDetail = !quarantineOver
@@ -78,7 +80,7 @@ public class EligibilityService {
             new Item("VACCINATED", "Đã tiêm phòng cơ bản", pet.isVaccinated(), null),
             new Item("DEWORMED", "Đã tẩy giun, ký sinh trùng", pet.isDewormed(), null),
             new Item("AGE", "Đủ tuổi tách mẹ", ageOk, ageDetail),
-            new Item("STERILIZATION", "Triệt sản hoặc chưa đủ tuổi triệt sản", sterilizationOk, sterilizationDetail),
+            new Item("STERILIZATION", "Đã triệt sản (nếu đủ tuổi)", sterilizationOk, sterilizationDetail),
             new Item("OBSERVATION", "Hết cách ly, tính cách không hung dữ", observationOk, observationDetail));
         return new Checklist(items.stream().allMatch(Item::passed), items);
     }

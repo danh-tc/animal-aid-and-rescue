@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
-/** Bảng pet_end_events: qua đời, thất lạc, chuyển cơ sở. Chuyển cơ sở bắt buộc có nơi nhận (CHECK ck_end_transfer_dest). */
+/** Bảng pet_end_events: hai sự kiện kết thúc vòng đời là qua đời và thất lạc (mục 2.1.6). */
 @Entity
 @Table(name = "pet_end_events")
 public class PetEndEvent {
@@ -31,22 +31,17 @@ public class PetEndEvent {
 
     private String detail;
 
-    @Column(name = "destination_org")
-    private String destinationOrg;
-
     @Column(name = "recorded_by", nullable = false)
     private Long recordedBy;
 
     protected PetEndEvent() {
     }
 
-    public PetEndEvent(Long petId, EndEventType eventType, OffsetDateTime occurredAt, String detail,
-                       String destinationOrg, Long recordedBy) {
+    public PetEndEvent(Long petId, EndEventType eventType, OffsetDateTime occurredAt, String detail, Long recordedBy) {
         this.petId = petId;
         this.eventType = eventType;
         this.occurredAt = occurredAt;
         this.detail = detail;
-        this.destinationOrg = destinationOrg;
         this.recordedBy = recordedBy;
     }
 
@@ -55,6 +50,5 @@ public class PetEndEvent {
     public EndEventType getEventType() { return eventType; }
     public OffsetDateTime getOccurredAt() { return occurredAt; }
     public String getDetail() { return detail; }
-    public String getDestinationOrg() { return destinationOrg; }
     public Long getRecordedBy() { return recordedBy; }
 }

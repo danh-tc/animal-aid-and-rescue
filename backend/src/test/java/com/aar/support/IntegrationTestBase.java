@@ -173,7 +173,7 @@ public abstract class IntegrationTestBase {
 
     /**
      * Thú đã qua thú y, hết cách ly, đủ checklist => AVAILABLE.
-     * young = true: thú chưa đủ tuổi triệt sản (khoảng 14 tuần) và chưa triệt sản, đơn phải kèm cam kết.
+     * young = true: thú chưa đủ tuổi triệt sản (khoảng 14 tuần) và chưa triệt sản, checklist mục 5 vẫn đạt.
      */
     protected long availablePet(boolean young) throws Exception {
         LocalDate birth = LocalDate.now().minusDays(young ? 100 : 400);
@@ -203,15 +203,15 @@ public abstract class IntegrationTestBase {
         return jdbc.queryForObject("SELECT status FROM adoption_applications WHERE id = ?", String.class, applicationId);
     }
 
-    protected long submitApplication(long petId, String adopter, boolean pledge) throws Exception {
+    protected long submitApplication(long petId, String adopter) throws Exception {
         return postJson("/api/adopter/applications", adopter, map("petId", petId, "housingType", "HOUSE",
-            "hasPetExperience", true, "motivation", "Yêu chó", "sterilizationPledge", pledge), 201).get("id").asLong();
+            "hasPetExperience", true, "motivation", "Yêu chó"), 201).get("id").asLong();
     }
 
     /** Thú Sẵn sàng => đơn của adopter => đã duyệt. Trả về id đơn. */
     protected long approvedApplication(String adopter) throws Exception {
         long petId = availablePet(false);
-        long appId = submitApplication(petId, adopter, false);
+        long appId = submitApplication(petId, adopter);
         postJson("/api/staff/applications/" + appId + "/approve", STAFF, null, 200);
         return appId;
     }

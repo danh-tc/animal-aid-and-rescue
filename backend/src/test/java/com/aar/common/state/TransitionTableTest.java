@@ -33,7 +33,7 @@ class TransitionTableTest {
         "PET, IN_CARE, APPLICATION_APPROVED",
         "PET, IN_TREATMENT, ELIGIBILITY_PASSED",
         "PET, DECEASED, FOUND",
-        "PET, TRANSFERRED, RETURNED",
+        "PET, IN_CARE, TRANSFERRED",
         "APPLICATION, REJECTED, APPROVED",
         "APPLICATION, HANDED_OVER, CANCELLED",
         "VET_REQUEST, COMPLETED, CANCELLED",
@@ -48,7 +48,7 @@ class TransitionTableTest {
     void terminalPetStatesHaveNoWayOutExceptFound() {
         assertThat(TransitionTable.all())
             .filteredOn(t -> t.entity() == EntityType.PET)
-            .filteredOn(t -> "DECEASED".equals(t.from()) || "TRANSFERRED".equals(t.from()))
+            .filteredOn(t -> "DECEASED".equals(t.from()))
             .isEmpty();
     }
 }

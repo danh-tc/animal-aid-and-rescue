@@ -12,16 +12,29 @@ import { Notice } from "@/components/notice/Notice";
 import { Timeline } from "@/components/timeline/Timeline";
 import { ApiRequestError, apiFetch, errorMessage } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { CASE_STATUS, REPORT_STATUS } from "@/lib/labels";
-import type { ReportLookup } from "@/types/api";
+import { CASE_STATUS, PET_STAGE, REPORT_STATUS } from "@/lib/labels";
+import type { PetProgress, ReportLookup } from "@/types/api";
 import "../rescue-form.scss";
 
 const STATUS_TEXT: Record<ReportLookup["status"], string> = {
   NEW: "Trung tâm đã nhận báo cáo và đang sắp xếp người xử lý.",
-  PROCESSED: "Đội cứu hộ đã được phân công. Tiến độ từng con vật ở bên dưới.",
+  PROCESSED: "Đội cứu hộ đã được phân công. Xem tiến độ của từng con vật bên dưới, con vật được cứu thành công sẽ có thêm tình trạng hiện tại.",
   DUPLICATE: "Báo cáo trùng với một ca đang được xử lý, đội cứu hộ đã nắm thông tin.",
   INVALID: "Báo cáo không đủ thông tin hoặc không cần cứu hộ. Liên hệ trung tâm nếu bạn cần trao đổi thêm.",
 };
+
+/** Ca thành công: cho người báo biết con vật mình đã báo hiện ra sao, chỉ ở mức công khai. */
+function PetStageNote({ pet }: { pet: PetProgress }) {
+  const stage = PET_STAGE[pet.stage];
+  const name = pet.petName ? `Bé ${pet.petName}` : "Bé";
+  return (
+    <div className="rescue-form__pet">
+      <StatusBadge map={PET_STAGE} value={pet.stage} />
+      <p>{stage.text(name)}</p>
+      {pet.petId != null && <Link href={`/pets/${pet.petId}`}>Xem hồ sơ của bé</Link>}
+    </div>
+  );
+}
 
 function LookupForm() {
   const params = useSearchParams();
@@ -59,7 +72,7 @@ function LookupForm() {
     <FormCard
       title="Tra cứu báo cáo cứu hộ"
       icon={Search}
-      description="Nhập mã nhận được sau khi gửi báo cáo và số điện thoại bạn đã khai."
+      description="Nhập mã nhận được sau khi gửi báo cáo và số điện thoại đã dùng khi gửi."
       footer={
         <>
           Chưa gửi báo cáo? <Link href="/rescue">Báo thú cần cứu hộ</Link>
@@ -97,7 +110,8 @@ function LookupForm() {
                     <StatusBadge map={CASE_STATUS} value={c.status} />
                   </>
                 ),
-                time: c.closedAt ? `Đóng ${formatDateTime(c.closedAt)}` : "Đang xử lý",
+                time: c.closedAt ? `Kết thúc lúc ${formatDateTime(c.closedAt)}` : "Đang xử lý",
+                body: c.pet ? <PetStageNote pet={c.pet} /> : undefined,
               }))}
             />
           )}

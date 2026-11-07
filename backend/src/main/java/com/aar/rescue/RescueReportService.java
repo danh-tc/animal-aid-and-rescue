@@ -2,6 +2,11 @@ package com.aar.rescue;
 
 import com.aar.common.security.AuthUser;
 import com.aar.rescue.RescueDtos.CaseProgress;
+import com.aar.rescue.RescueDtos.PetProgress;
+import com.aar.rescue.RescueDtos.PetStage;
+import com.aar.pet.IntakeRepository;
+import com.aar.pet.Pet;
+import com.aar.pet.PetRepository;
 import com.aar.rescue.RescueDtos.OpenCase;
 import com.aar.rescue.RescueDtos.ReportLookup;
 import java.util.Comparator;
@@ -50,11 +55,13 @@ public class RescueReportService {
     private final SystemParameterService params;
     private final StorageService storage;
     private final AttachmentRepository attachments;
+    private final IntakeRepository intakes;
+    private final PetRepository pets;
 
     public RescueReportService(RescueReportRepository reports, RescueCaseRepository cases,
                                RescueCaseService caseService, StateTransitionService state, CodeGenerator codes,
                                SystemParameterService params, StorageService storage,
-                               AttachmentRepository attachments) {
+                               AttachmentRepository attachments, IntakeRepository intakes, PetRepository pets) {
         this.reports = reports;
         this.cases = cases;
         this.caseService = caseService;
@@ -63,14 +70,20 @@ public class RescueReportService {
         this.params = params;
         this.storage = storage;
         this.attachments = attachments;
+        this.intakes = intakes;
+        this.pets = pets;
     }
 
     public ReportReceipt submit(ReportRequest req, List<MultipartFile> photos) {
+        // RB-22: có đủ cả vĩ độ và kinh độ hoặc không có cả hai (CHECK ck_report_coordinates chặn thêm ở CSDL)
+        if ((req.latitude() == null) != (req.longitude() == null)) {
+            throw BusinessException.badRequest("INVALID_COORDINATES", "Vị trí phải có đủ cả vĩ độ và kinh độ");
+        }
         int limit = params.getInt(SystemParameterService.REPORT_RATE_LIMIT_PER_HOUR);
         long recent = reports.countByReporterPhoneAndCreatedAtAfter(req.reporterPhone(), OffsetDateTime.now().minusHours(1));
         if (recent >= limit) {
             throw BusinessException.tooManyRequests("RATE_LIMITED",
-                "Số điện thoại này đã gửi " + limit + " báo cáo trong một giờ, vui lòng thử lại sau");
+                "Số điện thoại này đã gửi " + limit + " báo cáo trong 1 giờ qua, vui lòng thử lại sau");
         }
         ReportStatus initial = ReportStatus.valueOf(state.initialStatus(EntityType.RESCUE_REPORT, "SUBMITTED"));
         RescueReport report = reports.save(new RescueReport(uniqueCode(), req.reporterName().trim(),
@@ -151,7 +164,28 @@ public class RescueReportService {
         RescueReport r = reports.findByCodeAndReporterPhone(code.trim().toUpperCase(), phone.trim())
             .orElseThrow(() -> BusinessException.notFound("Không tìm thấy báo cáo khớp mã và số điện thoại"));
         return new ReportLookup(r.getCode(), r.getStatus(), r.getCreatedAt(), r.getHandledAt(),
-            cases.findByReportId(r.getId()).stream().map(c -> new CaseProgress(c.getStatus(), c.getClosedAt())).toList());
+            cases.findByReportId(r.getId()).stream()
+                .map(c -> new CaseProgress(c.getStatus(), c.getClosedAt(), petProgress(c))).toList());
+    }
+
+    /** Ca Thành công: tìm thú qua lượt tiếp nhận của ca, trả giai đoạn công khai theo trạng thái hiện tại của thú. */
+    private PetProgress petProgress(RescueCase c) {
+        if (c.getStatus() != CaseStatus.SUCCEEDED) return null;
+        return intakes.findByRescueCaseId(c.getId())
+            .flatMap(i -> pets.findById(i.getPetId()))
+            .map(this::toProgress)
+            .orElse(null);
+    }
+
+    private PetProgress toProgress(Pet pet) {
+        PetStage stage = switch (pet.getStatus()) {
+            case IN_CARE, IN_TREATMENT -> PetStage.IN_CARE;
+            case AVAILABLE -> PetStage.LOOKING_FOR_HOME;
+            case PENDING_HANDOVER, ADOPTED -> PetStage.ADOPTED;
+            case DECEASED -> PetStage.DECEASED;
+            case LOST -> PetStage.LOST;
+        };
+        return new PetProgress(stage, pet.getName(), stage == PetStage.LOOKING_FOR_HOME ? pet.getId() : null);
     }
 
     /** Bước 3 của UC-07: tạo một hoặc nhiều ca, mỗi ca một thú. Báo cáo chuyển sang Đã xử lý. */

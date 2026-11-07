@@ -40,7 +40,7 @@ public class AdminService {
     /** Quản lý tạo tài khoản nhân sự. Người nhận nuôi tự đăng ký ở P05. */
     public UserAdminView createUser(CreateUserRequest req) {
         if (req.role() == Role.ADOPTER) {
-            throw BusinessException.badRequest("INVALID_ROLE", "Tài khoản Người nhận nuôi tự đăng ký, Quản lý chỉ tạo Nhân viên hoặc Quản lý");
+            throw BusinessException.badRequest("INVALID_ROLE", "Người nhận nuôi tự đăng ký tài khoản, Quản lý chỉ tạo được tài khoản Nhân viên hoặc Quản lý");
         }
         if (users.existsByEmailIgnoreCase(req.email())) {
             throw BusinessException.conflict("EMAIL_TAKEN", "Email đã được sử dụng");
@@ -57,7 +57,7 @@ public class AdminService {
             throw BusinessException.badRequest("SELF_LOCKOUT", "Không thể tự khóa hoặc tự đổi vai trò của mình");
         }
         if (req.role() != null && (req.role() == Role.ADOPTER) != (user.getRole() == Role.ADOPTER)) {
-            throw BusinessException.badRequest("INVALID_ROLE", "Không chuyển đổi giữa tài khoản Người nhận nuôi và nhân sự");
+            throw BusinessException.badRequest("INVALID_ROLE", "Không đổi được tài khoản Người nhận nuôi thành tài khoản nhân viên và ngược lại");
         }
         user.updateProfile(req.fullName() != null ? req.fullName() : user.getFullName(),
             req.phone() != null ? req.phone() : user.getPhone(),

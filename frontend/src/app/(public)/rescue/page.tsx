@@ -24,7 +24,7 @@ type Errors = Partial<Record<keyof Form, string>>;
 
 function validate(f: Form): Errors {
   const e: Errors = {};
-  if (!f.reporterName.trim()) e.reporterName = "Nhập tên để đội cứu hộ xưng hô khi gọi lại.";
+  if (!f.reporterName.trim()) e.reporterName = "Nhập họ tên để đội cứu hộ tiện liên hệ.";
   if (!/^[0-9+]{9,15}$/.test(f.reporterPhone.trim())) e.reporterPhone = "Số điện thoại gồm 9 đến 15 chữ số.";
   if (!f.locationText.trim()) e.locationText = "Nhập địa chỉ hoặc mô tả vị trí để đội cứu hộ tìm đến.";
   if (!f.description.trim()) e.description = "Mô tả ngắn tình trạng của con vật.";
@@ -107,7 +107,7 @@ export default function RescuePage() {
       if (e instanceof ApiRequestError && Object.keys(e.fieldErrors).length > 0) setErrors(e.fieldErrors as Errors);
       setError(
         e instanceof ApiRequestError && e.status === 429
-          ? "Số điện thoại này đã gửi nhiều báo cáo trong một giờ. Nếu khẩn cấp, vui lòng gọi trực tiếp cho trung tâm."
+          ? "Số điện thoại này đã gửi quá nhiều báo cáo trong 1 giờ qua. Nếu khẩn cấp, vui lòng gọi trực tiếp cho trung tâm."
           : errorMessage(e),
       );
     } finally {
@@ -140,7 +140,7 @@ export default function RescuePage() {
           </div>
           <p className="rescue-form__note">
             Hãy lưu mã này. Bạn có thể <Link href={`/rescue/lookup?code=${receipt.code}`}>tra cứu tiến độ</Link> bằng mã
-            và số điện thoại đã khai.
+            và số điện thoại đã dùng khi gửi.
           </p>
           <div className="rescue-form__actions">
             <LinkButton href="/" variant="ghost">

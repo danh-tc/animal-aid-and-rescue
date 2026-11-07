@@ -37,7 +37,6 @@ public final class TransitionTable {
         for (String active : List.of("IN_CARE", "IN_TREATMENT", "AVAILABLE", "PENDING_HANDOVER")) {
             add(t, p, active, "DECEASED", "DECEASED");
             add(t, p, active, "LOST", "LOST");
-            add(t, p, active, "TRANSFERRED", "TRANSFERRED");
         }
         // Thú đã nhận nuôi: chỉ ghi nhận khi còn trong thời gian hậu kiểm (service kiểm tra)
         add(t, p, "ADOPTED", "DECEASED", "DECEASED");
@@ -68,6 +67,8 @@ public final class TransitionTable {
         add(t, h, "RECALL_PENDING", "RETURNED", "RETURNED");
         add(t, h, "IN_PROGRESS", "CLOSED", "CLOSED");
         add(t, h, "RECALL_PENDING", "CLOSED", "CLOSED");
+        // QĐ-18: Quản lý đóng thu hồi sau RECALL_CLOSE_AFTER_DAYS ngày, thú giữ ADOPTED
+        add(t, h, "RECALL_PENDING", "RECALL_CLOSED", "CLOSED");
 
         EntityType r = EntityType.RESCUE_REPORT;
         add(t, r, null, "SUBMITTED", "NEW");

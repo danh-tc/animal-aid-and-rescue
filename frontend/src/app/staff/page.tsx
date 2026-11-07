@@ -36,6 +36,20 @@ export default function StaffDashboardPage() {
     <div className="dashboard">
       <PageHeader title={`Xin chào, ${user?.fullName ?? ""}`} description="Những việc cần xử lý hôm nay." />
       {stats.error && <Notice tone="error">{stats.error}</Notice>}
+      {s && s.overdueUnassignedCases > 0 && (
+        <Notice
+          tone="warning"
+          title={`${s.overdueUnassignedCases} ca cứu hộ quá hạn mà chưa được phân công`}
+          action={<Link href="/staff/cases?status=NEW">Xem ca</Link>}
+        >
+          {user?.role === "MANAGER" ? "Hãy phân công người đi cứu." : "Chỉ Quản lý mới phân công được, hãy báo cho Quản lý."}
+        </Notice>
+      )}
+      {s && s.recallPending > 0 && (
+        <Notice tone="warning" title={`${s.recallPending} bàn giao đang chờ thu hồi`}>
+          Liên hệ chủ nuôi để thu hồi thú. Xem ở tab Bàn giao trong hồ sơ thú. Quản lý xem danh sách đầy đủ ở màn hình Hậu kiểm.
+        </Notice>
+      )}
 
       <div className="dashboard__stats">
         <StatCard label="Báo cáo mới" value={s?.newReports ?? null} href="/staff/reports?status=NEW" icon={FileText} tone="accent" />
@@ -55,7 +69,7 @@ export default function StaffDashboardPage() {
           tone="warning"
         />
         <StatCard
-          label="Yêu cầu thú y mở"
+          label="Yêu cầu thú y đang mở"
           value={s?.openVetRequests ?? null}
           href="/staff/vet-requests"
           icon={Stethoscope}
@@ -93,7 +107,7 @@ export default function StaffDashboardPage() {
                     {petName(a.pet.name, a.pet.code)} <StatusBadge map={APPLICATION_STATUS} value={a.status} />
                   </span>
                   <span className="dashboard__item-text">{a.applicant.fullName}</span>
-                  <span className="dashboard__item-meta">Nộp {formatDateTime(a.submittedAt)}</span>
+                  <span className="dashboard__item-meta">Nộp lúc {formatDateTime(a.submittedAt)}</span>
                 </Link>
               </li>
             ))}

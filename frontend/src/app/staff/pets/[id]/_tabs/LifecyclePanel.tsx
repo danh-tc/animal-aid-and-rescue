@@ -1,13 +1,12 @@
 "use client";
 
 import { Flag, Search } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Badge, StatusBadge } from "@/components/badge/Badge";
 import { Button } from "@/components/button/Button";
 import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
 import { Dialog } from "@/components/dialog/Dialog";
-import { CheckField, Field } from "@/components/form-field/Field";
+import { Field } from "@/components/form-field/Field";
 import { Notice } from "@/components/notice/Notice";
 import { useToast } from "@/components/toast/Toast";
 import { useMutation } from "@/hooks/useApi";
@@ -23,27 +22,29 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
   const toast = useToast();
   const [open, setOpen] = useState<"end" | "found" | null>(null);
   const [type, setType] = useState<EndEventType | null>(null);
-  const [form, setForm] = useState({ occurredAt: "", detail: "", destination: "" });
+  const [form, setForm] = useState({ occurredAt: "", detail: "" });
   const [found, setFound] = useState({ reason: "", priority: "NEED_CHECK" as Priority, assessment: "" });
   const adopted = pet.status === "ADOPTED";
-  // QĐ-15: yêu cầu thú y đang mở sẽ bị hủy, chi phí chưa ghi sẽ không vào 3 con số và báo cáo chi phí
+  // QĐ-14, QĐ-15: yêu cầu thú y đang mở sẽ bị hủy, nhân viên nhập chi phí đã phát sinh của từng yêu cầu
   const openVet = pet.vetRequests.filter((v) => v.status === "PENDING" || v.status === "IN_TREATMENT");
-  const [costsConfirmed, setCostsConfirmed] = useState(false);
+  const [costs, setCosts] = useState<Record<number, string>>({});
   const canEnd = AT_CENTER.includes(pet.status) || adopted;
 
   async function record() {
     if (!type) throw new Error("Chọn loại sự kiện.");
-    if (openVet.length > 0 && !costsConfirmed)
-      throw new Error("Hãy ghi kết quả và chi phí cho các yêu cầu thú y đang mở, hoặc xác nhận không cần ghi.");
-    if (type === "LOST" && !form.detail.trim()) throw new Error("Ghi nơi và hoàn cảnh mất.");
-    if (type === "TRANSFERRED" && (!form.destination.trim() || !form.detail.trim()))
-      throw new Error("Chuyển cơ sở phải ghi nơi nhận và lý do.");
+    if (type === "LOST" && !form.detail.trim()) throw new Error("Ghi nơi và hoàn cảnh thú bị thất lạc.");
+    const incurredCosts = openVet.map((v) => {
+      const raw = (costs[v.id] ?? "").trim();
+      const amount = raw === "" ? 0 : Number(raw);
+      if (!Number.isInteger(amount) || amount < 0) throw new Error(`Chi phí của yêu cầu #${v.id} phải là số nguyên không âm.`);
+      return { vetRequestId: v.id, amount };
+    });
     const res = await mutate<EndEventResult>(`/api/staff/pets/${pet.id}/end-events`, {
       body: {
         eventType: type,
         occurredAt: form.occurredAt ? new Date(form.occurredAt).toISOString() : null,
         detail: form.detail.trim() || null,
-        destinationOrg: type === "TRANSFERRED" ? form.destination.trim() : null,
+        incurredCosts,
       },
     });
     const closed = [
@@ -80,8 +81,8 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
           icon={<Flag aria-hidden="true" />}
           onClick={() => {
             setType(null);
-            setCostsConfirmed(false);
-            setForm({ occurredAt: "", detail: "", destination: "" });
+            setCosts({});
+            setForm({ occurredAt: "", detail: "" });
             setOpen("end");
           }}
         >
@@ -102,27 +103,26 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
         {openVet.length > 0 && (
           <div className="stack stack--sm">
             <Notice tone="warning" title={`Còn ${openVet.length} yêu cầu thú y đang mở`}>
-              Yêu cầu đang mở sẽ bị hủy. Nếu đã phát sinh chi phí, hãy ghi kết quả kèm chi phí trước để không thiếu trong
-              3 con số chi phí và báo cáo chi phí:{" "}
-              {openVet.map((v, i) => (
-                <span key={v.id}>
-                  {i > 0 && ", "}
-                  <Link href={`/staff/vet-requests/${v.id}`}>
-                    #{v.id} {v.clinicName}
-                  </Link>
-                </span>
-              ))}
+              Các yêu cầu này sẽ bị hủy. Nhập chi phí đã phát sinh của từng yêu cầu (để trống nếu chưa phát sinh), số tiền
+              được tính vào tổng chi phí điều trị của thú.
             </Notice>
-            <CheckField
-              label="Tôi đã ghi chi phí cần thiết, hủy các yêu cầu còn lại"
-              checked={costsConfirmed}
-              onChange={setCostsConfirmed}
-            />
+            {openVet.map((v) => (
+              <Field key={v.id} label={`Chi phí đã phát sinh, yêu cầu #${v.id} ${v.clinicName} (VND)`}>
+                <input
+                  type="number"
+                  min={0}
+                  step={1000}
+                  inputMode="numeric"
+                  value={costs[v.id] ?? ""}
+                  onChange={(e) => setCosts({ ...costs, [v.id]: e.target.value })}
+                />
+              </Field>
+            ))}
           </div>
         )}
         {adopted && (
           <Notice tone="info">
-            Thú đã nhận nuôi chỉ ghi được khi còn trong thời gian hậu kiểm. Lịch hậu kiểm còn lại sẽ bị hủy.
+            Với thú đã được nhận nuôi, chỉ ghi được sự kiện khi còn trong thời gian hậu kiểm. Các lịch hậu kiểm còn lại sẽ bị hủy.
           </Notice>
         )}
         <ChoiceGroup
@@ -133,21 +133,12 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
           choices={[
             { value: "DECEASED", label: "Qua đời" },
             { value: "LOST", label: "Thất lạc", hint: "Tìm lại được thì tạo lượt tiếp nhận mới" },
-            ...(adopted ? [] : [{ value: "TRANSFERRED" as const, label: "Chuyển cơ sở", hint: "Sang tổ chức khác" }]),
           ]}
         />
-        <Field label="Thời điểm" hint="Để trống nếu là bây giờ.">
+        <Field label="Thời điểm" hint="Để trống nếu là thời điểm hiện tại.">
           <input type="datetime-local" value={form.occurredAt} onChange={(e) => setForm({ ...form, occurredAt: e.target.value })} />
         </Field>
-        {type === "TRANSFERRED" && (
-          <Field label="Nơi nhận" required>
-            <input maxLength={255} value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} />
-          </Field>
-        )}
-        <Field
-          label={type === "LOST" ? "Nơi và hoàn cảnh mất" : type === "TRANSFERRED" ? "Lý do chuyển" : "Chi tiết"}
-          required={type === "LOST" || type === "TRANSFERRED"}
-        >
+        <Field label={type === "LOST" ? "Nơi và hoàn cảnh thất lạc" : "Chi tiết"} required={type === "LOST"}>
           <textarea rows={3} maxLength={2000} value={form.detail} onChange={(e) => setForm({ ...form, detail: e.target.value })} />
         </Field>
       </Dialog>
@@ -156,11 +147,11 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
         open={open === "found"}
         onClose={() => setOpen(null)}
         title="Tìm lại thú thất lạc"
-        description="Tạo lượt tiếp nhận mới trên hồ sơ cũ. Thú vào khu cách ly, trạng thái Đang chăm sóc."
+        description="Tạo lượt tiếp nhận mới trên hồ sơ cũ. Thú vào khu cách ly với trạng thái Đang chăm sóc."
         submitLabel="Tiếp nhận"
         onSubmit={markFound}
       >
-        <Field label="Lý do, nơi tìm thấy" required>
+        <Field label="Nơi và hoàn cảnh tìm thấy" required>
           <textarea rows={3} maxLength={1000} value={found.reason} onChange={(e) => setFound({ ...found, reason: e.target.value })} required />
         </Field>
         <Field label="Mức ưu tiên" required>
@@ -182,14 +173,13 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
 
 /** Thông báo đầu hồ sơ khi thú ở trạng thái kết thúc hoặc thất lạc. */
 export function EndEventNotice({ pet, events }: { pet: PetDetail; events: EndEventView[] | null }) {
-  if (!["DECEASED", "LOST", "TRANSFERRED"].includes(pet.status)) return null;
+  if (!["DECEASED", "LOST"].includes(pet.status)) return null;
   const last = events?.[0];
   return (
     <Notice tone={pet.status === "LOST" ? "warning" : "info"} title={`Thú ${PET_STATUS[pet.status].label.toLowerCase()}`}>
       {last ? (
         <>
           <StatusBadge map={END_EVENT} value={last.eventType} /> {formatDateTime(last.occurredAt)}
-          {last.destinationOrg && <> · Nơi nhận: {last.destinationOrg}</>}
           {last.detail && <> · {last.detail}</>}
         </>
       ) : (

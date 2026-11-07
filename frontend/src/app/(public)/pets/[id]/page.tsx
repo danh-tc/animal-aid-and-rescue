@@ -95,16 +95,13 @@ export default async function PetDetailPage({ params }: Props) {
               </li>
               <li>
                 <ShieldCheck aria-hidden="true" />
-                Đã qua thời gian cách ly, tính cách hiền
+                Đã hết thời gian cách ly, tính cách hiền lành
               </li>
               <li>
                 <ShieldCheck aria-hidden="true" />
                 {pet.sterilized ? "Đã triệt sản" : "Chưa triệt sản do chưa đủ tuổi"}
               </li>
             </ul>
-            {!pet.sterilized && (
-              <Notice tone="info">Người nhận nuôi cần cam kết đưa bé đi triệt sản khi bé đủ tuổi.</Notice>
-            )}
           </section>
 
           <AdoptCta petId={pet.id} petName={name} />

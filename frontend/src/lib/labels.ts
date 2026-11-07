@@ -11,6 +11,7 @@ import type {
   HousingType,
   IntakeSource,
   PetArea,
+  PetStage,
   PetStatus,
   Priority,
   ReportStatus,
@@ -37,7 +38,7 @@ export const HOUSING: Record<HousingType, string> = { HOUSE: "Nhà riêng", APAR
 export const CARE_MODE: Record<CareMode, string> = { OUTPATIENT: "Khám ngoại trú", INPATIENT: "Nội trú tại cơ sở" };
 export const INTAKE_SOURCE: Record<IntakeSource, string> = {
   RESCUE: "Cứu hộ",
-  RETURN: "Trả lại / thu hồi",
+  RETURN: "Trả lại hoặc thu hồi",
   FOUND: "Tìm lại sau thất lạc",
 };
 export const CARE_ACTIVITY: Record<CareActivity, string> = {
@@ -52,7 +53,6 @@ export const CARE_ACTIVITY: Record<CareActivity, string> = {
 export const END_EVENT: Record<EndEventType, Labeled> = {
   DECEASED: { label: "Qua đời", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "warning" },
-  TRANSFERRED: { label: "Chuyển cơ sở", tone: "info" },
 };
 
 export const CONTACT_METHOD: Record<ContactMethod, string> = {
@@ -72,10 +72,9 @@ export const PET_STATUS: Record<PetStatus, Labeled> = {
   IN_TREATMENT: { label: "Đang điều trị", tone: "warning" },
   AVAILABLE: { label: "Sẵn sàng nhận nuôi", tone: "success" },
   PENDING_HANDOVER: { label: "Chờ bàn giao", tone: "accent" },
-  ADOPTED: { label: "Đã có chủ", tone: "primary" },
-  DECEASED: { label: "Đã mất", tone: "neutral" },
+  ADOPTED: { label: "Đã nhận nuôi", tone: "primary" },
+  DECEASED: { label: "Qua đời", tone: "neutral" },
   LOST: { label: "Thất lạc", tone: "neutral" },
-  TRANSFERRED: { label: "Đã chuyển đi", tone: "neutral" },
 };
 
 export const REPORT_STATUS: Record<ReportStatus, Labeled> = {
@@ -100,7 +99,7 @@ export const VET_STATUS: Record<VetRequestStatus, Labeled> = {
 };
 
 export const APPLICATION_STATUS: Record<ApplicationStatus, Labeled> = {
-  PENDING: { label: "Chờ duyệt", tone: "accent" },
+  PENDING: { label: "Chờ xét duyệt", tone: "accent" },
   APPROVED: { label: "Đã duyệt", tone: "success" },
   REJECTED: { label: "Từ chối", tone: "danger" },
   CANCELLED: { label: "Đã hủy", tone: "neutral" },
@@ -138,12 +137,43 @@ export const PET_EVENT: Record<string, string> = {
   HANDOVER_CANCELLED: "Hủy bàn giao",
   HANDED_OVER: "Bàn giao cho chủ nuôi",
   RETURNED: "Nhận lại thú",
-  FOUND: "Tìm thấy",
-  DECEASED: "Đã mất",
+  FOUND: "Tìm lại sau thất lạc",
+  DECEASED: "Qua đời",
   LOST: "Thất lạc",
-  TRANSFERRED: "Chuyển đi",
 };
 
 export function labelOf<K extends string>(map: Record<K, string>, key: K | null | undefined): string {
   return key ? (map[key] ?? key) : "—";
 }
+
+/**
+ * Giai đoạn công khai của thú cho người báo cứu hộ (trang tra cứu). Lời lẽ nhẹ nhàng,
+ * không nêu chi tiết điều trị hay người nhận nuôi.
+ */
+export const PET_STAGE: Record<PetStage, Labeled & { text: (name: string) => string }> = {
+  IN_CARE: {
+    label: "Đang được chăm sóc",
+    tone: "info",
+    text: (n) => `${n} đang được trung tâm chăm sóc và theo dõi sức khỏe.`,
+  },
+  LOOKING_FOR_HOME: {
+    label: "Đang tìm nhà",
+    tone: "primary",
+    text: (n) => `${n} đã khỏe và đang chờ một mái nhà mới.`,
+  },
+  ADOPTED: {
+    label: "Đã có nhà mới",
+    tone: "success",
+    text: (n) => `${n} đã được một gia đình nhận nuôi. Cảm ơn bạn đã báo để bé có cơ hội này.`,
+  },
+  DECEASED: {
+    label: "Không qua khỏi",
+    tone: "neutral",
+    text: () => "Rất tiếc, dù đã được chăm sóc, bé đã không qua khỏi. Cảm ơn bạn đã quan tâm và báo cho trung tâm.",
+  },
+  LOST: {
+    label: "Đang thất lạc",
+    tone: "warning",
+    text: () => "Bé hiện đang thất lạc. Nếu bạn nhìn thấy bé, hãy gửi báo cáo cứu hộ để trung tâm đón bé về.",
+  },
+};

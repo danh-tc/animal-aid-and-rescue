@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/badge/Badge";
+import { DataTable } from "@/components/data-table/DataTable";
 import { Button } from "@/components/button/Button";
 import { ChoiceGroup } from "@/components/choice-group/ChoiceGroup";
 import { Dialog } from "@/components/dialog/Dialog";
@@ -13,22 +14,24 @@ import { FilePicker, filesValid } from "@/components/file-picker/FilePicker";
 import { CheckField, Field } from "@/components/form-field/Field";
 import { Notice } from "@/components/notice/Notice";
 import { PageHeader } from "@/components/page-header/PageHeader";
+import { Panel } from "@/components/panel/Panel";
 import { Segmented } from "@/components/segmented/Segmented";
 import { Skeleton } from "@/components/skeleton/Skeleton";
 import { useToast } from "@/components/toast/Toast";
 import { Toolbar } from "@/components/toolbar/Toolbar";
 import { useApi, useMutation } from "@/hooks/useApi";
 import { useUrlState } from "@/hooks/useUrlState";
+import { useAuth } from "@/lib/auth-context";
 import { daysUntil, formatDate, petName, todayIso } from "@/lib/format";
 import { CONTACT_METHOD, HANDOVER_STATUS } from "@/lib/labels";
-import type { ContactMethod, FollowUpOutcome, FollowUpResult, ScheduledFollowUp } from "@/types/api";
+import type { ContactMethod, ExceptionReport, FollowUpOutcome, FollowUpResult, HandoverView, ScheduledFollowUp } from "@/types/api";
 import "./follow-up-board.scss";
 
 type Range = "week" | "all";
 const CRITERIA = [
   { key: "healthOk", label: "Sức khỏe của bé tốt" },
   { key: "housingOk", label: "Chỗ ở đúng như trong đơn" },
-  { key: "commitmentOk", label: "Chủ nuôi giữ cam kết (tiêm phòng, triệt sản)" },
+  { key: "commitmentOk", label: "Tiêm nhắc đúng lịch" },
   { key: "petPresent", label: "Bé vẫn ở với chủ nuôi" },
   { key: "ownerReachable", label: "Liên lạc được với chủ nuôi" },
 ] as const;
@@ -50,6 +53,8 @@ function dueBadge(date: string) {
 
 /** S09: Hậu kiểm */
 export default function FollowUpsPage() {
+  const { user } = useAuth();
+  const isManager = user?.role === "MANAGER";
   const [range, setRange] = useUrlState<Range>("range", "week");
   const focus = Number(useSearchParams().get("focus"));
   const { data, error, loading, reload } = useApi<ScheduledFollowUp[]>("/api/staff/follow-ups", {
@@ -74,10 +79,19 @@ export default function FollowUpsPage() {
     setFiles([]);
   }
 
+  // QĐ-12: nhân viên tự chọn kết quả. Lần bổ sung chỉ được Đạt hoặc Không đạt, thay cho kết quả của lần gốc.
+  const isAdditional = target?.followUp.additional ?? false;
+  const resultChoices: { value: FollowUpResult; label: string; hint?: string }[] = [
+    { value: "PASS", label: "Đạt", hint: "Bé ổn, không cần theo dõi thêm" },
+    ...(isAdditional ? [] : [{ value: "WATCH" as const, label: "Cần theo dõi", hint: "Thêm một lần hậu kiểm bổ sung" }]),
+    { value: "FAIL", label: "Không đạt", hint: "Chuyển sang chờ thu hồi" },
+  ];
+
   async function submit() {
     if (!target) return;
     if (!result) throw new Error("Chọn kết quả hậu kiểm.");
-    if (result !== "PASS" && !reason.trim()) throw new Error("Cần theo dõi hoặc Không đạt phải ghi lý do.");
+    if (!resultChoices.some((c) => c.value === result)) throw new Error("Kết quả đã chọn không còn hợp lệ, hãy chọn lại.");
+    if (result !== "PASS" && !reason.trim()) throw new Error("Chọn Cần theo dõi hoặc Không đạt thì phải ghi nhận xét.");
     if (!filesValid(files)) throw new Error("Có tệp lớn hơn 5MB.");
     const id = target.followUp.id;
     // Mục 5.2: multipart gồm phần "data" (5 tiêu chí, kết quả, lý do) và "photos" (ảnh hậu kiểm)
@@ -197,17 +211,100 @@ export default function FollowUpsPage() {
           required
           value={result}
           onChange={setResult}
-          choices={[
-            { value: "PASS", label: "Đạt" },
-            { value: "WATCH", label: "Cần theo dõi", hint: "Thêm một lần hậu kiểm" },
-            { value: "FAIL", label: "Không đạt", hint: "Chuyển sang chờ thu hồi" },
-          ]}
+          choices={resultChoices}
         />
+        {isAdditional && (
+          <p className="form-field__hint">
+            Đây là lần hậu kiểm bổ sung nên chỉ chọn Đạt hoặc Không đạt. Nếu vẫn không liên lạc được chủ nuôi, chọn Không đạt.
+          </p>
+        )}
         <Field label="Nhận xét" required={result === "WATCH" || result === "FAIL"} hint="Bắt buộc khi Cần theo dõi hoặc Không đạt.">
           <textarea rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} />
         </Field>
         <FilePicker label="Ảnh thăm nhà (không bắt buộc)" files={files} onChange={setFiles} />
       </Dialog>
+      {isManager && <RecallPanel />}
     </>
+  );
+}
+
+type RecallRow = ExceptionReport["recallPending"][number];
+
+/**
+ * S09, QĐ-18: bàn giao đang chờ thu hồi. Quá thời gian chờ (RECALL_CLOSE_AFTER_DAYS) mà vẫn không thu hồi được
+ * thì Quản lý đóng thu hồi, ghi lý do. Thú giữ trạng thái Đã nhận nuôi.
+ */
+function RecallPanel() {
+  const { data, error, reload } = useApi<ExceptionReport>("/api/admin/reports/exceptions");
+  const mutate = useMutation();
+  const toast = useToast();
+  const [target, setTarget] = useState<RecallRow | null>(null);
+  const [reason, setReason] = useState("");
+  const now = Date.now();
+
+  async function closeRecall() {
+    if (!target) return;
+    if (!reason.trim()) throw new Error("Ghi lý do đóng thu hồi.");
+    await mutate<HandoverView>(`/api/staff/handovers/${target.handoverId}/close-recall`, { body: { reason: reason.trim() } });
+    toast.success(`Đã đóng thu hồi. ${petName(target.petName, target.petCode)} giữ trạng thái Đã nhận nuôi.`);
+    setTarget(null);
+    reload();
+  }
+
+  return (
+    <Panel title="Bàn giao chờ thu hồi" description="Các bàn giao có hậu kiểm Không đạt. Liên hệ chủ nuôi để thu hồi thú, nếu quá thời gian chờ vẫn không thu hồi được thì Quản lý đóng thu hồi." flush>
+      {error && <Notice tone="error">{error}</Notice>}
+      {data && data.recallPending.length === 0 && <EmptyState icon={ClipboardCheck} title="Không có bàn giao chờ thu hồi" />}
+      {data && data.recallPending.length > 0 && (
+        <DataTable
+          caption="Bàn giao chờ thu hồi"
+          rows={data.recallPending}
+          rowKey={(r) => r.handoverId}
+          columns={[
+            {
+              key: "pet",
+              header: "Thú",
+              render: (r) => <Link href={`/staff/pets/${r.petId}?tab=handovers`}>{petName(r.petName, r.petCode)}</Link>,
+            },
+            { key: "owner", header: "Chủ nuôi", render: (r) => `${r.ownerName}${r.ownerPhone ? ` · ${r.ownerPhone}` : ""}` },
+            { key: "failed", header: "Ngày Không đạt", render: (r) => (r.failedAt ? formatDate(r.failedAt) : "—"), hideOnMobile: true },
+            {
+              key: "action",
+              header: "Đóng thu hồi",
+              render: (r) => {
+                const ready = !!r.closableFrom && new Date(r.closableFrom).getTime() <= now;
+                return ready ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setReason("");
+                      setTarget(r);
+                    }}
+                  >
+                    Đóng thu hồi
+                  </Button>
+                ) : (
+                  `Đóng được từ ${r.closableFrom ? formatDate(r.closableFrom) : "—"}`
+                );
+              },
+            },
+          ]}
+        />
+      )}
+      <Dialog
+        open={target !== null}
+        onClose={() => setTarget(null)}
+        title="Đóng thu hồi?"
+        description="Bàn giao chuyển sang Đã đóng, thú vẫn ở trạng thái Đã nhận nuôi. Nếu người này nộp đơn sau, nhân viên sẽ thấy cảnh báo."
+        submitLabel="Đóng thu hồi"
+        submitVariant="danger"
+        onSubmit={closeRecall}
+      >
+        <Field label="Lý do" required>
+          <textarea rows={3} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} required />
+        </Field>
+      </Dialog>
+    </Panel>
   );
 }

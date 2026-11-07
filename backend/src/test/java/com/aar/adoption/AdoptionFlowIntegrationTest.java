@@ -25,7 +25,7 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void adopterSubmitsAndSeesOwnApplications() throws Exception {
         long petId = availablePet(false);
-        long appId = submitApplication(petId, ADOPTER1, false);
+        long appId = submitApplication(petId, ADOPTER1);
         JsonNode mine = getJson("/api/adopter/applications", ADOPTER1, 200);
         assertThat(mine.findValuesAsText("id")).contains(Long.toString(appId));
         assertThat(applicationStatus(appId)).isEqualTo("PENDING");
@@ -47,22 +47,20 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         assertThat(error.get("code").asText()).isEqualTo("PET_NOT_AVAILABLE");
     }
 
-    /** Checklist mục 5: thú chưa triệt sản thì đơn phải kèm cam kết. */
+    /** Checklist mục 5: thú chưa đủ tuổi triệt sản vẫn Sẵn sàng, nộp đơn không cần cam kết triệt sản. */
     @Test
-    void unsterilizedPetRequiresPledge() throws Exception {
+    void youngUnsterilizedPetAcceptsApplicationWithoutPledge() throws Exception {
         long petId = availablePet(true);
-        JsonNode error = postJson("/api/adopter/applications", ADOPTER1, map("petId", petId, "housingType", "APARTMENT",
-            "hasPetExperience", false, "sterilizationPledge", false), 400);
-        assertThat(error.get("code").asText()).isEqualTo("STERILIZATION_PLEDGE_REQUIRED");
-        submitApplication(petId, ADOPTER1, true);
+        long appId = submitApplication(petId, ADOPTER1);
+        assertThat(applicationStatus(appId)).isEqualTo("PENDING");
     }
 
     /** QĐ-09: duyệt một đơn thì thú Chờ bàn giao, các đơn chờ khác tự đóng. */
     @Test
     void approvingClosesOtherPendingApplications() throws Exception {
         long petId = availablePet(false);
-        long app1 = submitApplication(petId, ADOPTER1, false);
-        long app2 = submitApplication(petId, ADOPTER2, false);
+        long app1 = submitApplication(petId, ADOPTER1);
+        long app2 = submitApplication(petId, ADOPTER2);
 
         JsonNode detail = getJson("/api/staff/applications/" + app1, STAFF, 200);
         assertThat(detail.get("otherApplications")).hasSize(1);
@@ -82,7 +80,7 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void rejectRequiresNote() throws Exception {
         long petId = availablePet(false);
-        long app = submitApplication(petId, ADOPTER3, false);
+        long app = submitApplication(petId, ADOPTER3);
         postJson("/api/staff/applications/" + app + "/reject", STAFF, map("note", ""), 400);
         JsonNode rejected = postJson("/api/staff/applications/" + app + "/reject", STAFF,
             map("note", "Chung cư không cho nuôi chó"), 200);
@@ -94,8 +92,8 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
     @Test
     void adopterCancelsApprovedApplicationBeforeHandover() throws Exception {
         long petId = availablePet(false);
-        long app1 = submitApplication(petId, ADOPTER1, false);
-        long app2 = submitApplication(petId, ADOPTER2, false);
+        long app1 = submitApplication(petId, ADOPTER1);
+        long app2 = submitApplication(petId, ADOPTER2);
         postJson("/api/staff/applications/" + app1 + "/approve", STAFF, null, 200);
 
         // Người khác không hủy được đơn của mình
@@ -116,8 +114,8 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
     void concurrentApprovalsLetOnlyOneSucceed() throws Exception {
         for (int round = 0; round < 3; round++) {
             long petId = availablePet(false);
-            long app1 = submitApplication(petId, ADOPTER1, false);
-            long app2 = submitApplication(petId, ADOPTER2, false);
+            long app1 = submitApplication(petId, ADOPTER1);
+            long app2 = submitApplication(petId, ADOPTER2);
 
             CountDownLatch start = new CountDownLatch(1);
             ExecutorService pool = Executors.newFixedThreadPool(2);

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, HeartHandshake, Hourglass, PawPrint, Undo2 } from "lucide-react";
+import { CalendarClock, HeartHandshake, Hourglass, PawPrint, Siren, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { StatusBadge } from "@/components/badge/Badge";
@@ -41,7 +41,7 @@ export default function ReportsPage() {
     <>
       <PageHeader
         title="Báo cáo thống kê"
-        description="Mặc định 12 tháng gần nhất. Báo cáo ngoại lệ luôn tính tại thời điểm hiện tại."
+        description="Mặc định 12 tháng gần nhất. Báo cáo ngoại lệ luôn lấy số liệu tại thời điểm xem."
       />
       <Tabs
         label="Loại báo cáo"
@@ -114,8 +114,8 @@ function SummaryTab({ period }: { period: { from?: string; to?: string } }) {
         Kỳ {formatDate(data.period.from)} đến {formatDate(data.period.to)}
       </p>
       <div className="report-page__tiles">
-        <Tile label="Báo cáo cứu hộ nhận" value={count(data.reportsReceived)} />
-        <Tile label="Ca cứu hộ tạo mới" value={count(data.casesCreated)} />
+        <Tile label="Báo cáo cứu hộ đã nhận" value={count(data.reportsReceived)} />
+        <Tile label="Ca cứu hộ được tạo" value={count(data.casesCreated)} />
         <Tile
           label="Ca thành công"
           value={count(data.casesSucceeded)}
@@ -125,7 +125,7 @@ function SummaryTab({ period }: { period: { from?: string; to?: string } }) {
         <Tile
           label="Thú bị trả lại"
           value={count(data.returns)}
-          hint={data.adoptions > 0 ? `${Math.round((data.returns / data.adoptions) * 100)}% so với số bàn giao` : undefined}
+          hint={data.adoptions > 0 ? `${Math.round((data.returns / data.adoptions) * 100)}% số lượt bàn giao` : undefined}
         />
       </div>
       <Panel title="Theo tháng">
@@ -178,9 +178,31 @@ function ExceptionsTab() {
     <div className="stack stack--lg">
       <div className="report-page__tiles">
         <Tile label="Hậu kiểm quá hạn" value={count(data.overdueFollowUps.length)} />
-        <Tile label={`Đơn chờ quá ${data.applicationAlertDays} ngày`} value={count(data.staleApplications.length)} hint="Tham số APPLICATION_ALERT_DAYS" />
+        <Tile label={`Đơn chờ quá ${data.applicationAlertDays} ngày`} value={count(data.staleApplications.length)} hint="Đổi ngưỡng ở mục Tham số hệ thống" />
         <Tile label="Bàn giao chờ thu hồi" value={count(data.recallPending.length)} />
+        <Tile
+          label={`Ca chưa phân công quá ${data.caseUnassignedAlertHours} giờ`}
+          value={count(data.unassignedCases.length)}
+          hint="Đổi ngưỡng ở mục Tham số hệ thống"
+        />
       </div>
+      <Panel title={`Ca cứu hộ chưa phân công quá ${data.caseUnassignedAlertHours} giờ`} flush>
+        {data.unassignedCases.length === 0 ? (
+          <EmptyState icon={Siren} title="Không có ca chờ phân công quá hạn" />
+        ) : (
+          <DataTable
+            caption="Ca cứu hộ chưa phân công quá hạn"
+            rows={data.unassignedCases}
+            rowKey={(r) => r.caseId}
+            rowHref={(r) => `/staff/cases/${r.caseId}`}
+            columns={[
+              { key: "case", header: "Ca", render: (r) => `#${r.caseId} · ${r.locationText}` },
+              { key: "created", header: "Tạo lúc", render: (r) => formatDateTime(r.createdAt), hideOnMobile: true },
+              { key: "wait", header: "Đã chờ", numeric: true, render: (r) => `${r.hoursWaiting} giờ` },
+            ]}
+          />
+        )}
+      </Panel>
       <Panel title="Hậu kiểm quá hạn" flush>
         {data.overdueFollowUps.length === 0 ? (
           <EmptyState icon={CalendarClock} title="Không có lịch hậu kiểm quá hạn" />
@@ -229,12 +251,17 @@ function ExceptionsTab() {
             columns={[
               { key: "pet", header: "Thú", render: (r) => petName(r.petName, r.petCode) },
               { key: "owner", header: "Chủ nuôi", render: (r) => `${r.ownerName}${r.ownerPhone ? ` · ${r.ownerPhone}` : ""}` },
-              { key: "date", header: "Bàn giao", render: (r) => formatDate(r.handedOverAt) },
+              { key: "date", header: "Bàn giao", render: (r) => formatDate(r.handedOverAt), hideOnMobile: true },
+              {
+                key: "closable",
+                header: "Đóng thu hồi được từ",
+                render: (r) => (r.closableFrom ? formatDate(r.closableFrom) : "—"),
+              },
             ]}
           />
         )}
       </Panel>
-      {data.overdueFollowUps.length + data.staleApplications.length + data.recallPending.length > 0 && (
+      {data.overdueFollowUps.length + data.staleApplications.length + data.recallPending.length + data.unassignedCases.length > 0 && (
         <Notice tone="warning" title="Cần xử lý">
           Bấm vào từng dòng để mở màn hình xử lý tương ứng.
         </Notice>
@@ -287,13 +314,13 @@ function CostsTab({ period }: { period: { from?: string; to?: string } }) {
             rowKey={(r) => r.clinicId}
             columns={[
               { key: "name", header: "Cơ sở", render: (r) => r.clinicName },
-              { key: "n", header: "Lượt hoàn tất", numeric: true, render: (r) => count(r.completedRequests) },
+              { key: "n", header: "Số lượt hoàn tất", numeric: true, render: (r) => count(r.completedRequests) },
               { key: "cost", header: "Chi phí", numeric: true, render: (r) => formatMoney(r.treatmentCost) },
             ]}
           />
         )}
       </Panel>
-      <Panel title="Theo từng thú" description="Cộng dồn cả vòng đời, giống 3 con số khi bàn giao (QĐ-14)." flush>
+      <Panel title="Theo từng thú" description="Cộng dồn từ lần tiếp nhận đầu tiên, khớp với số liệu cho người nhận xem lúc bàn giao." flush>
         {data.byPet.length === 0 ? (
           <EmptyState icon={PawPrint} title="Chưa có dữ liệu chi phí" />
         ) : (
@@ -313,7 +340,7 @@ function CostsTab({ period }: { period: { from?: string; to?: string } }) {
         )}
       </Panel>
       <p className="report-page__note">
-        <HeartHandshake aria-hidden="true" /> Khoản ủng hộ không hoàn lại khi thú bị trả, phần vượt chi phí thuộc về trung tâm.{" "}
+        <HeartHandshake aria-hidden="true" /> Tiền ủng hộ không được hoàn lại khi thú bị trả lại, phần vượt chi phí thuộc về trung tâm.{" "}
         <Link href="/admin/reports?tab=exceptions">Xem báo cáo ngoại lệ</Link>
       </p>
     </div>

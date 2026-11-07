@@ -32,6 +32,14 @@ npm install
 npm run dev
 ```
 
+Hoặc chạy cả 3 bước trên bằng một lệnh (tự tắt bản đang chạy rồi bật lại, chờ đến khi sẵn sàng):
+
+```bash
+./scripts/dev.sh          # hiện log của backend và frontend, Ctrl+C để tắt hết
+./scripts/dev.sh --bg     # chạy nền, log ở .dev-logs/
+./scripts/dev.sh stop     # tắt backend và frontend, Postgres vẫn chạy
+```
+
 - Tài liệu API (Swagger): http://localhost:8080/swagger-ui.html
 - Kiểm thử backend: `mvn test`. Test tích hợp chạy trên PostgreSQL thật qua Testcontainers, cần Docker đang chạy (không có Docker thì test này tự bỏ qua).
 
@@ -159,14 +167,6 @@ node scripts/seed-photos.mjs --online     # lấy ảnh ngẫu nhiên từ Dog C
 ```
 
 Nguồn ảnh ghi trong `dev-photos/manifest.json`: Dog CEO (Stanford Dogs Dataset) và Kaggle Dogs vs. Cats. Chỉ dùng cho demo đồ án, không dùng cho sản phẩm thật.
-
-### Đăng nhập nhanh bằng Google
-
-1. Google Cloud Console, mục APIs & Services, Credentials: tạo OAuth client ID loại **Web application**.
-2. Authorized JavaScript origins thêm `http://localhost:3000` (và tên miền thật khi triển khai).
-3. Chạy backend với biến môi trường `GOOGLE_CLIENT_ID=<client id>`. Frontend tự đọc qua `GET /api/public/auth/config`, không cần cấu hình thêm.
-
-Chưa đặt biến này, Client ID sai định dạng hoặc không tải được thư viện Google thì nút Google và đường kẻ "hoặc" ẩn hẳn, đăng nhập bằng mật khẩu vẫn dùng bình thường. Lý do được ghi ra console của trình duyệt với tiền tố `[GoogleSignIn]`. Email Google đã có tài khoản thì đăng nhập vào tài khoản đó (kể cả nhân viên), chưa có thì tạo tài khoản Người nhận nuôi.
 
 ### Phân quyền phân công ca cứu hộ
 

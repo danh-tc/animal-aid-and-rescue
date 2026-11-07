@@ -6,7 +6,6 @@ import { type FormEvent, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { Field } from "@/components/form-field/Field";
 import { AuthShell } from "@/components/auth-shell/AuthShell";
-import { GoogleSignIn } from "@/components/google-sign-in/GoogleSignIn";
 import { Notice } from "@/components/notice/Notice";
 import { PasswordInput } from "@/components/password-input/PasswordInput";
 import { ApiRequestError, apiFetch, errorMessage } from "@/lib/api";
@@ -64,7 +63,6 @@ function LoginForm() {
         <Notice tone="warning">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.</Notice>
       )}
       {error && <Notice tone="error">{error}</Notice>}
-      <GoogleSignIn mode="signin" onError={setError} dividerLabel="hoặc đăng nhập bằng email" />
       <form className="stack" onSubmit={handleSubmit}>
         <Field label="Email" required>
           <input

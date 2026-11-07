@@ -94,15 +94,15 @@ INSERT INTO vet_requests (id, pet_id, clinic_id, reason, priority, care_mode, st
   (7, 8, 1, 'Suy kiệt, mất nước',            'URGENT',     'INPATIENT',  'COMPLETED', 'Suy thận cấp', 'Truyền dịch', 800000, NULL, 3, now() - interval '20 days', now() - interval '18 days', FALSE);
 
 -- Đơn nhận nuôi: Vàng có hai đơn đang chờ để demo xử lý đồng thời
-INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation, sterilization_pledge,
+INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation,
                                    status, review_note, reviewed_by, reviewed_at, submitted_at) VALUES
-  (1, 3, 4, 'HOUSE',     TRUE,  'Nhà có sân rộng',           FALSE, 'PENDING',     NULL, NULL, NULL, now() - interval '2 days'),
-  (2, 3, 5, 'APARTMENT', FALSE, 'Muốn có bạn đồng hành',     FALSE, 'PENDING',     NULL, NULL, NULL, now() - interval '1 day'),
-  (3, 5, 6, 'HOUSE',     TRUE,  'Từng nuôi chó 10 năm',      FALSE, 'APPROVED',    'Điều kiện tốt', 2, now() - interval '3 days', now() - interval '6 days'),
-  (4, 6, 5, 'APARTMENT', TRUE,  'Nhà có một mèo cái',        FALSE, 'HANDED_OVER', 'Phù hợp', 3, now() - interval '35 days', now() - interval '40 days'),
-  (5, 6, 6, 'OTHER',     FALSE, 'Thích mèo trắng',           FALSE, 'CANCELLED',   NULL, NULL, NULL, now() - interval '38 days'),
-  (6, 7, 4, 'HOUSE',     TRUE,  'Muốn nuôi chó giữ nhà',     FALSE, 'HANDED_OVER', 'Phù hợp', 2, now() - interval '62 days', now() - interval '65 days'),
-  (7, 4, 5, 'APARTMENT', FALSE, 'Muốn nuôi mèo',             FALSE, 'REJECTED',    'Chung cư không cho nuôi thú', 2, now() - interval '10 days', now() - interval '12 days');
+  (1, 3, 4, 'HOUSE',     TRUE,  'Nhà có sân rộng',           'PENDING',     NULL, NULL, NULL, now() - interval '2 days'),
+  (2, 3, 5, 'APARTMENT', FALSE, 'Muốn có bạn đồng hành',     'PENDING',     NULL, NULL, NULL, now() - interval '1 day'),
+  (3, 5, 6, 'HOUSE',     TRUE,  'Từng nuôi chó 10 năm',      'APPROVED',    'Điều kiện tốt', 2, now() - interval '3 days', now() - interval '6 days'),
+  (4, 6, 5, 'APARTMENT', TRUE,  'Nhà có một mèo cái',        'HANDED_OVER', 'Phù hợp', 3, now() - interval '35 days', now() - interval '40 days'),
+  (5, 6, 6, 'OTHER',     FALSE, 'Thích mèo trắng',           'CANCELLED',   NULL, NULL, NULL, now() - interval '38 days'),
+  (6, 7, 4, 'HOUSE',     TRUE,  'Muốn nuôi chó giữ nhà',     'HANDED_OVER', 'Phù hợp', 2, now() - interval '62 days', now() - interval '65 days'),
+  (7, 4, 5, 'APARTMENT', FALSE, 'Muốn nuôi mèo',             'REJECTED',    'Chung cư không cho nuôi thú', 2, now() - interval '10 days', now() - interval '12 days');
 UPDATE adoption_applications SET cancel_reason = 'Hệ thống tự đóng: thú đã có đơn khác được duyệt' WHERE id = 5;
 -- Đơn đã duyệt của Đốm có lịch hẹn bàn giao (mục 2.1.4 bước 3)
 UPDATE adoption_applications SET handover_date = current_date + 2 WHERE id = 3;
@@ -132,6 +132,58 @@ INSERT INTO status_histories (entity_type, entity_id, from_status, to_status, ev
   ('PET', 3, 'IN_TREATMENT', 'IN_CARE',      'VET_REQUEST_CLOSED', 2, now() - interval '48 days'),
   ('PET', 3, 'IN_CARE',      'AVAILABLE',    'ELIGIBILITY_PASSED', 2, now() - interval '20 days');
 
+-- Dữ liệu cho các quy tắc chốt ở báo cáo bản rút gọn (demo mục 5.3)
+-- QĐ-17: ca #11 chưa phân công đã 4 giờ, hiện ở bảng công việc và báo cáo ngoại lệ.
+-- QĐ-18: Na (mèo xám) hậu kiểm lần 1 Không đạt cách đây 35 ngày, Quản lý đóng thu hồi được ngay.
+-- QĐ-16, nhánh S-1b: Ki (chó xám) đang Thất lạc, ca #14 đang xử lý là báo cáo thấy một chó giống Ki.
+INSERT INTO rescue_reports (id, code, reporter_name, reporter_phone, location_text, description, status, handled_by, created_at, handled_at) VALUES
+  (13, 'BC-K7P3DS', 'Ngọc Hân',   '0911000013', 'Ngã tư Hàng Xanh, Bình Thạnh',   'Chó nhỏ chạy giữa đường, có vẻ hoảng sợ',          'PROCESSED', 2, now() - interval '4 hours',  now() - interval '4 hours'),
+  (14, 'BC-N2V6QE', 'Tuấn Kiệt',  '0911000014', 'Đường Nguyễn Văn Linh, Quận 7',  'Mèo xám bị bỏ trước cửa hàng',                     'PROCESSED', 3, now() - interval '100 days', now() - interval '100 days'),
+  (15, 'BC-P8L4WZ', 'Hồng Nhung', '0911000015', 'Phố đi bộ Nguyễn Huệ, Quận 1',   'Chó xám đeo vòng cổ đỏ đi lạc',                    'PROCESSED', 2, now() - interval '40 days',  now() - interval '40 days'),
+  (16, 'BC-S5D9TM', 'Phúc Thịnh', '0911000016', 'Bến Bạch Đằng, Quận 1',          'Chó lông xám đeo vòng cổ đỏ, quen người, đi lang thang', 'PROCESSED', 2, now() - interval '1 day', now() - interval '1 day');
+
+INSERT INTO rescue_cases (id, location_text, assigned_staff_id, status, failure_reason, created_by, created_at, closed_at) VALUES
+  (11, 'Ngã tư Hàng Xanh, Bình Thạnh',  NULL, 'NEW',         NULL, 2, now() - interval '4 hours',  NULL),
+  (12, 'Đường Nguyễn Văn Linh, Quận 7', 3,    'SUCCEEDED',   NULL, 3, now() - interval '100 days', now() - interval '100 days'),
+  (13, 'Phố đi bộ Nguyễn Huệ, Quận 1',  2,    'SUCCEEDED',   NULL, 2, now() - interval '40 days',  now() - interval '40 days'),
+  (14, 'Bến Bạch Đằng, Quận 1',         2,    'IN_PROGRESS', NULL, 2, now() - interval '1 day',    NULL);
+
+INSERT INTO report_cases (report_id, case_id) VALUES (13, 11), (14, 12), (15, 13), (16, 14);
+
+INSERT INTO pets (id, code, name, species, sex, estimated_birth_date, color, description, status, area, current_location,
+                  is_vaccinated, is_dewormed, is_sterilized, temperament_ok, eligibility_checked_at, eligibility_checked_by, created_at) VALUES
+  (9,  'TH-2026-0009', 'Na', 'CAT', 'FEMALE', current_date - 800, 'Xám', 'Đã nhận nuôi, hậu kiểm lần 1 không đạt, đang chờ thu hồi', 'ADOPTED', NULL, 'Nhà chủ nuôi', TRUE, TRUE, TRUE, TRUE, now() - interval '60 days', 2, now() - interval '100 days'),
+  (10, 'TH-2026-0010', 'Ki', 'DOG', 'MALE',   current_date - 450, 'Xám, vòng cổ đỏ', 'Sổng chuồng khi đưa đi khám, đang thất lạc', 'LOST', NULL, NULL, TRUE, TRUE, FALSE, TRUE, NULL, NULL, now() - interval '40 days');
+
+INSERT INTO intakes (id, pet_id, source, rescue_case_id, returned_handover_id, intake_at, reason, priority, initial_assessment, created_by) VALUES
+  (10, 9,  'RESCUE', 12, NULL, now() - interval '100 days', 'Bị bỏ rơi', 'STABLE',     'Khỏe, hơi gầy',               3),
+  (11, 10, 'RESCUE', 13, NULL, now() - interval '40 days',  'Đi lạc',    'NEED_CHECK', 'Có vòng cổ đỏ, không rõ chủ', 2);
+
+INSERT INTO vet_requests (id, pet_id, clinic_id, reason, priority, care_mode, status, diagnosis_summary, treatment_summary,
+                          total_cost, aftercare_instructions, created_by, requested_at, completed_at, health_ok) VALUES
+  (8, 9,  1, 'Khám tổng quát, tiêm phòng', 'STABLE',     'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 4 bệnh, tẩy giun, triệt sản', 900000, NULL, 3, now() - interval '95 days', now() - interval '94 days', TRUE),
+  (9, 10, 1, 'Khám tổng quát, tiêm phòng', 'NEED_CHECK', 'OUTPATIENT', 'COMPLETED', 'Khỏe mạnh', 'Tiêm 7 bệnh, tẩy giun',           600000, NULL, 2, now() - interval '38 days', now() - interval '37 days', TRUE);
+
+INSERT INTO adoption_applications (id, pet_id, applicant_id, housing_type, has_pet_experience, motivation,
+                                   status, review_note, reviewed_by, reviewed_at, submitted_at) VALUES
+  (8, 9, 5, 'APARTMENT', TRUE, 'Muốn có thêm bạn cho Miu', 'HANDED_OVER', 'Phù hợp', 3, now() - interval '52 days', now() - interval '55 days');
+
+INSERT INTO handovers (id, application_id, pet_id, staff_id, handed_over_at, donation_amount, note, follow_up_status) VALUES
+  (3, 8, 9, 3, now() - interval '50 days', 200000, 'Bàn giao tại trung tâm', 'RECALL_PENDING');
+
+INSERT INTO follow_ups (handover_id, sequence_no, is_additional, due_date, status, result, contact_method,
+                        health_ok, housing_ok, commitment_ok, pet_present, owner_reachable, reason, performed_by, performed_at) VALUES
+  (3, 1, FALSE, current_date - 36, 'DONE',      'FAIL', 'HOME_VISIT', FALSE, FALSE, TRUE, FALSE, TRUE,
+   'Chủ đã cho mèo sang nhà người quen, không còn ở với chủ', 3, now() - interval '35 days'),
+  (3, 2, FALSE, current_date + 10, 'CANCELLED', NULL,   NULL,         NULL,  NULL,  NULL, NULL,  NULL, NULL, NULL, NULL);
+
+INSERT INTO pet_end_events (pet_id, event_type, occurred_at, detail, recorded_by) VALUES
+  (10, 'LOST', now() - interval '5 days', 'Sổng chuồng khi đưa đi dạo ở Bến Bạch Đằng', 2);
+
+INSERT INTO status_histories (entity_type, entity_id, from_status, to_status, event, note, changed_by, changed_at) VALUES
+  ('HANDOVER', 3, 'IN_PROGRESS', 'RECALL_PENDING', 'FOLLOW_UP_FAILED', 'Chủ đã cho mèo sang nhà người quen', 3, now() - interval '35 days'),
+  ('PET', 10, 'IN_CARE', 'LOST', 'LOST', 'Thất lạc: sổng chuồng khi đưa đi dạo', 2, now() - interval '5 days');
+
 -- Đồng bộ sequence sau khi chèn id thủ công
 PERFORM setval('users_id_seq',                 (SELECT max(id) FROM users));
 PERFORM setval('vet_clinics_id_seq',           (SELECT max(id) FROM vet_clinics));
@@ -142,6 +194,6 @@ PERFORM setval('intakes_id_seq',               (SELECT max(id) FROM intakes));
 PERFORM setval('vet_requests_id_seq',          (SELECT max(id) FROM vet_requests));
 PERFORM setval('adoption_applications_id_seq', (SELECT max(id) FROM adoption_applications));
 PERFORM setval('handovers_id_seq',             (SELECT max(id) FROM handovers));
-PERFORM setval('pet_code_seq',                 8);
+PERFORM setval('pet_code_seq',                 10);
 END
 $seed$;

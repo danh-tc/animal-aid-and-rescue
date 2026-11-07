@@ -12,6 +12,7 @@ import com.aar.report.ReportDtos.PetCost;
 import com.aar.report.ReportDtos.RecallPending;
 import com.aar.report.ReportDtos.StaleApplication;
 import com.aar.report.ReportDtos.SummaryReport;
+import com.aar.report.ReportDtos.UnassignedCase;
 import com.aar.system.SystemParameterService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -67,7 +68,7 @@ public class ReportService {
         long returns = count("SELECT count(*) FROM intakes WHERE source = 'RETURN' AND intake_at >= :from AND intake_at < :to", q);
 
         Map<String, Long> endEvents = new LinkedHashMap<>();
-        for (String type : List.of("DECEASED", "LOST", "TRANSFERRED")) {
+        for (String type : List.of("DECEASED", "LOST")) {
             endEvents.put(type, 0L);
         }
         jdbc.query("SELECT event_type, count(*) n FROM pet_end_events WHERE occurred_at >= :from AND occurred_at < :to GROUP BY event_type",
@@ -125,18 +126,37 @@ public class ReportService {
                     ChronoUnit.DAYS.between(submitted.atZoneSameInstant(ZONE).toLocalDate(), today));
             });
 
+        int recallDays = params.getInt(SystemParameterService.RECALL_CLOSE_AFTER_DAYS);
         List<RecallPending> recall = jdbc.query("""
-            SELECT h.id, p.id pet_id, p.code, p.name, u.full_name, u.phone, h.handed_over_at
+            SELECT h.id, p.id pet_id, p.code, p.name, u.full_name, u.phone, h.handed_over_at,
+                   (SELECT max(f.performed_at) FROM follow_ups f WHERE f.handover_id = h.id AND f.result = 'FAIL') failed_at
             FROM handovers h
             JOIN pets p ON p.id = h.pet_id
             JOIN adoption_applications a ON a.id = h.application_id
             JOIN users u ON u.id = a.applicant_id
             WHERE h.follow_up_status = 'RECALL_PENDING'
-            ORDER BY h.handed_over_at""", q, (rs, i) -> new RecallPending(rs.getLong("id"), rs.getLong("pet_id"),
-                rs.getString("code"), rs.getString("name"), rs.getString("full_name"), rs.getString("phone"),
-                rs.getObject("handed_over_at", OffsetDateTime.class)));
+            ORDER BY h.handed_over_at""", q, (rs, i) -> {
+                OffsetDateTime failedAt = rs.getObject("failed_at", OffsetDateTime.class);
+                return new RecallPending(rs.getLong("id"), rs.getLong("pet_id"),
+                    rs.getString("code"), rs.getString("name"), rs.getString("full_name"), rs.getString("phone"),
+                    rs.getObject("handed_over_at", OffsetDateTime.class), failedAt,
+                    failedAt == null ? null : failedAt.plusDays(recallDays));
+            });
 
-        return new ExceptionReport(alertDays, overdue, stale, recall);
+        int unassignedHours = params.getInt(SystemParameterService.CASE_UNASSIGNED_ALERT_HOURS);
+        OffsetDateTime now = OffsetDateTime.now();
+        q.addValue("caseCutoff", Timestamp.from(now.minusHours(unassignedHours).toInstant()));
+        List<UnassignedCase> unassigned = jdbc.query("""
+            SELECT c.id, c.location_text, c.created_at
+            FROM rescue_cases c
+            WHERE c.status = 'NEW' AND c.created_at < :caseCutoff
+            ORDER BY c.created_at, c.id""", q, (rs, i) -> {
+                OffsetDateTime created = rs.getObject("created_at", OffsetDateTime.class);
+                return new UnassignedCase(rs.getLong("id"), rs.getString("location_text"), created,
+                    ChronoUnit.HOURS.between(created, now));
+            });
+
+        return new ExceptionReport(alertDays, overdue, stale, recall, unassignedHours, unassigned);
     }
 
     public CostReport costs(Period p) {
@@ -146,7 +166,7 @@ public class ReportService {
             months.put(m, new BigDecimal[] {BigDecimal.ZERO, BigDecimal.ZERO});
         }
         jdbc.query("SELECT to_char(completed_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM') m, SUM(total_cost) s "
-            + "FROM vet_requests WHERE status = 'COMPLETED' AND completed_at >= :from AND completed_at < :to GROUP BY m",
+            + "FROM vet_requests WHERE status IN ('COMPLETED','CANCELLED') AND completed_at >= :from AND completed_at < :to GROUP BY m",
             q, rs -> { addMonth(months, rs.getString("m"), 0, rs.getBigDecimal("s")); });
         jdbc.query("SELECT to_char(handed_over_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM') m, SUM(donation_amount) s "
             + "FROM handovers WHERE handed_over_at >= :from AND handed_over_at < :to GROUP BY m",
@@ -159,7 +179,7 @@ public class ReportService {
         List<ClinicCost> byClinic = jdbc.query("""
             SELECT c.id, c.name, count(v.id) n, COALESCE(SUM(v.total_cost), 0) s
             FROM vet_clinics c
-            JOIN vet_requests v ON v.clinic_id = c.id AND v.status = 'COMPLETED'
+            JOIN vet_requests v ON v.clinic_id = c.id AND v.status IN ('COMPLETED','CANCELLED')
                 AND v.completed_at >= :from AND v.completed_at < :to
             GROUP BY c.id, c.name
             ORDER BY s DESC, c.name""", q, (rs, i) -> new ClinicCost(rs.getLong("id"), rs.getString("name"),
@@ -167,10 +187,10 @@ public class ReportService {
 
         List<PetCost> byPet = jdbc.query("""
             SELECT p.id, p.code, p.name, p.status,
-                   COALESCE((SELECT SUM(total_cost) FROM vet_requests v WHERE v.pet_id = p.id AND v.status = 'COMPLETED'), 0) cost,
+                   COALESCE((SELECT SUM(total_cost) FROM vet_requests v WHERE v.pet_id = p.id AND v.status IN ('COMPLETED','CANCELLED')), 0) cost,
                    COALESCE((SELECT SUM(donation_amount) FROM handovers h WHERE h.pet_id = p.id), 0) donated
             FROM pets p
-            WHERE EXISTS (SELECT 1 FROM vet_requests v WHERE v.pet_id = p.id AND v.status = 'COMPLETED')
+            WHERE EXISTS (SELECT 1 FROM vet_requests v WHERE v.pet_id = p.id AND v.status IN ('COMPLETED','CANCELLED'))
                OR EXISTS (SELECT 1 FROM handovers h WHERE h.pet_id = p.id)
             ORDER BY cost DESC, p.code""", q, (rs, i) -> {
                 BigDecimal cost = rs.getBigDecimal("cost");

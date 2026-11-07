@@ -5,6 +5,7 @@ import com.aar.adoption.AdoptionDtos.ApplicationView;
 import com.aar.adoption.AdoptionDtos.HandoverDateRequest;
 import com.aar.adoption.AdoptionDtos.RejectRequest;
 import com.aar.adoption.AdoptionDtos.ReviewRequest;
+import com.aar.adoption.AdoptionDtos.StaffCancelRequest;
 import com.aar.common.PageResponse;
 import com.aar.common.security.AuthUser;
 import com.aar.common.security.CurrentUser;
@@ -57,5 +58,12 @@ public class StaffApplicationController {
     public ApplicationView reject(@PathVariable Long id, @Valid @RequestBody RejectRequest req,
                                   @CurrentUser AuthUser me) {
         return service.reject(id, req.note(), me.id());
+    }
+
+    /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn đã duyệt và ghi lý do. */
+    @PostMapping("/{id}/cancel")
+    public ApplicationView cancel(@PathVariable Long id, @Valid @RequestBody StaffCancelRequest req,
+                                  @CurrentUser AuthUser me) {
+        return service.cancelByStaff(id, req.reason(), me.id());
     }
 }

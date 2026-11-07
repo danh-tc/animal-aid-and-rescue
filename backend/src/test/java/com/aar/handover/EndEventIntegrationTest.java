@@ -13,8 +13,8 @@ class EndEventIntegrationTest extends IntegrationTestBase {
     @Test
     void deceasedClosesOpenApplications() throws Exception {
         long petId = availablePet(false);
-        long pending = submitApplication(petId, ADOPTER1, false);
-        long pending2 = submitApplication(petId, ADOPTER2, false);
+        long pending = submitApplication(petId, ADOPTER1);
+        long pending2 = submitApplication(petId, ADOPTER2);
         postJson("/api/staff/applications/" + pending + "/approve", STAFF, null, 200);
 
         JsonNode res = postJson("/api/staff/pets/" + petId + "/end-events", STAFF,
@@ -63,17 +63,29 @@ class EndEventIntegrationTest extends IntegrationTestBase {
         postJson("/api/staff/pets/" + petId + "/found", STAFF, map("reason", "x", "priority", "STABLE"), 409);
     }
 
+    /** Mục 2.1.6: chỉ còn hai sự kiện kết thúc là Qua đời và Thất lạc. */
     @Test
-    void transferNeedsDestinationAndReason() throws Exception {
+    void transferIsNoLongerAnEndEvent() throws Exception {
         long petId = rescuedPet("DOG", LocalDate.now().minusYears(1));
-        JsonNode bad = postJson("/api/staff/pets/" + petId + "/end-events", STAFF,
+        postJson("/api/staff/pets/" + petId + "/end-events", STAFF,
             map("eventType", "TRANSFERRED", "detail", "Quá tải"), 400);
-        assertThat(bad.get("code").asText()).isEqualTo("DESTINATION_REQUIRED");
-        JsonNode ok = postJson("/api/staff/pets/" + petId + "/end-events", STAFF, map("eventType", "TRANSFERRED",
-            "detail", "Trung tâm quá tải", "destinationOrg", "Trạm cứu hộ Thủ Đức"), 201);
-        assertThat(ok.get("event").get("destinationOrg").asText()).isEqualTo("Trạm cứu hộ Thủ Đức");
-        assertThat(getJson("/api/staff/pets/" + petId, STAFF, 200).get("currentLocation").asText())
-            .isEqualTo("Trạm cứu hộ Thủ Đức");
+        assertThat(petStatus(petId)).isEqualTo("IN_CARE");
+    }
+
+    /** QĐ-14, QĐ-15: qua đời trong điều trị, nhân viên nhập chi phí đã phát sinh của yêu cầu đang mở. */
+    @Test
+    void deathDuringTreatmentRecordsIncurredCost() throws Exception {
+        long petId = rescuedPet("CAT", LocalDate.now().minusYears(1));
+        long vetId = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
+            map("clinicId", 1, "reason", "Suy kiệt", "priority", "URGENT", "careMode", "INPATIENT"), 201)
+            .get("request").get("id").asLong();
+        JsonNode result = postJson("/api/staff/pets/" + petId + "/end-events", STAFF, map("eventType", "DECEASED",
+            "detail", "Không qua khỏi", "incurredCosts", java.util.List.of(map("vetRequestId", vetId, "amount", 700000))), 201);
+        assertThat(result.get("cancelledVetRequests").asInt()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT total_cost FROM vet_requests WHERE id = ?", Long.class, vetId))
+            .isEqualTo(700000L);
+        assertThat(getJson("/api/staff/pets/" + petId + "/costs", STAFF, 200).get("totalTreatmentCost").asLong())
+            .isEqualTo(700000L);
     }
 
     @Test
@@ -81,10 +93,6 @@ class EndEventIntegrationTest extends IntegrationTestBase {
         JsonNode handover = handedOver(ADOPTER3);
         long petId = handover.get("petId").asLong();
         long handoverId = handover.get("id").asLong();
-
-        JsonNode transfer = postJson("/api/staff/pets/" + petId + "/end-events", STAFF,
-            map("eventType", "TRANSFERRED", "detail", "x", "destinationOrg", "y"), 409);
-        assertThat(transfer.get("code").asText()).isEqualTo("INVALID_END_EVENT");
 
         JsonNode lost = postJson("/api/staff/pets/" + petId + "/end-events", STAFF,
             map("eventType", "LOST", "detail", "Chủ nuôi báo bé đi lạc khi dắt đi dạo"), 201);

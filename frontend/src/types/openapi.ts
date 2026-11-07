@@ -308,6 +308,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/staff/handovers/{id}/close-recall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["closeRecall"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/staff/follow-ups/{id}/result": {
         parameters: {
             query?: never;
@@ -388,6 +404,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/staff/applications/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/staff/applications/{id}/approve": {
         parameters: {
             query?: never;
@@ -452,22 +484,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/auth/google": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["google"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/adopter/applications": {
         parameters: {
             query?: never;
@@ -493,7 +509,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cancel_1"];
+        post: operations["cancel_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -916,22 +932,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/auth/config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["config"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/me": {
         parameters: {
             query?: never;
@@ -1044,7 +1044,7 @@ export interface components {
         };
         EligibilityResult: {
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             checklist?: components["schemas"]["Checklist"];
             missing?: string[];
         };
@@ -1065,7 +1065,7 @@ export interface components {
         VetRequestResult: {
             request?: components["schemas"]["VetRequestView"];
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledApplications?: number;
         };
@@ -1102,8 +1102,9 @@ export interface components {
             aftercareInstructions?: string;
             healthOk: boolean;
         };
-        ReasonRequest: {
+        VetRequestCancel: {
             reason: string;
+            incurredCost?: number;
         };
         AttachmentView: {
             /** Format: int64 */
@@ -1128,6 +1129,9 @@ export interface components {
             status?: "NEW" | "PROCESSED" | "DUPLICATE" | "INVALID";
             /** Format: date-time */
             createdAt?: string;
+        };
+        ReasonRequest: {
+            reason: string;
         };
         CreateCasesRequest: {
             /** Format: int32 */
@@ -1167,7 +1171,9 @@ export interface components {
             description?: string;
         };
         SucceedRequest: {
-            pet: components["schemas"]["NewPet"];
+            pet?: components["schemas"]["NewPet"];
+            /** Format: int64 */
+            lostPetId?: number;
             intake: components["schemas"]["NewIntake"];
         };
         SucceedResult: {
@@ -1211,7 +1217,7 @@ export interface components {
         };
         IneligibleResult: {
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledApplications?: number;
         };
@@ -1225,22 +1231,27 @@ export interface components {
             /** Format: int64 */
             petId?: number;
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int64 */
             intakeId?: number;
         };
         EndEventRequest: {
             /** @enum {string} */
-            eventType: "DECEASED" | "LOST" | "TRANSFERRED";
+            eventType: "DECEASED" | "LOST";
             /** Format: date-time */
             occurredAt?: string;
             detail?: string;
-            destinationOrg?: string;
+            incurredCosts?: components["schemas"]["IncurredCost"][];
+        };
+        IncurredCost: {
+            /** Format: int64 */
+            vetRequestId: number;
+            amount: number;
         };
         EndEventResult: {
             event?: components["schemas"]["EndEventView"];
             /** @enum {string} */
-            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            petStatus?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** Format: int32 */
             cancelledVetRequests?: number;
             /** Format: int32 */
@@ -1253,11 +1264,10 @@ export interface components {
             /** Format: int64 */
             id?: number;
             /** @enum {string} */
-            eventType?: "DECEASED" | "LOST" | "TRANSFERRED";
+            eventType?: "DECEASED" | "LOST";
             /** Format: date-time */
             occurredAt?: string;
             detail?: string;
-            destinationOrg?: string;
             /** Format: int64 */
             recordedBy?: number;
         };
@@ -1279,23 +1289,8 @@ export interface components {
             /** Format: date-time */
             loggedAt?: string;
         };
-        FollowUpResultRequest: {
-            /** @enum {string} */
-            result: "PASS" | "WATCH" | "FAIL";
-            /** @enum {string} */
-            contactMethod: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
-            healthOk: boolean;
-            housingOk: boolean;
-            commitmentOk: boolean;
-            petPresent: boolean;
-            ownerReachable: boolean;
-            reason?: string;
-        };
-        FollowUpOutcome: {
-            followUp?: components["schemas"]["FollowUpView"];
-            /** @enum {string} */
-            handoverStatus?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
-            additionalFollowUp?: components["schemas"]["FollowUpView"];
+        CloseRecallRequest: {
+            reason: string;
         };
         FollowUpView: {
             /** Format: int64 */
@@ -1324,48 +1319,6 @@ export interface components {
             /** Format: date-time */
             performedAt?: string;
         };
-        RejectRequest: {
-            note: string;
-        };
-        ApplicantBrief: {
-            /** Format: int64 */
-            id?: number;
-            fullName?: string;
-            email?: string;
-            phone?: string;
-            address?: string;
-        };
-        ApplicationView: {
-            /** Format: int64 */
-            id?: number;
-            pet?: components["schemas"]["PetBrief"];
-            applicant?: components["schemas"]["ApplicantBrief"];
-            /** @enum {string} */
-            housingType?: "HOUSE" | "APARTMENT" | "OTHER";
-            hasPetExperience?: boolean;
-            motivation?: string;
-            sterilizationPledge?: boolean;
-            /** @enum {string} */
-            status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "HANDED_OVER";
-            reviewNote?: string;
-            /** Format: date-time */
-            reviewedAt?: string;
-            /** Format: date */
-            handoverDate?: string;
-            cancelReason?: string;
-            /** Format: date-time */
-            submittedAt?: string;
-        };
-        PetBrief: {
-            /** Format: int64 */
-            id?: number;
-            code?: string;
-            name?: string;
-        };
-        HandoverRequest: {
-            note?: string;
-            donationAmount?: number;
-        };
         HandoverView: {
             /** Format: int64 */
             id?: number;
@@ -1387,9 +1340,71 @@ export interface components {
             status?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
             followUps?: components["schemas"]["FollowUpView"][];
         };
+        FollowUpResultRequest: {
+            /** @enum {string} */
+            result: "PASS" | "WATCH" | "FAIL";
+            /** @enum {string} */
+            contactMethod: "PHONE" | "HOME_VISIT" | "VIDEO_CALL";
+            healthOk: boolean;
+            housingOk: boolean;
+            commitmentOk: boolean;
+            petPresent: boolean;
+            ownerReachable: boolean;
+            reason?: string;
+        };
+        FollowUpOutcome: {
+            followUp?: components["schemas"]["FollowUpView"];
+            /** @enum {string} */
+            handoverStatus?: "IN_PROGRESS" | "COMPLETED" | "RECALL_PENDING" | "RETURNED" | "CLOSED";
+            additionalFollowUp?: components["schemas"]["FollowUpView"];
+        };
+        RejectRequest: {
+            note: string;
+        };
+        ApplicantBrief: {
+            /** Format: int64 */
+            id?: number;
+            fullName?: string;
+            email?: string;
+            phone?: string;
+            address?: string;
+        };
+        ApplicationView: {
+            /** Format: int64 */
+            id?: number;
+            pet?: components["schemas"]["PetBrief"];
+            applicant?: components["schemas"]["ApplicantBrief"];
+            /** @enum {string} */
+            housingType?: "HOUSE" | "APARTMENT" | "OTHER";
+            hasPetExperience?: boolean;
+            motivation?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "HANDED_OVER";
+            reviewNote?: string;
+            /** Format: date-time */
+            reviewedAt?: string;
+            /** Format: date */
+            handoverDate?: string;
+            cancelReason?: string;
+            /** Format: date-time */
+            submittedAt?: string;
+        };
+        PetBrief: {
+            /** Format: int64 */
+            id?: number;
+            code?: string;
+            name?: string;
+        };
+        HandoverRequest: {
+            note?: string;
+            donationAmount?: number;
+        };
         HandoverDateRequest: {
             /** Format: date */
             handoverDate: string;
+        };
+        StaffCancelRequest: {
+            reason: string;
         };
         ReviewRequest: {
             note?: string;
@@ -1435,16 +1450,6 @@ export interface components {
             email: string;
             password: string;
         };
-        GoogleLoginRequest: {
-            credential: string;
-        };
-        GoogleAuthResponse: {
-            accessToken?: string;
-            /** Format: int64 */
-            expiresInMinutes?: number;
-            user?: components["schemas"]["UserView"];
-            newAccount?: boolean;
-        };
         SubmitRequest: {
             /** Format: int64 */
             petId: number;
@@ -1452,7 +1457,6 @@ export interface components {
             housingType: "HOUSE" | "APARTMENT" | "OTHER";
             hasPetExperience: boolean;
             motivation?: string;
-            sterilizationPledge?: boolean;
             phone?: string;
             address?: string;
         };
@@ -1516,7 +1520,7 @@ export interface components {
             /** @enum {string} */
             sex?: "MALE" | "FEMALE" | "UNKNOWN";
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** @enum {string} */
             area?: "QUARANTINE" | "GENERAL";
             currentLocation?: string;
@@ -1661,7 +1665,7 @@ export interface components {
             color?: string;
             description?: string;
             /** @enum {string} */
-            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+            status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
             /** @enum {string} */
             area?: "QUARANTINE" | "GENERAL";
             currentLocation?: string;
@@ -1731,6 +1735,10 @@ export interface components {
             followUpsDueThisWeek?: number;
             /** Format: int64 */
             openVetRequests?: number;
+            /** Format: int64 */
+            overdueUnassignedCases?: number;
+            /** Format: int64 */
+            recallPending?: number;
         };
         PageResponseApplicationView: {
             items?: components["schemas"]["ApplicationView"][];
@@ -1764,6 +1772,14 @@ export interface components {
             status?: "NEW" | "IN_PROGRESS" | "SUCCEEDED" | "FAILED";
             /** Format: date-time */
             closedAt?: string;
+            pet?: components["schemas"]["PetProgress"];
+        };
+        PetProgress: {
+            /** @enum {string} */
+            stage?: "IN_CARE" | "LOOKING_FOR_HOME" | "ADOPTED" | "DECEASED" | "LOST";
+            petName?: string;
+            /** Format: int64 */
+            petId?: number;
         };
         ReportLookup: {
             code?: string;
@@ -1801,10 +1817,6 @@ export interface components {
             description?: string;
             sterilized?: boolean;
             photoIds?: number[];
-        };
-        AuthConfig: {
-            googleEnabled?: boolean;
-            googleClientId?: string;
         };
         MeView: {
             /** Format: int64 */
@@ -1870,6 +1882,9 @@ export interface components {
             overdueFollowUps?: components["schemas"]["OverdueFollowUp"][];
             staleApplications?: components["schemas"]["StaleApplication"][];
             recallPending?: components["schemas"]["RecallPending"][];
+            /** Format: int32 */
+            caseUnassignedAlertHours?: number;
+            unassignedCases?: components["schemas"]["UnassignedCase"][];
         };
         OverdueFollowUp: {
             /** Format: int64 */
@@ -1898,6 +1913,10 @@ export interface components {
             ownerPhone?: string;
             /** Format: date-time */
             handedOverAt?: string;
+            /** Format: date-time */
+            failedAt?: string;
+            /** Format: date-time */
+            closableFrom?: string;
         };
         StaleApplication: {
             /** Format: int64 */
@@ -1911,6 +1930,15 @@ export interface components {
             submittedAt?: string;
             /** Format: int64 */
             daysWaiting?: number;
+        };
+        UnassignedCase: {
+            /** Format: int64 */
+            caseId?: number;
+            locationText?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: int64 */
+            hoursWaiting?: number;
         };
         ClinicCost: {
             /** Format: int64 */
@@ -2068,7 +2096,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReasonRequest"];
+                "application/json": components["schemas"]["VetRequestCancel"];
             };
         };
         responses: {
@@ -2546,6 +2574,32 @@ export interface operations {
             };
         };
     };
+    closeRecall: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseRecallRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HandoverView"];
+                };
+            };
+        };
+    };
     resultWithPhotos: {
         parameters: {
             query?: never;
@@ -2704,6 +2758,32 @@ export interface operations {
             };
         };
     };
+    cancel_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApplicationView"];
+                };
+            };
+        };
+    };
     approve: {
         parameters: {
             query?: never;
@@ -2806,30 +2886,6 @@ export interface operations {
             };
         };
     };
-    google: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GoogleLoginRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["GoogleAuthResponse"];
-                };
-            };
-        };
-    };
     mine: {
         parameters: {
             query?: never;
@@ -2874,7 +2930,7 @@ export interface operations {
             };
         };
     };
-    cancel_1: {
+    cancel_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -3273,7 +3329,7 @@ export interface operations {
     pets: {
         parameters: {
             query?: {
-                status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST" | "TRANSFERRED";
+                status?: "IN_CARE" | "IN_TREATMENT" | "AVAILABLE" | "PENDING_HANDOVER" | "ADOPTED" | "DECEASED" | "LOST";
                 species?: "DOG" | "CAT";
                 q?: string;
                 page?: number;
@@ -3561,26 +3617,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicPet"];
-                };
-            };
-        };
-    };
-    config: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AuthConfig"];
                 };
             };
         };

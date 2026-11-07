@@ -11,8 +11,10 @@ import com.aar.common.storage.StorageService;
 import com.aar.pet.Intake;
 import com.aar.pet.IntakeRepository;
 import com.aar.pet.Pet;
+import com.aar.pet.PetArea;
 import com.aar.pet.PetLifecycle;
 import com.aar.pet.PetRepository;
+import com.aar.pet.PetStatus;
 import com.aar.pet.Priority;
 import com.aar.rescue.RescueDtos.CaseDetail;
 import com.aar.rescue.RescueDtos.CaseSummary;
@@ -108,7 +110,14 @@ public class RescueCaseService {
 
     /** Bản multipart: ảnh thú (S-1 của UC-07 "loài, đặc điểm, ảnh") lưu cùng giao dịch với hồ sơ. */
     public SucceedResult succeed(Long caseId, SucceedRequest req, List<MultipartFile> photos, Long by) {
+        if ((req.pet() == null) == (req.lostPetId() == null)) {
+            throw BusinessException.badRequest("PET_OR_LOST_PET_REQUIRED",
+                "Nhập thông tin thú mới, hoặc chọn thú thất lạc của trung tâm nếu đã xác nhận đúng con");
+        }
         RescueCase rescueCase = find(caseId);
+        if (req.lostPetId() != null) {
+            return succeedAsFound(rescueCase, req, photos, by);
+        }
         transition(rescueCase, "SUCCEEDED", by, null);
         var p = req.pet();
         Pet pet = petLifecycle.createFromRescue(blankToNull(p.name()), p.species(), p.sex(),
@@ -117,6 +126,28 @@ public class RescueCaseService {
         storage.store(AttachmentOwner.PET, pet.getId(), photos);
         Intake intake = intakes.save(Intake.fromRescue(pet.getId(), rescueCase.getId(), blankToNull(i.reason()),
             i.priority(), blankToNull(i.initialAssessment()), by));
+        return new SucceedResult(CaseSummary.of(rescueCase), pet.getId(), pet.getCode(), intake.getId(),
+            i.priority() == Priority.URGENT);
+    }
+
+    /**
+     * Nhánh S-1b của UC-07 (QĐ-16): thú cứu được là thú thất lạc của trung tâm. Không tạo hồ sơ mới,
+     * thú từ Thất lạc về Đang chăm sóc với lượt tiếp nhận tìm lại gắn với ca cứu hộ (RB-03 vẫn giữ một ca một lượt).
+     */
+    private SucceedResult succeedAsFound(RescueCase rescueCase, SucceedRequest req, List<MultipartFile> photos, Long by) {
+        Pet pet = petLifecycle.lock(req.lostPetId());
+        if (pet.getStatus() != PetStatus.LOST) {
+            throw BusinessException.conflict("PET_NOT_LOST", "Chỉ ghi nhận tìm lại cho thú đang Thất lạc");
+        }
+        transition(rescueCase, "SUCCEEDED", by, "Tìm lại thú thất lạc " + pet.getCode());
+        var i = req.intake();
+        String reason = blankToNull(i.reason()) == null ? "Tìm lại qua ca cứu hộ #" + rescueCase.getId() : i.reason().trim();
+        petLifecycle.transition(pet, "FOUND", by, reason);
+        pet.changeArea(PetArea.QUARANTINE);
+        pet.changeLocation(PetLifecycle.CENTER_LOCATION);
+        storage.store(AttachmentOwner.PET, pet.getId(), photos);
+        Intake intake = intakes.save(Intake.fromFound(pet.getId(), rescueCase.getId(), reason, i.priority(),
+            blankToNull(i.initialAssessment()), by));
         return new SucceedResult(CaseSummary.of(rescueCase), pet.getId(), pet.getCode(), intake.getId(),
             i.priority() == Priority.URGENT);
     }

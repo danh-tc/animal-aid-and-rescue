@@ -32,7 +32,7 @@ class CostAndAttachmentIntegrationTest extends IntegrationTestBase {
         backdateIntakes(petId, 30);
         assertThat(putJson("/api/staff/pets/" + petId + "/eligibility", STAFF, map("vaccinated", true,
             "dewormed", true, "sterilized", true, "temperamentOk", true), 200).get("status").asText()).isEqualTo("AVAILABLE");
-        long app2 = submitApplication(petId, ADOPTER3, false);
+        long app2 = submitApplication(petId, ADOPTER3);
         postJson("/api/staff/applications/" + app2 + "/approve", STAFF, null, 200);
         postJson("/api/staff/applications/" + app2 + "/handover", STAFF, map("donationAmount", 1000000), 201);
         JsonNode second = getJson("/api/staff/pets/" + petId + "/costs", STAFF, 200);

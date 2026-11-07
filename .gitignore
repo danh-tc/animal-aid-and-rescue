@@ -25,3 +25,6 @@ Thumbs.db
 backend/uploads/
 backend/data/
 backups/
+
+# Log và PID của scripts/dev.sh
+.dev-logs/

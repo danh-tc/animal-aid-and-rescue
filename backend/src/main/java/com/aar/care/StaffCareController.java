@@ -9,6 +9,7 @@ import com.aar.care.CareDtos.IneligibleResult;
 import com.aar.care.CareDtos.PetDetail;
 import com.aar.care.CareDtos.PetSummary;
 import com.aar.care.CareDtos.ReasonRequest;
+import com.aar.care.CareDtos.VetRequestCancel;
 import com.aar.care.CareDtos.UpdatePetRequest;
 import com.aar.care.CareDtos.VetRequestComplete;
 import com.aar.care.CareDtos.VetRequestCreate;
@@ -144,8 +145,8 @@ public class StaffCareController {
     }
 
     @PostMapping("/vet-requests/{id}/cancel")
-    public VetRequestResult cancel(@PathVariable Long id, @Valid @RequestBody ReasonRequest req,
+    public VetRequestResult cancel(@PathVariable Long id, @Valid @RequestBody VetRequestCancel req,
                                    @CurrentUser AuthUser me) {
-        return vet.cancel(id, req.reason(), me.id());
+        return vet.cancel(id, req.reason(), req.incurredCost(), me.id());
     }
 }

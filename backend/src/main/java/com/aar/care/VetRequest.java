@@ -87,7 +87,8 @@ public class VetRequest {
 
     public void changeStatus(VetRequestStatus status) {
         this.status = status;
-        if (status == VetRequestStatus.COMPLETED) {
+        // completed_at là thời điểm đóng yêu cầu, dùng để tính chi phí theo tháng (gồm cả chi phí của yêu cầu hủy)
+        if (status == VetRequestStatus.COMPLETED || status == VetRequestStatus.CANCELLED) {
             this.completedAt = OffsetDateTime.now();
         }
     }
@@ -100,8 +101,10 @@ public class VetRequest {
         this.aftercareInstructions = aftercare;
     }
 
-    public void recordCancel(String reason) {
+    /** QĐ-14: hủy vẫn ghi chi phí đã phát sinh (mặc định 0), tính vào tổng chi phí điều trị. */
+    public void recordCancel(String reason, BigDecimal incurredCost) {
         this.cancelReason = reason;
+        this.totalCost = incurredCost == null ? BigDecimal.ZERO : incurredCost;
     }
 
     public Long getId() { return id; }

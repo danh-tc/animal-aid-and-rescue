@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, Check, Mail, PackageCheck, Phone, X } from "lucide-react";
+import { Ban, CalendarClock, Check, Mail, PackageCheck, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -28,7 +28,7 @@ export default function ApplicationDetailPage() {
   const { data, error, loading, reload } = useApi<ApplicationDetail>(`/api/staff/applications/${id}`);
   const mutate = useMutation();
   const toast = useToast();
-  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | "schedule" | null>(null);
+  const [dialog, setDialog] = useState<"approve" | "reject" | "handover" | "schedule" | "cancel" | null>(null);
   const [handoverDate, setHandoverDate] = useState(todayIso(2));
   const [note, setNote] = useState("");
   const [donation, setDonation] = useState("0");
@@ -39,7 +39,7 @@ export default function ApplicationDetailPage() {
   const a = data.application;
   const name = petName(a.pet.name, a.pet.code);
 
-  function openDialog(kind: "approve" | "reject" | "handover" | "schedule") {
+  function openDialog(kind: "approve" | "reject" | "handover" | "schedule" | "cancel") {
     setNote("");
     setHandoverDate(a.handoverDate ?? todayIso(2));
     setDialog(kind);
@@ -56,7 +56,7 @@ export default function ApplicationDetailPage() {
       }
       throw e;
     }
-    toast.success(`Đã duyệt đơn. ${name} chuyển sang Chờ bàn giao, các đơn chờ khác đã tự đóng.`);
+    toast.success(`Đã duyệt đơn. ${name} chuyển sang Chờ bàn giao, các đơn khác của bé đã tự động đóng.`);
     setDialog(null);
     reload();
   }
@@ -65,6 +65,15 @@ export default function ApplicationDetailPage() {
     if (!handoverDate || handoverDate < todayIso()) throw new Error("Chọn ngày hẹn bàn giao từ hôm nay trở đi.");
     await mutate(`/api/staff/applications/${id}/handover-date`, { body: { handoverDate } });
     toast.success(`Đã hẹn bàn giao ngày ${formatDate(handoverDate)}.`);
+    setDialog(null);
+    reload();
+  }
+
+  /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn và ghi lý do, thú về Sẵn sàng. */
+  async function cancelNoShow() {
+    if (!note.trim()) throw new Error("Ghi lý do hủy, ví dụ không đến theo hẹn và không liên lạc được.");
+    await mutate(`/api/staff/applications/${id}/cancel`, { body: { reason: note.trim() } });
+    toast.success(`Đã hủy đơn. ${name} trở lại Sẵn sàng nhận nuôi.`);
     setDialog(null);
     reload();
   }
@@ -78,12 +87,12 @@ export default function ApplicationDetailPage() {
 
   async function doHandover() {
     const amount = Number(donation || "0");
-    if (!(amount >= 0) || !Number.isInteger(amount)) throw new Error("Khoản ủng hộ là số nguyên VND, không âm.");
+    if (!(amount >= 0) || !Number.isInteger(amount)) throw new Error("Số tiền ủng hộ phải là số nguyên không âm (VND).");
     const res = await mutate<HandoverView>(`/api/staff/applications/${id}/handover`, {
       body: { note: note.trim() || null, donationAmount: amount },
     });
     setHandover(res);
-    toast.success(`Đã bàn giao ${name}. Hệ thống tạo ${res.followUps.length} lịch hậu kiểm.`);
+    toast.success(`Đã bàn giao ${name}. Hệ thống đã tạo ${res.followUps.length} lịch hậu kiểm.`);
     setDialog(null);
     reload();
   }
@@ -117,6 +126,9 @@ export default function ApplicationDetailPage() {
             )}
             {a.status === "APPROVED" && (
               <>
+                <Button variant="ghost" icon={<Ban aria-hidden="true" />} onClick={() => openDialog("cancel")}>
+                  Hủy do không đến
+                </Button>
                 <Button variant="ghost" icon={<CalendarClock aria-hidden="true" />} onClick={() => openDialog("schedule")}>
                   {a.handoverDate ? "Đổi ngày hẹn" : "Hẹn ngày bàn giao"}
                 </Button>
@@ -145,7 +157,7 @@ export default function ApplicationDetailPage() {
           ))}
           {a.status === "APPROVED" && (
             <Notice tone={a.handoverDate ? "info" : "warning"} title={a.handoverDate ? `Hẹn bàn giao ngày ${formatDate(a.handoverDate)}` : "Chưa hẹn ngày bàn giao"}>
-              {a.handoverDate ? "Người nhận nuôi thấy ngày hẹn trong mục Đơn của tôi." : "Bấm Hẹn ngày bàn giao để báo cho người nhận nuôi."}
+              {a.handoverDate ? "Người nhận nuôi xem được ngày hẹn ở mục Đơn của tôi." : "Bấm Hẹn ngày bàn giao để báo cho người nhận nuôi."}
             </Notice>
           )}
           {a.status === "PENDING" && data.petStatus !== "AVAILABLE" && (
@@ -159,7 +171,7 @@ export default function ApplicationDetailPage() {
               title="Đã bàn giao"
               action={<LinkButton href={`/staff/pets/${a.pet.id}?tab=handovers`} size="sm" variant="secondary">Xem lịch hậu kiểm</LinkButton>}
             >
-              Lịch hậu kiểm: {handover.followUps.map((f) => `lần ${f.sequenceNo} ngày ${f.dueDate}`).join(", ")}.
+              Lịch hậu kiểm: {handover.followUps.map((f) => `lần ${f.sequenceNo} ngày ${formatDate(f.dueDate)}`).join(", ")}.
             </Notice>
           )}
           <Panel title="Người nộp đơn">
@@ -190,10 +202,6 @@ export default function ApplicationDetailPage() {
               items={[
                 { label: "Nhà ở", value: HOUSING[a.housingType] },
                 { label: "Kinh nghiệm", value: a.hasPetExperience ? "Đã từng nuôi chó mèo" : "Chưa từng nuôi" },
-                {
-                  label: "Cam kết triệt sản",
-                  value: a.sterilizationPledge ? <Badge tone="success">Đã cam kết</Badge> : "Không cần hoặc không có",
-                },
                 { label: "Lý do nhận nuôi", value: a.motivation, wide: true },
                 ...(a.reviewedAt
                   ? [{ label: "Xét duyệt", value: `${formatDateTime(a.reviewedAt)}${a.reviewNote ? `\n${a.reviewNote}` : ""}`, wide: true }]
@@ -242,11 +250,11 @@ export default function ApplicationDetailPage() {
         open={dialog === "approve"}
         onClose={() => setDialog(null)}
         title={`Duyệt đơn nhận nuôi ${name}?`}
-        description="Bé chuyển sang Chờ bàn giao. Các đơn đang chờ khác cho bé sẽ tự đóng."
+        description="Bé chuyển sang Chờ bàn giao. Các đơn khác đang chờ cho bé sẽ tự động đóng."
         submitLabel="Duyệt đơn"
         onSubmit={approve}
       >
-        <Field label="Ngày hẹn bàn giao" required hint="Người nhận nuôi thấy ngày này trong mục Đơn của tôi, đổi được sau.">
+        <Field label="Ngày hẹn bàn giao" required hint="Người nhận nuôi xem được ngày này ở mục Đơn của tôi. Có thể đổi lại sau.">
           <input type="date" min={todayIso()} value={handoverDate} onChange={(e) => setHandoverDate(e.target.value)} required />
         </Field>
         <Field label="Ghi chú" hint="Không bắt buộc, người nộp đơn sẽ thấy ghi chú này.">
@@ -267,6 +275,20 @@ export default function ApplicationDetailPage() {
       </Dialog>
 
       <Dialog
+        open={dialog === "cancel"}
+        onClose={() => setDialog(null)}
+        title="Hủy đơn đã duyệt?"
+        description={`Dùng khi người nhận không đến bàn giao theo hẹn và không liên lạc được. ${name} trở lại Sẵn sàng nhận nuôi, các đơn đã tự đóng trước đó không được mở lại.`}
+        submitLabel="Hủy đơn"
+        submitVariant="danger"
+        onSubmit={cancelNoShow}
+      >
+        <Field label="Lý do" required hint="Ví dụ: hẹn ngày 12/11, gọi 3 lần không nghe máy.">
+          <textarea rows={3} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} required />
+        </Field>
+      </Dialog>
+
+      <Dialog
         open={dialog === "reject"}
         onClose={() => setDialog(null)}
         title="Từ chối đơn?"
@@ -283,12 +305,12 @@ export default function ApplicationDetailPage() {
         open={dialog === "handover"}
         onClose={() => setDialog(null)}
         title={`Bàn giao ${name}`}
-        description="Cho người nhận xem 3 con số chi phí của bé, ghi khoản ủng hộ nếu có. Hệ thống tự tạo 2 lịch hậu kiểm."
+        description="Cho người nhận xem chi phí điều trị của bé và ghi khoản ủng hộ nếu có. Hệ thống tự tạo 2 lịch hậu kiểm."
         submitLabel="Xác nhận bàn giao"
         onSubmit={doHandover}
       >
         <CostSummary petId={a.pet.id} />
-        <Field label="Khoản ủng hộ (VND)" hint="Tùy tâm, không hoàn lại khi trả thú. Hệ thống chỉ ghi nhận số tiền.">
+        <Field label="Khoản ủng hộ (VND)" hint="Tùy tâm, không hoàn lại nếu trả thú. Hệ thống chỉ ghi nhận số tiền.">
           <input type="number" min={0} step={10000} inputMode="numeric" value={donation} onChange={(e) => setDonation(e.target.value)} />
         </Field>
         <Field label="Ghi chú">

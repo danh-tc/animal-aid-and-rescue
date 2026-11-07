@@ -63,12 +63,3 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
     </div>
   );
 }
-
-/** Đường kẻ "hoặc" giữa nút Google và form mật khẩu. */
-export function AuthDivider({ label = "hoặc" }: { label?: string }) {
-  return (
-    <div className="auth-shell__divider" role="separator">
-      <span>{label}</span>
-    </div>
-  );
-}

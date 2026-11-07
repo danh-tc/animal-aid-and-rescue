@@ -14,9 +14,8 @@ public final class AdoptionDtos {
     private AdoptionDtos() {
     }
 
-    /** A01. sterilizationPledge bắt buộc nếu thú chưa triệt sản (checklist mục 5). */
     /**
-     * phone, address: bắt buộc nếu tài khoản chưa có (ví dụ đăng ký bằng Google), được lưu vào tài khoản
+     * phone, address: bắt buộc nếu tài khoản chưa có (ví dụ đăng ký không nhập số điện thoại), được lưu vào tài khoản
      * để nhân viên liên hệ khi xét duyệt và hậu kiểm.
      */
     public record SubmitRequest(
@@ -24,7 +23,6 @@ public final class AdoptionDtos {
         @NotNull HousingType housingType,
         @NotNull Boolean hasPetExperience,
         @Size(max = 2000) String motivation,
-        Boolean sterilizationPledge,
         @Pattern(regexp = "^[0-9+]{9,15}$", message = "Số điện thoại không hợp lệ") String phone,
         @Size(max = 255) String address) {
     }
@@ -42,6 +40,10 @@ public final class AdoptionDtos {
     public record RejectRequest(@NotBlank @Size(max = 2000) String note) {
     }
 
+    /** QĐ-11: nhân viên hủy đơn đã duyệt khi người nhận không đến bàn giao theo hẹn, bắt buộc ghi lý do. */
+    public record StaffCancelRequest(@NotBlank @Size(max = 1000) String reason) {
+    }
+
     public record PetBrief(Long id, String code, String name) {
     }
 
@@ -49,7 +51,7 @@ public final class AdoptionDtos {
     }
 
     public record ApplicationView(Long id, PetBrief pet, ApplicantBrief applicant, HousingType housingType,
-                                  boolean hasPetExperience, String motivation, boolean sterilizationPledge,
+                                  boolean hasPetExperience, String motivation,
                                   ApplicationStatus status, String reviewNote, OffsetDateTime reviewedAt,
                                   LocalDate handoverDate, String cancelReason, OffsetDateTime submittedAt) {
     }

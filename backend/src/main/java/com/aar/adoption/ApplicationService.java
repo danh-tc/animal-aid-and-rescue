@@ -67,11 +67,6 @@ public class ApplicationService {
         if (pet.getStatus() != PetStatus.AVAILABLE) {
             throw BusinessException.conflict("PET_NOT_AVAILABLE", "Thú không còn mở nhận nuôi");
         }
-        boolean pledge = Boolean.TRUE.equals(req.sterilizationPledge());
-        if (!pet.isSterilized() && !pledge) {
-            throw BusinessException.badRequest("STERILIZATION_PLEDGE_REQUIRED",
-                "Thú chưa triệt sản, đơn nhận nuôi phải kèm cam kết triệt sản");
-        }
         if (applications.existsByPetIdAndApplicantIdAndStatus(pet.getId(), applicantId, ApplicationStatus.PENDING)) {
             throw BusinessException.conflict("DUPLICATE_APPLICATION", "Bạn đã có đơn đang chờ cho thú này");
         }
@@ -93,7 +88,7 @@ public class ApplicationService {
         }
         ApplicationStatus initial = ApplicationStatus.valueOf(state.initialStatus(EntityType.APPLICATION, "SUBMITTED"));
         AdoptionApplication app = applications.save(new AdoptionApplication(pet.getId(), applicantId,
-            req.housingType(), req.hasPetExperience(), blankToNull(req.motivation()), pledge, initial));
+            req.housingType(), req.hasPetExperience(), blankToNull(req.motivation()), initial));
         state.apply(EntityType.APPLICATION, app.getId(), null, "SUBMITTED", applicantId, null);
         return view(app, pet, users.findById(applicantId).orElse(null));
     }
@@ -140,7 +135,10 @@ public class ApplicationService {
             pet.getStatus().name(), views(others), applicantHistory(app.getApplicantId()));
     }
 
-    /** Cảnh báo cho nhân viên: người nộp từng bị thu hồi thú (hậu kiểm Không đạt) hoặc từng trả lại thú. */
+    /**
+     * Cảnh báo cho nhân viên (UC-10 bước 2): người nộp từng có hậu kiểm Không đạt hoặc từng trả lại thú.
+     * Hệ thống không chặn duyệt, nhân viên dựa vào cảnh báo để đánh giá theo tiêu chí thẩm định (mục 2.1.4).
+     */
     private List<ApplicantFlag> applicantHistory(Long applicantId) {
         return jdbc.query("""
             SELECT p.id pet_id, p.code, p.name, h.handed_over_at,
@@ -157,12 +155,38 @@ public class ApplicationService {
                 if (!failed && returnReason == null) {
                     return null;
                 }
-                String note = failed
-                    ? "Hậu kiểm Không đạt" + ("RETURNED".equals(rs.getString("follow_up_status")) ? ", thú đã được thu hồi" : ", đang chờ thu hồi")
+                String note = failed ? "Hậu kiểm Không đạt" + recallNote(rs.getString("follow_up_status"))
                     : "Đã trả lại thú: " + returnReason;
                 return new ApplicantFlag(failed ? "RECALLED" : "RETURNED", rs.getLong("pet_id"), rs.getString("code"),
                     rs.getString("name"), rs.getObject("handed_over_at", OffsetDateTime.class), note);
             }, applicantId).stream().filter(java.util.Objects::nonNull).toList();
+    }
+
+    private static String recallNote(String handoverStatus) {
+        return switch (handoverStatus) {
+            case "RETURNED" -> ", thú đã được thu hồi";
+            case "CLOSED" -> ", không thu hồi được, Quản lý đã đóng thu hồi";
+            default -> ", đang chờ thu hồi";
+        };
+    }
+
+    /**
+     * QĐ-11, ngoại lệ 3a của UC-11: người nhận không đến bàn giao theo hẹn và không liên lạc được,
+     * nhân viên hủy đơn đã duyệt và ghi lý do. Thú về Sẵn sàng, các đơn đã đóng không mở lại.
+     */
+    public ApplicationView cancelByStaff(Long applicationId, String reason, Long by) {
+        Long petId = applications.findPetIdById(applicationId).orElseThrow(this::notFound);
+        Pet pet = petLifecycle.lock(petId);
+        AdoptionApplication app = applications.findById(applicationId).orElseThrow(this::notFound);
+        if (app.getStatus() != ApplicationStatus.APPROVED) {
+            throw BusinessException.conflict("APPLICATION_NOT_APPROVED",
+                "Nhân viên chỉ hủy đơn đã duyệt khi người nhận không đến bàn giao");
+        }
+        cascade.cancel(app, reason.trim(), by);
+        if (pet.getStatus() == PetStatus.PENDING_HANDOVER) {
+            petLifecycle.transition(pet, "HANDOVER_CANCELLED", by, "Người nhận không đến bàn giao: " + reason.trim());
+        }
+        return view(app, pet, users.findById(app.getApplicantId()).orElse(null));
     }
 
     /**
@@ -187,7 +211,7 @@ public class ApplicationService {
         }
         if (app.getStatus() != ApplicationStatus.PENDING) {
             throw BusinessException.conflict("APPLICATION_NOT_PENDING",
-                "Đơn không còn ở trạng thái chờ xét duyệt (" + app.getStatus() + ")");
+                "Đơn không còn ở trạng thái Chờ xét duyệt");
         }
         transition(app, "APPROVED", by, blankToNull(note));
         app.recordReview(blankToNull(note), by);
@@ -238,7 +262,7 @@ public class ApplicationService {
             pet == null ? null : new PetBrief(pet.getId(), pet.getCode(), pet.getName()),
             applicant == null ? null : new ApplicantBrief(applicant.getId(), applicant.getFullName(),
                 applicant.getEmail(), applicant.getPhone(), applicant.getAddress()),
-            a.getHousingType(), a.isHasPetExperience(), a.getMotivation(), a.isSterilizationPledge(), a.getStatus(),
+            a.getHousingType(), a.isHasPetExperience(), a.getMotivation(), a.getStatus(),
             a.getReviewNote(), a.getReviewedAt(), a.getHandoverDate(), a.getCancelReason(), a.getSubmittedAt());
     }
 
