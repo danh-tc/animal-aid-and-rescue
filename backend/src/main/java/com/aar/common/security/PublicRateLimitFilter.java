@@ -19,11 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Giới hạn tần suất cho /api/public/** (mục 5.1): đếm số yêu cầu theo IP trong cửa sổ 1 phút, quá thì trả 429.
- * Đăng nhập, đăng ký và tra cứu báo cáo có ngưỡng thấp hơn để chống dò mật khẩu và dò mã báo cáo.
- * Bộ đếm nằm trong bộ nhớ, đủ cho một máy chủ như kiến trúc ở mục 5.1.
- */
 @Component
 public class PublicRateLimitFilter extends OncePerRequestFilter {
 

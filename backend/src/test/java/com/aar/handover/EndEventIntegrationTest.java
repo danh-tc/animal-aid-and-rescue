@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
-/** Đợt 2: sự kiện kết thúc vòng đời (mục 2.1.6, QĐ-15, QĐ-16) và tìm lại thú thất lạc. */
 class EndEventIntegrationTest extends IntegrationTestBase {
 
     @Test
@@ -23,15 +22,15 @@ class EndEventIntegrationTest extends IntegrationTestBase {
         assertThat(res.get("cancelledApplications").asInt()).isEqualTo(1);
         assertThat(petStatus(petId)).isEqualTo("DECEASED");
         assertThat(applicationStatus(pending)).isEqualTo("CANCELLED");
-        // Đơn thứ hai đã bị hệ thống tự đóng lúc duyệt, giữ nguyên
+
         assertThat(applicationStatus(pending2)).isEqualTo("CANCELLED");
 
         JsonNode events = getJson("/api/staff/pets/" + petId + "/end-events", STAFF, 200);
         assertThat(events).hasSize(1);
         assertThat(events.get(0).get("eventType").asText()).isEqualTo("DECEASED");
-        // Trạng thái kết thúc không ghi thêm sự kiện
+
         postJson("/api/staff/pets/" + petId + "/end-events", STAFF, map("eventType", "LOST", "detail", "x"), 409);
-        // Hồ sơ vẫn còn (RB-11)
+
         getJson("/api/staff/pets/" + petId, STAFF, 200);
     }
 
@@ -59,11 +58,9 @@ class EndEventIntegrationTest extends IntegrationTestBase {
         assertThat(pet.get("currentLocation").asText()).isEqualTo("Trung tâm");
         assertThat(pet.get("intakes").findValuesAsText("source")).containsExactly("FOUND", "RESCUE");
 
-        // Chỉ thú đang Thất lạc mới tìm lại
         postJson("/api/staff/pets/" + petId + "/found", STAFF, map("reason", "x", "priority", "STABLE"), 409);
     }
 
-    /** Mục 2.1.6: chỉ còn hai sự kiện kết thúc là Qua đời và Thất lạc. */
     @Test
     void transferIsNoLongerAnEndEvent() throws Exception {
         long petId = rescuedPet("DOG", LocalDate.now().minusYears(1));
@@ -72,7 +69,6 @@ class EndEventIntegrationTest extends IntegrationTestBase {
         assertThat(petStatus(petId)).isEqualTo("IN_CARE");
     }
 
-    /** QĐ-14, QĐ-15: qua đời trong điều trị, nhân viên nhập chi phí đã phát sinh của yêu cầu đang mở. */
     @Test
     void deathDuringTreatmentRecordsIncurredCost() throws Exception {
         long petId = rescuedPet("CAT", LocalDate.now().minusYears(1));

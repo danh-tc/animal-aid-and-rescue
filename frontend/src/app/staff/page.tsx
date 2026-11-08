@@ -23,7 +23,6 @@ function dueLabel(date: string) {
   return <Badge tone="info">Còn {d} ngày</Badge>;
 }
 
-/** S01: Bảng công việc */
 export default function StaffDashboardPage() {
   const { user } = useAuth();
   const stats = useApi<Dashboard>("/api/staff/dashboard");

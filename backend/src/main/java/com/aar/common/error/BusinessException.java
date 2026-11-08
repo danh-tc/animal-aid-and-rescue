@@ -2,7 +2,6 @@ package com.aar.common.error;
 
 import org.springframework.http.HttpStatus;
 
-/** Lỗi nghiệp vụ có mã lỗi và HTTP status tương ứng. */
 public class BusinessException extends RuntimeException {
 
     private final HttpStatus status;

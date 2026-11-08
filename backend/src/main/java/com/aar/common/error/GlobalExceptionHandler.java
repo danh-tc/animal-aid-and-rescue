@@ -38,7 +38,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of("INVALID_TRANSITION", ex.getMessage()));
     }
 
-    /** Ràng buộc database chặn lại, ví dụ đơn Đã duyệt thứ hai cho cùng một thú (RB-01). */
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<ApiError> integrity(DataIntegrityViolationException ex) {
         log.warn("Vi phạm ràng buộc dữ liệu: {}", ex.getMostSpecificCause().getMessage());

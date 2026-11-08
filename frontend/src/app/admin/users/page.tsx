@@ -23,7 +23,6 @@ import "../../staff/detail-page.scss";
 type Filter = Role | "ALL";
 const EMPTY = { email: "", fullName: "", phone: "", address: "", role: "STAFF" as Role, active: true, password: "" };
 
-/** M02: Tài khoản và phân quyền */
 export default function UsersPage() {
   const { user: me } = useAuth();
   const [role, setRole] = useUrlState<Filter>("role", "ALL");

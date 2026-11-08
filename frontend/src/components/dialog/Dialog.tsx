@@ -13,17 +13,14 @@ interface DialogProps {
   title: string;
   description?: ReactNode;
   children?: ReactNode;
-  /** Nhãn nút xác nhận. Có thì hộp thoại là một form. */
+
   submitLabel?: string;
   submitVariant?: "primary" | "danger" | "accent";
-  /** Ném lỗi thì hộp thoại giữ nguyên và hiện thông báo lỗi. */
+
   onSubmit?: () => Promise<void> | void;
   size?: "md" | "lg";
 }
 
-/**
- * Hộp thoại dùng thẻ <dialog> gốc: tự khóa focus, Esc để đóng, có nút đóng rõ ràng.
- */
 export function Dialog({
   open,
   onClose,
@@ -74,7 +71,7 @@ export function Dialog({
         if (!busy) onClose();
       }}
       onClick={(e) => {
-        // Bấm ra ngoài vùng nội dung để đóng
+
         if (e.target === ref.current && !busy) onClose();
       }}
     >

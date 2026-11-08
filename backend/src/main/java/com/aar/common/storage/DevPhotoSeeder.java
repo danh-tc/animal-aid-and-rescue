@@ -22,11 +22,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Chỉ chạy với profile dev: gắn ảnh chó mèo thật cho các thú trong dữ liệu mẫu (R__dev_seed.sql)
- * nếu thú đó chưa có ảnh. Ảnh và nguồn gốc nằm ở resources/dev-photos/manifest.json.
- * Đi qua StorageService nên ảnh được lưu và kiểm tra y như ảnh nhân viên tải lên.
- */
 @Component
 @Profile("dev")
 public class DevPhotoSeeder implements ApplicationRunner {
@@ -78,7 +73,6 @@ public class DevPhotoSeeder implements ApplicationRunner {
         }
     }
 
-    /** MultipartFile từ mảng byte, chỉ dùng để nạp ảnh mẫu. */
     private record BytesFile(String name, byte[] bytes) implements MultipartFile {
 
         @Override public String getName() { return "files"; }

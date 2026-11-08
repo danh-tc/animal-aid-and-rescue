@@ -11,7 +11,6 @@ interface FormCardProps {
   wide?: boolean;
 }
 
-/** Khung chung cho các form công khai: đăng nhập, đăng ký, báo cứu hộ, nộp đơn. */
 export function FormCard({ title, description, icon: Icon, children, footer, wide }: FormCardProps) {
   return (
     <div className={`form-card${wide ? " form-card--wide" : ""}`}>

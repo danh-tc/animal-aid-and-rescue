@@ -34,7 +34,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** S04, S05: hồ sơ thú, nhật ký chăm sóc, checklist, đánh dấu không đủ điều kiện, lịch sử trạng thái. */
 @Service
 @Transactional
 public class PetCareService {
@@ -87,7 +86,6 @@ public class PetCareService {
             attachments.findByPetIdOrderById(petId).stream().map(AttachmentView::of).toList());
     }
 
-    /** Sửa thông tin mô tả, khu vực, nơi ở. Đổi khu vực tự ghi nhật ký AREA_CHANGE. */
     public PetSummary update(Long petId, UpdatePetRequest req, Long by) {
         Pet pet = find(petId);
         pet.updateInfo(req.name() != null ? blankToNull(req.name()) : pet.getName(),
@@ -128,10 +126,6 @@ public class PetCareService {
             req.activityType() == CareActivity.WEIGHT ? req.weightKg() : null, blankToNull(req.note()))));
     }
 
-    /**
-     * S-4 của UC-09: lưu checklist. Thú Đang chăm sóc đạt đủ 6 mục thì chuyển Sẵn sàng (QĐ-07, RB-13).
-     * Thú đang Sẵn sàng hoặc Chờ bàn giao muốn hạ điều kiện thì dùng ineligible().
-     */
     public EligibilityResult saveEligibility(Long petId, EligibilityRequest req, Long by) {
         Pet pet = petLifecycle.lock(petId);
         if (pet.getStatus() != PetStatus.IN_CARE && pet.getStatus() != PetStatus.IN_TREATMENT) {
@@ -152,7 +146,6 @@ public class PetCareService {
         return new EligibilityResult(pet.getStatus(), checklist, checklist.missing());
     }
 
-    /** QĐ-10: thú không đủ điều kiện khi Sẵn sàng hoặc Chờ bàn giao, hủy đơn đang chờ và đã duyệt. */
     public IneligibleResult markIneligible(Long petId, String reason, Long by) {
         Pet pet = petLifecycle.lock(petId);
         if (pet.getStatus() != PetStatus.AVAILABLE && pet.getStatus() != PetStatus.PENDING_HANDOVER) {

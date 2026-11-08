@@ -13,7 +13,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
-/** Trả lỗi 401 và 403 theo cùng định dạng ApiError với các lỗi khác. */
 @Component
 public class RestAuthenticationHandlers implements AuthenticationEntryPoint, AccessDeniedHandler {
 

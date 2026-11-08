@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 
-/** Đơn nhận nuôi. Không xóa (RB-11), trạng thái chỉ đổi qua StateTransitionService. */
 @Entity
 @Table(name = "adoption_applications")
 public class AdoptionApplication {
@@ -35,7 +34,6 @@ public class AdoptionApplication {
 
     private String motivation;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status;
@@ -52,7 +50,6 @@ public class AdoptionApplication {
     @Column(name = "cancel_reason")
     private String cancelReason;
 
-    /** Ngày hẹn bàn giao, nhân viên ghi khi duyệt hoặc đổi sau (mục 2.1.4 bước 3). */
     @Column(name = "handover_date")
     private java.time.LocalDate handoverDate;
 

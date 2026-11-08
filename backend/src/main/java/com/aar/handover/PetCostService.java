@@ -8,10 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * QĐ-14: tổng chi phí điều trị (mọi yêu cầu Hoàn tất, kể cả sau khi bị trả lại), đã được ủng hộ
- * (cộng dồn qua các lần bàn giao), còn chưa bù đắp = tổng trừ ủng hộ, thấp nhất là 0.
- */
 @Service
 @Transactional(readOnly = true)
 public class PetCostService {

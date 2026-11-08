@@ -9,10 +9,8 @@ import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Các quy tắc chốt ở báo cáo bản rút gọn: QĐ-05, QĐ-11, QĐ-12, QĐ-16, QĐ-17, QĐ-18. */
 class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
 
-    /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn đã duyệt và ghi lý do, thú về Sẵn sàng. */
     @Test
     void staffCancelsApprovedApplicationWhenAdopterDoesNotShowUp() throws Exception {
         long appId = approvedApplication(ADOPTER1);
@@ -27,14 +25,12 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         assertThat(cancelled.get("cancelReason").asText()).contains("Không đến theo hẹn");
         assertThat(petStatus(petId)).isEqualTo("AVAILABLE");
 
-        // Chỉ hủy được đơn đã duyệt
         long pending = submitApplication(petId, ADOPTER2);
         JsonNode notApproved = postJson("/api/staff/applications/" + pending + "/cancel", STAFF,
             map("reason", "x"), 409);
         assertThat(notApproved.get("code").asText()).isEqualTo("APPLICATION_NOT_APPROVED");
     }
 
-    /** QĐ-12, RB-23: lần bổ sung chỉ Đạt hoặc Không đạt. Nhân viên tự chọn kết quả, kết quả bổ sung thay lần gốc. */
     @Test
     void additionalFollowUpOnlyPassOrFail() throws Exception {
         JsonNode handover = handedOver(ADOPTER2);
@@ -48,7 +44,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
             criteria("WATCH", "Vẫn chưa ổn"), 400);
         assertThat(watchAgain.get("code").asText()).isEqualTo("ADDITIONAL_RESULT_INVALID");
 
-        // Lần bổ sung vẫn không liên lạc được chủ: nhân viên ghi Không đạt
         @SuppressWarnings("unchecked")
         Map<String, Object> unreachable = (Map<String, Object>) criteria("FAIL", "Lần bổ sung vẫn không liên lạc được chủ");
         unreachable.put("ownerReachable", false);
@@ -56,7 +51,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         assertThat(fail.get("handoverStatus").asText()).isEqualTo("RECALL_PENDING");
     }
 
-    /** QĐ-18, RB-21: chỉ Quản lý đóng thu hồi, sau đủ số ngày ở Chờ thu hồi, có lý do. Thú giữ Đã nhận nuôi. */
     @Test
     void managerClosesRecallAfterWaitingPeriod() throws Exception {
         JsonNode handover = handedOver(ADOPTER3);
@@ -82,7 +76,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         assertThat(closed.get("status").asText()).isEqualTo("CLOSED");
         assertThat(petStatus(petId)).isEqualTo("ADOPTED");
 
-        // Người này nộp đơn mới: hệ thống chỉ cảnh báo, không chặn (mục 2.1.4)
         long another = availablePet(false);
         long appId = submitApplication(another, ADOPTER3);
         JsonNode detail = getJson("/api/staff/applications/" + appId, STAFF, 200);
@@ -90,7 +83,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         postJson("/api/staff/applications/" + appId + "/approve", STAFF, null, 200);
     }
 
-    /** Nhánh S-1b của UC-07 (QĐ-16): thú cứu được là thú thất lạc của trung tâm, tạo lượt tìm lại trên hồ sơ cũ. */
     @Test
     void rescueOfLostPetCreatesFoundIntakeOnExistingRecord() throws Exception {
         long petId = rescuedPet("CAT", LocalDate.now().minusYears(2));
@@ -114,14 +106,13 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
             .isEqualTo("FOUND");
     }
 
-    /** QĐ-05: thú bị trả lại phải khám lại trong lượt tiếp nhận mới, kết quả khám lượt trước không được tính. */
     @Test
     void returnedPetNeedsNewVetExamBeforeAvailable() throws Exception {
         JsonNode handover = handedOver(ADOPTER1);
         long petId = handover.get("petId").asLong();
         postJson("/api/staff/pets/" + petId + "/returns", STAFF,
             map("reason", "Chủ chuyển nhà", "priority", "STABLE"), 201);
-        // Lượt trả lại đã hết cách ly, lần khám duy nhất thuộc lượt cứu hộ trước đó
+
         jdbc.update("UPDATE vet_requests SET completed_at = now() - interval '200 days' WHERE pet_id = ?", petId);
         jdbc.update("UPDATE intakes SET intake_at = now() - interval '20 days' WHERE pet_id = ? AND source = 'RETURN'", petId);
 
@@ -130,7 +121,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         assertThat(check.get("status").asText()).isEqualTo("IN_CARE");
     }
 
-    /** RB-22: tọa độ nếu có phải hợp lệ và có đủ cả hai. */
     @Test
     void reportCoordinatesMustBeComplete() throws Exception {
         Map<String, Object> base = map("reporterName", "Người báo", "reporterPhone", randomPhone(),
@@ -145,7 +135,6 @@ class ReportRulesSyncIntegrationTest extends IntegrationTestBase {
         postJson("/api/public/rescue-reports", null, full, 201);
     }
 
-    /** QĐ-17: ca ở Mới quá số giờ cho phép vào báo cáo ngoại lệ để nhắc Quản lý. */
     @Test
     void unassignedCaseAppearsInExceptionReport() throws Exception {
         long reportId = reportId(submitReport());

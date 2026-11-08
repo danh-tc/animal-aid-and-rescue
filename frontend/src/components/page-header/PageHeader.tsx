@@ -6,7 +6,7 @@ import "./page-header.scss";
 interface PageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
-  /** Nút quay lại rõ ràng thay cho breadcrumb nhiều cấp. */
+
   back?: { href: string; label: string };
   meta?: ReactNode;
   actions?: ReactNode;

@@ -19,10 +19,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Tải lên và tải về tệp đính kèm: ảnh thú (S05), phiếu khám (S06), ảnh hậu kiểm (S09).
- * Khách chỉ xem được ảnh của thú đang Sẵn sàng.
- */
 @RestController
 public class AttachmentController {
 
@@ -68,13 +64,11 @@ public class AttachmentController {
         return upload(AttachmentOwner.FOLLOW_UP, id, files);
     }
 
-    /** Danh sách phiếu khám của một yêu cầu thú y (S06). */
     @GetMapping("/api/staff/vet-requests/{id}/attachments")
     public List<AttachmentView> vetAttachments(@PathVariable Long id) {
         return attachments.findByVetRequestIdOrderById(id).stream().map(AttachmentView::of).toList();
     }
 
-    /** Ảnh của một lần hậu kiểm (S09). */
     @GetMapping("/api/staff/follow-ups/{id}/attachments")
     public List<AttachmentView> followUpAttachments(@PathVariable Long id) {
         return attachments.findByFollowUpIdOrderById(id).stream().map(AttachmentView::of).toList();

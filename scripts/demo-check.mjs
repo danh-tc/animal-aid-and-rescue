@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-// Chạy tự động 4 kịch bản demo ở báo cáo mục 5.3 (docs/demo.md) qua API và in kết quả từng bước.
-// Thao tác thay đổi dữ liệu, nên chạy trên database vừa nạp lại dữ liệu mẫu:
+
 //
-//   docker compose down -v && docker compose up -d     # rồi bật backend với profile dev
-//   node scripts/demo-check.mjs                        # hoặc --api http://localhost:8080
+
 //
-// Chạy xong muốn demo bằng giao diện thì nạp lại dữ liệu mẫu lần nữa.
+
 const args = process.argv.slice(2);
 const API = args.includes("--api") ? args[args.indexOf("--api") + 1] : "http://localhost:8080";
 const PASSWORD = "Password@123";
@@ -43,7 +41,6 @@ function check(label, ok, detail = "") {
   }
 }
 
-/** Gọi API và kiểm tra mã trạng thái, trả về dữ liệu để bước sau dùng. */
 async function expect(label, method, path, opts, status) {
   const res = await call(method, path, opts);
   check(`${label} (${res.status})`, res.status === status,

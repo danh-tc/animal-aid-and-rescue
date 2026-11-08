@@ -1,7 +1,5 @@
 @use "abstracts" as *;
 
-// Bảng trên màn hình rộng, tự chuyển thành danh sách thẻ trên điện thoại
-// để không phải cuộn ngang.
 .data-table {
   width: 100%;
   transition: opacity $duration-base $ease-out;
@@ -68,7 +66,6 @@
     color: $color-text;
     text-decoration: none;
 
-    // Kéo vùng bấm ra cả dòng
     &::after {
       content: "";
       position: absolute;
@@ -141,7 +138,6 @@
   }
 }
 
-// Liên kết phụ trong ô (không phải ô đầu) nằm trên lớp phủ của liên kết dòng
 .data-table__cell-link {
   position: relative;
   z-index: 1;

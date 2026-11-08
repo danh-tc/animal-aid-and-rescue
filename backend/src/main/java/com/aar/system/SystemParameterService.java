@@ -38,7 +38,6 @@ public class SystemParameterService {
         return params.findAll(Sort.by("key"));
     }
 
-    /** Mọi tham số hiện có đều là số nguyên dương. */
     @Transactional
     public SystemParameter update(String key, String value) {
         SystemParameter p = params.findById(key)

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Thao tác dùng chung trên hồ sơ thú: tải có khóa dòng, tạo hồ sơ, đổi trạng thái qua RB-12. */
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
 public class PetLifecycle {
@@ -31,7 +30,6 @@ public class PetLifecycle {
         return pets.findByIdForUpdate(petId).orElseThrow(() -> BusinessException.notFound("Không tìm thấy thú"));
     }
 
-    /** Hồ sơ mới sau ca cứu hộ thành công: IN_CARE, khu cách ly (bảng 3.4). */
     public Pet createFromRescue(String name, Species species, Sex sex, LocalDate birth, String color,
                                 String description, Long by) {
         PetStatus initial = PetStatus.valueOf(state.initialStatus(EntityType.PET, "RESCUE_SUCCEEDED"));

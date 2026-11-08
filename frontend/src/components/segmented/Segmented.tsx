@@ -14,7 +14,6 @@ interface SegmentedProps<V extends string> {
   onChange: (value: V) => void;
 }
 
-/** Nhóm nút lọc. Xuống dòng khi hẹp thay vì cuộn ngang. */
 export function Segmented<V extends string>({ label, options, value, onChange }: SegmentedProps<V>) {
   return (
     <div className="segmented" role="group" aria-label={label}>

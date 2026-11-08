@@ -5,13 +5,6 @@ import java.time.Year;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Sinh mã nghiệp vụ (báo cáo mục 4.2).
- * <ul>
- *   <li>Mã báo cáo: BC- + 6 ký tự ngẫu nhiên, bỏ các ký tự dễ nhầm (0, O, 1, I, L). Khó đoán, dùng để tra cứu.</li>
- *   <li>Mã hồ sơ thú: TH-YYYY-NNNN, NNNN lấy từ sequence pet_code_seq, tăng liên tục không đặt lại theo năm.</li>
- * </ul>
- */
 @Component
 public class CodeGenerator {
 

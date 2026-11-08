@@ -6,7 +6,6 @@ import "./password-input.scss";
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
-/** Ô mật khẩu có nút hiện/ẩn, vẫn cho trình quản lý mật khẩu tự điền và dán. */
 export function PasswordInput({ className, ...props }: Props) {
   const [visible, setVisible] = useState(false);
   return (

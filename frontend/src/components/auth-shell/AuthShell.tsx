@@ -16,7 +16,6 @@ const BENEFITS = [
   "Một tài khoản cho mọi lần nhận nuôi",
 ];
 
-/** Bố cục chia đôi: cột thương hiệu nền màu đặc (ẩn trên điện thoại) và cột form. */
 export function AuthShell({ title, description, children, footer }: AuthShellProps) {
   return (
     <div className="auth-shell">

@@ -6,9 +6,9 @@ export interface Column<T> {
   key: string;
   header: string;
   render: (row: T) => ReactNode;
-  /** Cột số: căn phải, chữ số đều nhau. */
+
   numeric?: boolean;
-  /** Ẩn trên màn hình nhỏ để giữ thẻ gọn. */
+
   hideOnMobile?: boolean;
 }
 
@@ -17,7 +17,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
   rowKey: (row: T) => string | number;
-  /** Có href thì ô đầu tiên là liên kết, bấm cả dòng đều mở được. */
+
   rowHref?: (row: T) => string;
   loading?: boolean;
 }

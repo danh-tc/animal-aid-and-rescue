@@ -23,11 +23,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Chạy trên PostgreSQL thật (Testcontainers) với migration và dữ liệu mẫu.
- * Context khởi động được nghĩa là entity JPA khớp schema (ddl-auto: validate).
- * Bỏ qua tự động nếu máy không có Docker.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
@@ -76,7 +71,7 @@ class ApplicationIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.newReports").value(2))
             .andExpect(jsonPath("$.pendingApplications").value(2));
-        // Quản lý kế thừa quyền Nhân viên (RoleHierarchy)
+
         mvc.perform(get("/api/staff/dashboard").header("Authorization", bearer("manager@aar.local")))
             .andExpect(status().isOk());
     }
@@ -94,7 +89,6 @@ class ApplicationIntegrationTest {
             .andExpect(jsonPath("$.email").value("moi@aar.local"));
     }
 
-    /** RB-01: database chặn đơn Đã duyệt thứ hai cho cùng một thú. Vàng (id 3) có hai đơn PENDING. */
     @Test
     void databaseRejectsSecondApprovedApplicationForSamePet() {
         jdbc.update("UPDATE adoption_applications SET status = 'APPROVED' WHERE id = 1");

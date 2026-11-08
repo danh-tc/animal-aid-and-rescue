@@ -19,7 +19,6 @@ interface ToastApi {
 const ToastContext = createContext<ToastApi | null>(null);
 let nextId = 1;
 
-/** Thông báo ngắn sau thao tác, tự ẩn sau 4 giây, đọc qua aria-live mà không cướp focus. */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
 

@@ -22,7 +22,6 @@ import { APPLICATION_STATUS, HOUSING, PET_STATUS } from "@/lib/labels";
 import type { ApplicationDetail, HandoverView } from "@/types/api";
 import "../../detail-page.scss";
 
-/** S07: Xét duyệt đơn. S08: Bàn giao khi đơn đã duyệt. */
 export default function ApplicationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, error, loading, reload } = useApi<ApplicationDetail>(`/api/staff/applications/${id}`);
@@ -69,7 +68,6 @@ export default function ApplicationDetailPage() {
     reload();
   }
 
-  /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn và ghi lý do, thú về Sẵn sàng. */
   async function cancelNoShow() {
     if (!note.trim()) throw new Error("Ghi lý do hủy, ví dụ không đến theo hẹn và không liên lạc được.");
     await mutate(`/api/staff/applications/${id}/cancel`, { body: { reason: note.trim() } });

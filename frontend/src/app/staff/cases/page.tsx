@@ -22,7 +22,6 @@ const OPTIONS: { value: Filter; label: string }[] = [
   { value: "FAILED", label: "Thất bại" },
 ];
 
-/** S03: Danh sách ca cứu hộ */
 export default function CasesPage() {
   const [status, setStatus] = useUrlState<Filter>("status", "ALL");
   const [page, setPage] = usePageParam();

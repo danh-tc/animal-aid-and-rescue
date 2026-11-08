@@ -39,7 +39,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-/** UC báo cứu hộ (P03) và xử lý báo cáo (S02). */
 @Service
 @Transactional
 public class RescueReportService {
@@ -75,7 +74,7 @@ public class RescueReportService {
     }
 
     public ReportReceipt submit(ReportRequest req, List<MultipartFile> photos) {
-        // RB-22: có đủ cả vĩ độ và kinh độ hoặc không có cả hai (CHECK ck_report_coordinates chặn thêm ở CSDL)
+
         if ((req.latitude() == null) != (req.longitude() == null)) {
             throw BusinessException.badRequest("INVALID_COORDINATES", "Vị trí phải có đủ cả vĩ độ và kinh độ");
         }
@@ -111,7 +110,6 @@ public class RescueReportService {
             cases.findByReportId(id).stream().map(CaseSummary::of).toList(), openCases(r));
     }
 
-    /** Ca NEW hoặc IN_PROGRESS, sắp theo khoảng cách tới báo cáo (ca không có tọa độ xếp sau), tối đa 10 ca. */
     private List<OpenCase> openCases(RescueReport report) {
         if (report.getStatus() != ReportStatus.NEW) {
             return List.of();
@@ -145,7 +143,6 @@ public class RescueReportService {
         return 6371.0 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào ca đang mở, báo cáo chuyển sang Trùng (QĐ-01). */
     public ReportSummary merge(Long reportId, Long caseId, Long by) {
         RescueReport report = find(reportId);
         RescueCase rescueCase = cases.findById(caseId)
@@ -158,7 +155,6 @@ public class RescueReportService {
         return ReportSummary.of(report);
     }
 
-    /** P04: khớp cả mã và số điện thoại mới trả kết quả (RB-15). Sai một trong hai đều báo không tìm thấy. */
     @Transactional(readOnly = true)
     public ReportLookup lookup(String code, String phone) {
         RescueReport r = reports.findByCodeAndReporterPhone(code.trim().toUpperCase(), phone.trim())
@@ -168,7 +164,6 @@ public class RescueReportService {
                 .map(c -> new CaseProgress(c.getStatus(), c.getClosedAt(), petProgress(c))).toList());
     }
 
-    /** Ca Thành công: tìm thú qua lượt tiếp nhận của ca, trả giai đoạn công khai theo trạng thái hiện tại của thú. */
     private PetProgress petProgress(RescueCase c) {
         if (c.getStatus() != CaseStatus.SUCCEEDED) return null;
         return intakes.findByRescueCaseId(c.getId())
@@ -188,7 +183,6 @@ public class RescueReportService {
         return new PetProgress(stage, pet.getName(), stage == PetStage.LOOKING_FOR_HOME ? pet.getId() : null);
     }
 
-    /** Bước 3 của UC-07: tạo một hoặc nhiều ca, mỗi ca một thú. Báo cáo chuyển sang Đã xử lý. */
     public List<CaseSummary> createCases(Long reportId, CreateCasesRequest req, AuthUser user) {
         if (req.assignedStaffId() != null) {
             RescueCaseService.requireManager(user.role());
@@ -207,7 +201,6 @@ public class RescueReportService {
         return created;
     }
 
-    /** Ngoại lệ 2b của UC-07: báo cáo sai hoặc spam. */
     public ReportSummary markInvalid(Long reportId, String reason, Long by) {
         RescueReport report = find(reportId);
         transition(report, "INVALIDATED", by, reason);
@@ -223,7 +216,6 @@ public class RescueReportService {
         return reports.findById(id).orElseThrow(() -> BusinessException.notFound("Không tìm thấy báo cáo"));
     }
 
-    /** Mã ngẫu nhiên 31^6 khả năng, gần như không trùng, vẫn kiểm tra để chắc chắn. */
     private String uniqueCode() {
         for (int i = 0; i < MAX_CODE_ATTEMPTS; i++) {
             String code = codes.nextReportCode();

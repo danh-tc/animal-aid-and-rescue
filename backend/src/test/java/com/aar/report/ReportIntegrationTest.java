@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import org.junit.jupiter.api.Test;
 
-/** M01, mục 5.3: báo cáo tổng hợp, ngoại lệ, chi phí và ủng hộ. Chỉ Quản lý. */
 class ReportIntegrationTest extends IntegrationTestBase {
 
     @Test

@@ -9,14 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
-/** QĐ-14 (3 con số chi phí) và bản multipart của ghi kết quả thú y, hậu kiểm theo mục 5.2. */
 class CostAndAttachmentIntegrationTest extends IntegrationTestBase {
 
     @Test
     void costsAccumulateAcrossHandoversAndNeverNegative() throws Exception {
         long appId = approvedApplication(ADOPTER2);
         long petId = petIdOfApplication(appId);
-        // availablePet đã có một lần khám 500.000
+
         JsonNode before = getJson("/api/staff/pets/" + petId + "/costs", STAFF, 200);
         assertThat(before.get("totalTreatmentCost").decimalValue()).isEqualByComparingTo("500000");
         assertThat(before.get("totalDonated").decimalValue()).isEqualByComparingTo("0");
@@ -27,7 +26,6 @@ class CostAndAttachmentIntegrationTest extends IntegrationTestBase {
         assertThat(after.get("totalDonated").decimalValue()).isEqualByComparingTo("200000");
         assertThat(after.get("outstanding").decimalValue()).isEqualByComparingTo("300000");
 
-        // Trả lại rồi bàn giao lần 2 với khoản ủng hộ vượt chi phí: còn chưa bù đắp thấp nhất là 0
         postJson("/api/staff/pets/" + petId + "/returns", STAFF, map("reason", "Dị ứng lông", "priority", "STABLE"), 201);
         backdateIntakes(petId, 30);
         assertThat(putJson("/api/staff/pets/" + petId + "/eligibility", STAFF, map("vaccinated", true,

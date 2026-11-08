@@ -54,14 +54,12 @@
   border: 0;
 }
 
-// Bề mặt dạng thẻ dùng chung
 @mixin surface($radius: $radius-lg) {
   background: $color-surface;
   border: 1px solid $color-border;
   border-radius: $radius;
 }
 
-// Ô nhập liệu dùng chung cho input, select, textarea
 @mixin control {
   width: 100%;
   min-height: $control-height;

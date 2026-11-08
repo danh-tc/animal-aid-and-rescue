@@ -16,7 +16,6 @@ interface TabsProps {
   onChange: (id: string) => void;
 }
 
-/** Thanh tab theo mẫu WAI-ARIA: phím mũi tên chuyển tab, panel dùng id `tab-panel-{id}`. */
 export function Tabs({ label, items, value, onChange }: TabsProps) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
 

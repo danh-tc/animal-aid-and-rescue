@@ -14,7 +14,6 @@ import type { ClinicView } from "@/types/api";
 
 const EMPTY = { name: "", address: "", phone: "", active: true };
 
-/** M03: Danh mục cơ sở thú y */
 export default function ClinicsPage() {
   const { data, error, loading, reload } = useApi<ClinicView[]>("/api/admin/vet-clinics");
   const mutate = useMutation();

@@ -3,10 +3,6 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-/**
- * Lưu bộ lọc trên URL để quay lại trang vẫn giữ trạng thái và chia sẻ được đường dẫn.
- * Trang dùng hook này phải nằm trong <Suspense>.
- */
 export function useUrlState<T extends string>(key: string, fallback: T): [T, (value: T) => void] {
   const params = useSearchParams();
   const router = useRouter();
@@ -18,7 +14,7 @@ export function useUrlState<T extends string>(key: string, fallback: T): [T, (va
       const search = new URLSearchParams(params.toString());
       if (next === fallback || next === "") search.delete(key);
       else search.set(key, next);
-      // Đổi bộ lọc thì về trang đầu
+
       if (key !== "page") search.delete("page");
       const qs = search.toString();
       router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });

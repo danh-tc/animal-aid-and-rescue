@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
-/** Lượt tiếp nhận: mỗi lần thú vào trung tâm (QĐ-03). Không xóa (RB-11). */
 @Entity
 @Table(name = "intakes")
 public class Intake {
@@ -68,12 +67,10 @@ public class Intake {
         return new Intake(petId, IntakeSource.RESCUE, caseId, null, reason, priority, assessment, by);
     }
 
-    /** Tìm lại thú thất lạc (QĐ-16): lượt tiếp nhận mới trên hồ sơ cũ. */
     public static Intake fromFound(Long petId, String reason, Priority priority, String initialAssessment, Long by) {
         return fromFound(petId, null, reason, priority, initialAssessment, by);
     }
 
-    /** Tìm lại qua báo cáo cứu hộ (nhánh S-1b của UC-07): lượt tìm lại tham chiếu ca cứu hộ. */
     public static Intake fromFound(Long petId, Long rescueCaseId, String reason, Priority priority,
                                    String initialAssessment, Long by) {
         return new Intake(petId, IntakeSource.FOUND, rescueCaseId, null, reason, priority, initialAssessment, by);

@@ -29,7 +29,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** S06: yêu cầu thú y. Thú ở Đang điều trị khi còn ít nhất một yêu cầu mở (QĐ-06). */
 @Service
 @Transactional
 public class VetRequestService {
@@ -51,7 +50,6 @@ public class VetRequestService {
         this.storage = storage;
     }
 
-    /** S-2 của UC-09 và ngoại lệ 3a: thú Sẵn sàng hoặc Chờ bàn giao bị bệnh thì hủy đơn liên quan. */
     public VetRequestResult create(Long petId, VetRequestCreate req, Long by) {
         Pet pet = petLifecycle.lock(petId);
         if (!pet.getStatus().atCenter()) {
@@ -86,16 +84,14 @@ public class VetRequestService {
         return new VetRequestResult(view(request), petLifecycle.lock(request.getPetId()).getStatus(), 0);
     }
 
-    /** S-3 của UC-09: ghi kết quả. Không còn yêu cầu mở thì thú về Đang chăm sóc. */
     public VetRequestResult complete(Long requestId, VetRequestComplete req, Long by) {
         return complete(requestId, req, List.of(), by);
     }
 
-    /** Bản multipart theo mục 5.2: kết quả, chi phí, hướng dẫn và phiếu khám trong cùng một giao dịch. */
     public VetRequestResult complete(Long requestId, VetRequestComplete req, List<MultipartFile> files, Long by) {
         VetRequest request = find(requestId);
         Pet pet = petLifecycle.lock(request.getPetId());
-        // Ghi kết quả trước khi đổi trạng thái: CHECK ck_vet_completed_cost đòi COMPLETED phải có chi phí (RB-07)
+
         request.recordResult(blankToNull(req.diagnosisSummary()), blankToNull(req.treatmentSummary()),
             req.totalCost(), blankToNull(req.aftercareInstructions()), req.healthOk());
         transition(request, "COMPLETED", by, null);
@@ -104,22 +100,16 @@ public class VetRequestService {
         return new VetRequestResult(view(request), pet.getStatus(), 0);
     }
 
-    /** Ngoại lệ S-2a của UC-09: phòng khám không nhận hoặc dừng điều trị, ghi chi phí đã phát sinh (QĐ-14). */
     public VetRequestResult cancel(Long requestId, String reason, BigDecimal incurredCost, Long by) {
         VetRequest request = find(requestId);
         Pet pet = petLifecycle.lock(request.getPetId());
-        // Ghi lý do và chi phí trước khi đổi trạng thái: CHECK ck_vet_cancelled_cost đòi CANCELLED phải có chi phí
+
         request.recordCancel(reason.trim(), incurredCost);
         transition(request, "CANCELLED", by, reason);
         closeTreatmentIfDone(pet, by);
         return new VetRequestResult(view(request), pet.getStatus(), 0);
     }
 
-    /**
-     * QĐ-15: sự kiện kết thúc hủy mọi yêu cầu thú y đang mở của thú. Không đổi trạng thái thú,
-     * người gọi chịu trách nhiệm chuyển thú sang trạng thái kết thúc. Trả về số yêu cầu đã hủy.
-     * incurredCosts: chi phí đã phát sinh do nhân viên nhập theo từng yêu cầu, yêu cầu không có trong map ghi 0.
-     */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
     public int cancelAllOpen(Long petId, String reason, Map<Long, BigDecimal> incurredCosts, Long by) {
         List<VetRequest> open = requests.findByPetIdAndStatusIn(petId, VetRequestStatus.OPEN);

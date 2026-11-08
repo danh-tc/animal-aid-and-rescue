@@ -27,7 +27,6 @@ import "../../detail-page.scss";
 const EMPTY_PET = { name: "", species: "DOG" as Species, sex: "UNKNOWN" as Sex, birth: "", color: "", description: "" };
 const EMPTY_INTAKE = { reason: "", priority: "NEED_CHECK" as Priority, assessment: "" };
 
-/** S03: Chi tiết ca cứu hộ: phân công, thành công (tạo hồ sơ thú), thất bại */
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: c, error, loading, reload } = useApi<CaseDetail>(`/api/staff/rescue-cases/${id}`);
@@ -43,7 +42,7 @@ export default function CaseDetailPage() {
   const [intake, setIntake] = useState(EMPTY_INTAKE);
   const [result, setResult] = useState<SucceedResult | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
-  // Nhánh S-1b của UC-07: thú cứu được là thú thất lạc của trung tâm (nhân viên đã đối chiếu ảnh, đặc điểm)
+
   const [kind, setKind] = useState<"new" | "lost">("new");
   const [lostPetId, setLostPetId] = useState("");
   const lostPets = useApi<PageResponse<PetSummary>>(dialog === "succeed" ? "/api/staff/pets" : null, {
@@ -53,6 +52,7 @@ export default function CaseDetailPage() {
 
   if (loading && !c) return <Skeleton card lines={6} />;
   if (!c) return <Notice tone="error">{error}</Notice>;
+  const canClose = isManager || c.assignedStaffId === user?.id;
 
   async function assign() {
     if (!assignee) throw new Error("Chọn nhân viên phụ trách.");
@@ -84,7 +84,7 @@ export default function CaseDetailPage() {
       },
     };
     if (!filesValid(photos)) throw new Error("Có ảnh lớn hơn 5MB.");
-    // S-1 của UC-07: hồ sơ thú (loài, đặc điểm, ảnh) và lượt tiếp nhận tạo trong cùng một yêu cầu
+
     const data = new FormData();
     data.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
     photos.forEach((p) => data.append("photos", p));
@@ -118,12 +118,19 @@ export default function CaseDetailPage() {
         }
         actions={
           <>
-            {c.status === "NEW" && isManager && (
-              <Button icon={<UserCheck aria-hidden="true" />} onClick={() => setDialog("assign")}>
-                Phân công
+            {(c.status === "NEW" || c.status === "IN_PROGRESS") && isManager && (
+              <Button
+                variant={c.status === "IN_PROGRESS" ? "ghost" : undefined}
+                icon={<UserCheck aria-hidden="true" />}
+                onClick={() => {
+                  setAssignee(c.assignedStaffId ? String(c.assignedStaffId) : "");
+                  setDialog("assign");
+                }}
+              >
+                {c.status === "IN_PROGRESS" ? "Phân công lại" : "Phân công"}
               </Button>
             )}
-            {c.status === "IN_PROGRESS" && (
+            {c.status === "IN_PROGRESS" && canClose && (
               <>
                 <Button variant="ghost" icon={<XCircle aria-hidden="true" />} onClick={() => setDialog("fail")}>
                   Thất bại
@@ -142,6 +149,11 @@ export default function CaseDetailPage() {
           {c.status === "NEW" && !isManager && (
             <Notice tone="info" title="Chờ Quản lý phân công">
               Chỉ Quản lý được phân công người đi cứu. Sau khi phân công, nhân viên phụ trách cập nhật kết quả ca.
+            </Notice>
+          )}
+          {c.status === "IN_PROGRESS" && !canClose && (
+            <Notice tone="info" title="Ca đã được phân công cho nhân viên khác">
+              Bạn có thể xem thông tin ca nhưng chỉ nhân viên phụ trách hoặc Quản lý được ghi kết quả thành công hay thất bại.
             </Notice>
           )}
           {result?.urgentVetRequestSuggested && (
@@ -189,7 +201,13 @@ export default function CaseDetailPage() {
         </aside>
       </div>
 
-      <Dialog open={dialog === "assign"} onClose={() => setDialog(null)} title="Phân công ca cứu hộ" submitLabel="Phân công" onSubmit={assign}>
+      <Dialog
+        open={dialog === "assign"}
+        onClose={() => setDialog(null)}
+        title={c.status === "IN_PROGRESS" ? "Phân công lại ca cứu hộ" : "Phân công ca cứu hộ"}
+        submitLabel={c.status === "IN_PROGRESS" ? "Lưu phân công" : "Phân công"}
+        onSubmit={assign}
+      >
         <Field label="Nhân viên phụ trách" required>
           <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
             <option value="">Chọn nhân viên</option>

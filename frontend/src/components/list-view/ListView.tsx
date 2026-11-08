@@ -24,7 +24,6 @@ interface ListViewProps<T> {
   onRetry?: () => void;
 }
 
-/** Danh sách chuẩn của khu làm việc: đang tải, lỗi, rỗng, bảng, phân trang. */
 export function ListView<T>(props: ListViewProps<T>) {
   const { data, loading, error, onPage, onRetry } = props;
   const rows = Array.isArray(data) ? data : (data?.items ?? []);

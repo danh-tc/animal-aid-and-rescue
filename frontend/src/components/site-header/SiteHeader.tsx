@@ -19,7 +19,6 @@ export function SiteHeader() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Đóng menu khi chuyển trang
   useEffect(() => setOpen(false), [pathname]);
 
   const links: NavLink[] = [{ href: "/", label: "Nhận nuôi", icon: Heart }];

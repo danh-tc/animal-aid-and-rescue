@@ -29,7 +29,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** M01, mục 5.3. Chỉ đọc, tổng hợp trực tiếp bằng SQL trên các bảng nghiệp vụ. */
 @Service
 @Transactional(readOnly = true)
 public class ReportService {
@@ -45,7 +44,6 @@ public class ReportService {
         this.params = params;
     }
 
-    /** Mặc định 12 tháng gần nhất, tính tới hôm nay. */
     public static Period period(LocalDate from, LocalDate to) {
         LocalDate end = to == null ? LocalDate.now(ZONE) : to;
         LocalDate start = from == null ? YearMonth.from(end).minusMonths(11).atDay(1) : from;

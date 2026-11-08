@@ -29,15 +29,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * S10: sự kiện kết thúc vòng đời (mục 2.1.6, QĐ-15, QĐ-16) và tìm lại thú thất lạc.
- * Mọi thay đổi trạng thái đi qua StateTransitionService theo bảng 3.4.
- */
 @Service
 @Transactional
 public class EndEventService {
 
-    /** Thú đã nhận nuôi chỉ ghi nhận khi còn trong thời gian hậu kiểm. */
     private static final EnumSet<HandoverStatus> FOLLOW_UP_PERIOD =
         EnumSet.of(HandoverStatus.IN_PROGRESS, HandoverStatus.RECALL_PENDING);
 
@@ -81,7 +76,7 @@ public class EndEventService {
         }
 
         String note = label(type) + (detail == null ? "" : ": " + detail);
-        // Đóng việc đang mở trước khi đổi trạng thái thú (QĐ-15)
+
         Map<Long, BigDecimal> costs = new HashMap<>();
         if (req.incurredCosts() != null) {
             req.incurredCosts().forEach(c -> costs.put(c.vetRequestId(), c.amount()));
@@ -106,7 +101,6 @@ public class EndEventService {
             activeHandover.isPresent());
     }
 
-    /** QĐ-16: LOST => IN_CARE, lượt tiếp nhận FOUND, vào khu cách ly. */
     public FoundResult found(Long petId, FoundRequest req, Long by) {
         Pet pet = petLifecycle.lock(petId);
         if (pet.getStatus() != PetStatus.LOST) {

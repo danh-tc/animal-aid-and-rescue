@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** Đợt 2 của UC-07 và P04: tra cứu báo cáo (RB-15), ca đang mở ở gần, gộp báo cáo trùng (QĐ-01). */
 class RescuePhase2IntegrationTest extends IntegrationTestBase {
 
     @Test
@@ -21,7 +20,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         assertThat(found.get("code").asText()).isEqualTo(code);
         assertThat(found.get("status").asText()).isEqualTo("NEW");
         assertThat(found.get("cases")).isEmpty();
-        // Không lộ dữ liệu nội bộ
+
         assertThat(found.has("reporterName")).isFalse();
         assertThat(found.has("description")).isFalse();
 
@@ -37,7 +36,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
 
     @Test
     void openCasesSortedByDistanceAndMergeMarksDuplicate() throws Exception {
-        // Ca A ở gần (cách khoảng 0,5 km), ca B ở xa (Hà Nội)
+
         long nearCase = caseAt(10.7769, 106.7009);
         long farCase = caseAt(21.0285, 105.8542);
 
@@ -54,7 +53,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         assertThat(merged.get("status").asText()).isEqualTo("DUPLICATE");
         JsonNode caseDetail = getJson("/api/staff/rescue-cases/" + nearCase, STAFF, 200);
         assertThat(caseDetail.get("reports").findValuesAsText("code")).contains(dupCode);
-        // Báo cáo đã xử lý không còn gợi ý ca mở, cũng không gộp lại được
+
         assertThat(getJson("/api/staff/rescue-reports/" + dupId, STAFF, 200).get("openCases")).isEmpty();
         postJson("/api/staff/rescue-reports/" + dupId + "/merge", STAFF, map("caseId", farCase), 409);
         String history = jdbc.queryForObject(
@@ -86,7 +85,6 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
             map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
     }
 
-    /** UC-02 mở rộng: ca thành công thì người báo thấy giai đoạn công khai của thú, link hồ sơ chỉ khi thú đang tìm nhà. */
     @Test
     void lookupShowsPublicStageOfRescuedPet() throws Exception {
         long petId = rescuedPet("DOG", LocalDate.now().minusYears(1));
@@ -111,7 +109,7 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         pet = getJson(url, null, 200).get("cases").get(0).get("pet");
         assertThat(pet.get("stage").asText()).isEqualTo("ADOPTED");
         assertThat(pet.get("petId").isNull()).isTrue();
-        // Không lộ thông tin người nhận nuôi
+
         assertThat(pet.has("ownerName")).isFalse();
 
         jdbc.update("UPDATE pets SET status = 'DECEASED' WHERE id = ?", petId);

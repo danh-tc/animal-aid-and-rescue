@@ -1,4 +1,3 @@
-# Môi trường dev. Chạy: docker compose up -d
 services:
   postgres:
     image: postgres:16-alpine
@@ -18,9 +17,55 @@ services:
       timeout: 3s
       retries: 10
 
-  # NFR-06: sao lưu hằng ngày vào ./backups, giữ BACKUP_KEEP_DAYS ngày gần nhất. Mỗi lần gồm
-  # database (pg_dump) và thư mục ảnh, tệp đính kèm (UPLOADS_DIR, khớp STORAGE_DIR của backend).
-  # Khôi phục: scripts/restore.sh backups/<tệp>.dump
+  backend:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/aar
+      DB_USERNAME: aar
+      DB_PASSWORD: aar
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      STORAGE_DIR: /app/data/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${UPLOADS_DIR:-./backend/data/uploads}:/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    environment:
+      API_INTERNAL_BASE_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
   backup:
     image: postgres:16-alpine
     container_name: aar-backup

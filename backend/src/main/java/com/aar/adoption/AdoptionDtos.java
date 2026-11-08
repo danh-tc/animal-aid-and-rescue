@@ -14,10 +14,6 @@ public final class AdoptionDtos {
     private AdoptionDtos() {
     }
 
-    /**
-     * phone, address: bắt buộc nếu tài khoản chưa có (ví dụ đăng ký không nhập số điện thoại), được lưu vào tài khoản
-     * để nhân viên liên hệ khi xét duyệt và hậu kiểm.
-     */
     public record SubmitRequest(
         @NotNull Long petId,
         @NotNull HousingType housingType,
@@ -30,7 +26,6 @@ public final class AdoptionDtos {
     public record CancelRequest(@Size(max = 1000) String reason) {
     }
 
-    /** Duyệt đơn: ghi chú và ngày hẹn bàn giao (mục 2.1.4 bước 3). */
     public record ReviewRequest(@Size(max = 2000) String note, @FutureOrPresent LocalDate handoverDate) {
     }
 
@@ -40,7 +35,6 @@ public final class AdoptionDtos {
     public record RejectRequest(@NotBlank @Size(max = 2000) String note) {
     }
 
-    /** QĐ-11: nhân viên hủy đơn đã duyệt khi người nhận không đến bàn giao theo hẹn, bắt buộc ghi lý do. */
     public record StaffCancelRequest(@NotBlank @Size(max = 1000) String reason) {
     }
 
@@ -56,15 +50,10 @@ public final class AdoptionDtos {
                                   LocalDate handoverDate, String cancelReason, OffsetDateTime submittedAt) {
     }
 
-    /**
-     * Lịch sử nhận nuôi của người nộp đơn để cảnh báo nhân viên khi xét duyệt.
-     * RECALLED: từng bị thu hồi thú do hậu kiểm Không đạt. RETURNED: từng tự trả lại thú.
-     */
     public record ApplicantFlag(String kind, Long petId, String petCode, String petName, OffsetDateTime handedOverAt,
                                 String note) {
     }
 
-    /** S07: đơn kèm các đơn khác cho cùng thú để nhân viên so sánh. */
     public record ApplicationDetail(ApplicationView application, String petStatus,
                                     List<ApplicationView> otherApplications, List<ApplicantFlag> applicantHistory) {
     }

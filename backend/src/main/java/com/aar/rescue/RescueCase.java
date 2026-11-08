@@ -15,7 +15,6 @@ import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/** Ca cứu hộ, mỗi ca một thú (QĐ-01). Báo cáo – Ca là n–n qua bảng report_cases. */
 @Entity
 @Table(name = "rescue_cases")
 public class RescueCase {
@@ -70,7 +69,6 @@ public class RescueCase {
         }
     }
 
-    /** Gộp báo cáo trùng vào ca này (QĐ-01). */
     public void addReport(RescueReport report) {
         this.reports.add(report);
     }

@@ -22,7 +22,7 @@ async function load(id: string): Promise<{ pet: PublicPet | null; error: string 
   try {
     return { pet: await apiFetch<PublicPet>(`/api/public/pets/${id}`, { cache: "no-store" }), error: null };
   } catch (e) {
-    // Thú không còn AVAILABLE cũng trả 404 để không lộ thông tin nội bộ
+
     if (e instanceof ApiRequestError && e.status === 404) notFound();
     return { pet: null, error: errorMessage(e) };
   }

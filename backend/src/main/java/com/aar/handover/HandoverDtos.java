@@ -21,7 +21,6 @@ public final class HandoverDtos {
     private HandoverDtos() {
     }
 
-    /** S08. Khoản ủng hộ thuộc đợt 2 nhưng cột đã có nên nhận luôn, mặc định 0. */
     public record HandoverRequest(
         @Size(max = 2000) String note,
         @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal donationAmount) {
@@ -46,12 +45,10 @@ public final class HandoverDtos {
                                List<FollowUpView> followUps) {
     }
 
-    /** S09: lịch hậu kiểm kèm thông tin liên hệ chủ nuôi. */
     public record ScheduledFollowUp(FollowUpView followUp, Long petId, String petCode, String petName,
                                     String ownerName, String ownerPhone, String ownerAddress) {
     }
 
-    /** 5 tiêu chí (QĐ-12) và hình thức liên hệ (mục 2.1.5). Cần theo dõi và Không đạt bắt buộc ghi lý do (RB-09). */
     public record FollowUpResultRequest(
         @NotNull FollowUpResult result,
         @NotNull ContactMethod contactMethod,
@@ -66,11 +63,9 @@ public final class HandoverDtos {
     public record FollowUpOutcome(FollowUpView followUp, HandoverStatus handoverStatus, FollowUpView additionalFollowUp) {
     }
 
-    /** QĐ-18: Quản lý đóng thu hồi, bắt buộc ghi lý do (RB-21). */
     public record CloseRecallRequest(@NotBlank @Size(max = 1000) String reason) {
     }
 
-    /** S10: tiếp nhận trả lại hoặc thu hồi. */
     public record ReturnRequest(
         @NotBlank @Size(max = 1000) String reason,
         @NotNull Priority priority,
@@ -80,10 +75,6 @@ public final class HandoverDtos {
     public record ReturnResult(Long petId, String petStatus, Long intakeId, Long handoverId, int cancelledFollowUps) {
     }
 
-    /**
-     * S10: ghi sự kiện kết thúc (mục 2.1.6). Thất lạc cần nơi và hoàn cảnh mất.
-     * incurredCosts: chi phí đã phát sinh của từng yêu cầu thú y đang mở (QĐ-14), yêu cầu không nhập thì ghi 0.
-     */
     public record EndEventRequest(
         @NotNull EndEventType eventType,
         @PastOrPresent OffsetDateTime occurredAt,
@@ -103,12 +94,10 @@ public final class HandoverDtos {
         }
     }
 
-    /** Kết quả kèm số việc đang mở đã bị đóng theo QĐ-15. */
     public record EndEventResult(EndEventView event, PetStatus petStatus, int cancelledVetRequests,
                                  int cancelledApplications, int cancelledFollowUps, boolean handoverClosed) {
     }
 
-    /** QĐ-16: thú thất lạc tìm lại được, tạo lượt tiếp nhận FOUND. */
     public record FoundRequest(
         @NotBlank @Size(max = 1000) String reason,
         @NotNull Priority priority,
@@ -118,7 +107,6 @@ public final class HandoverDtos {
     public record FoundResult(Long petId, PetStatus petStatus, Long intakeId) {
     }
 
-    /** QĐ-14: 3 con số chi phí của thú, hiển thị khi bàn giao (bước 2 của UC-11). */
     public record PetCosts(Long petId, BigDecimal totalTreatmentCost, BigDecimal totalDonated, BigDecimal outstanding) {
     }
 }

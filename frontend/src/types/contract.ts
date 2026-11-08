@@ -1,12 +1,10 @@
-// Đối chiếu kiểu viết tay trong api.ts với hợp đồng do springdoc sinh ra (openapi.ts).
-// Chỉ có ở mức kiểu, không sinh mã chạy. Backend thêm, bớt hoặc đổi tên trường thì `npm run typecheck`
-// báo lỗi ở đây, nhắc chạy lại `npm run gen:api` và sửa api.ts.
+
+
 import type * as Api from "./api";
 import type { components } from "./openapi";
 
 type S = components["schemas"];
 
-/** Hai kiểu có đúng cùng tập tên trường. */
 type SameKeys<Generated, Hand> = [keyof Generated] extends [keyof Hand]
   ? [keyof Hand] extends [keyof Generated]
     ? true

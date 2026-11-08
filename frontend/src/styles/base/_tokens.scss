@@ -1,5 +1,4 @@
-// Giá trị token cho giao diện sáng và tối. Chỉ file này được viết mã màu.
-// Đã kiểm tra tương phản: chữ thường >= 4.5:1, viền và icon mang nghĩa >= 3:1.
+
 
 :root {
   color-scheme: light;
@@ -17,7 +16,7 @@
   --color-on-primary: #ffffff;
   --color-primary-soft: #e0f3f0;
   --color-primary-text: #0f766e;
-  /* Khối màu đặc lớn (hero, cột thương hiệu trang đăng nhập) */
+
   --color-brand-block: #0f766e;
   --color-on-brand-block: #ffffff;
 
@@ -40,11 +39,10 @@
   --color-neutral-soft: #edf0ef;
 
   --color-scrim: rgba(8, 24, 22, 0.55);
-  /* Mũi tên của ô chọn, vẽ bằng SVG thay cho gradient */
+
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23566260' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --color-focus: #c2410c;
 
-  /* Màu chuỗi dữ liệu cho biểu đồ (dataviz, đã chạy validator trên nền #ffffff) */
   --chart-1: #2a78d6;
   --chart-2: #eb6834;
   --chart-3: #1baf7a;

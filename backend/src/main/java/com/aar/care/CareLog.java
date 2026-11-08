@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/** Nhật ký chăm sóc thường ngày do nhân viên tự làm (không cần bác sĩ). */
 @Entity
 @Table(name = "care_logs")
 public class CareLog {

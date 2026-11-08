@@ -11,10 +11,6 @@ interface RequireRoleProps {
   children: ReactNode;
 }
 
-/**
- * Chặn trang theo vai trò ở phía giao diện. Backend vẫn kiểm tra quyền qua JWT,
- * lớp này chỉ để người dùng không thấy trang không dành cho mình.
- */
 export function RequireRole({ roles, children }: RequireRoleProps) {
   const { ready, user } = useAuth();
   const router = useRouter();

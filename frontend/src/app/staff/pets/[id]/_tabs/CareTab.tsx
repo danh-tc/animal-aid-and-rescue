@@ -17,7 +17,6 @@ import { CARE_ACTIVITY } from "@/lib/labels";
 import type { CareActivity, CareLogView, PageResponse, PetDetail } from "@/types/api";
 import "../../../detail-page.scss";
 
-// AREA_CHANGE do hệ thống tự ghi khi đổi khu ở tab Thông tin
 const ACTIVITIES: CareActivity[] = ["FEEDING", "CLEANING", "WEIGHT", "MEDICATION", "HEALTH_NOTE"];
 
 export function CareTab({ pet }: { pet: PetDetail; onChanged: () => void }) {

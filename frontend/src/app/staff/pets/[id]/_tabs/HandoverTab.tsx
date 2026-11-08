@@ -22,7 +22,6 @@ import "../../../detail-page.scss";
 
 const RETURNABLE = ["IN_PROGRESS", "COMPLETED", "RECALL_PENDING"];
 
-/** Bàn giao, hậu kiểm và S10: tiếp nhận trả lại hoặc thu hồi */
 export function HandoverTab({ pet, onChanged }: { pet: PetDetail; onChanged: () => void }) {
   const { data, error, loading, reload } = useApi<HandoverView[]>(`/api/staff/pets/${pet.id}/handovers`);
   const mutate = useMutation();

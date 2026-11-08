@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Danh mục cho các ô chọn ở màn hình nhân viên: người được phân công (S03), cơ sở thú y (S06). */
 @RestController
 @RequestMapping("/api/staff")
 @Transactional(readOnly = true)

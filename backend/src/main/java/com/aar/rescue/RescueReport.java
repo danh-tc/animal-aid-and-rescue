@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/** Báo cáo cứu hộ của Khách. Lưu trực tiếp tên và số điện thoại, không gắn tài khoản. */
 @Entity
 @Table(name = "rescue_reports")
 public class RescueReport {
@@ -68,7 +67,6 @@ public class RescueReport {
         this.createdAt = OffsetDateTime.now();
     }
 
-    /** Chỉ gọi với trạng thái đích do StateTransitionService trả về. */
     public void changeStatus(ReportStatus status, Long handledBy) {
         this.status = status;
         this.handledBy = handledBy;

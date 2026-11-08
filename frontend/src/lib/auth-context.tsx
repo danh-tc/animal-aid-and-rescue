@@ -7,7 +7,7 @@ import { clearAuth, loadAuth, saveAuth } from "@/lib/auth-storage";
 import type { AuthResponse, Role, UserView } from "@/types/api";
 
 interface AuthState {
-  /** false cho tới khi đã đọc localStorage, tránh chuyển hướng nhầm khi tải trang. */
+
   ready: boolean;
   user: UserView | null;
   token: string | null;
@@ -36,7 +36,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuth(null);
   }, []);
 
-  // Token hết hạn hoặc bị thu hồi: đăng xuất và đưa về trang đăng nhập.
   useEffect(() => {
     setUnauthorizedListener(() => {
       clearAuth();
@@ -64,13 +63,11 @@ export function isStaff(role: Role | undefined | null): boolean {
   return role === "STAFF" || role === "MANAGER";
 }
 
-/** Trang đích sau khi đăng nhập theo vai trò. */
 export function homeFor(role: Role): string {
   if (role === "ADOPTER") return "/me/applications";
   return "/staff";
 }
 
-/** Chỉ nhận đường dẫn nội bộ để tránh chuyển hướng ra trang ngoài. */
 export function safeNext(next: string | null, role: Role): string {
   if (next && next.startsWith("/") && !next.startsWith("//")) {
     if (next.startsWith("/staff") && role === "ADOPTER") return homeFor(role);

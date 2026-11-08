@@ -16,7 +16,7 @@ export function PetCard({ pet }: { pet: PublicPet }) {
     <article className={`pet-card pet-card--${pet.species.toLowerCase()}`}>
       <div className="pet-card__media">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element -- ảnh từ API Spring
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             className="pet-card__image"
             src={publicPhotoUrl(pet.id, photo)}

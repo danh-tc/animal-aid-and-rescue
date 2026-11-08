@@ -20,7 +20,6 @@ const OPTIONS: { value: Filter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
 ];
 
-/** S02: Danh sách báo cáo cứu hộ */
 export default function ReportsPage() {
   const [status, setStatus] = useUrlState<Filter>("status", "NEW");
   const [page, setPage] = usePageParam();

@@ -4,7 +4,7 @@ import "./detail-list.scss";
 export interface DetailItem {
   label: string;
   value: ReactNode;
-  /** Chiếm cả hàng, dùng cho mô tả dài. */
+
   wide?: boolean;
 }
 

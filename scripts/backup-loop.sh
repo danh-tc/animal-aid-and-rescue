@@ -1,8 +1,8 @@
 #!/bin/sh
-# Chạy trong container "backup" của docker-compose: sao lưu một lần khi khởi động,
-# sau đó mỗi ngày vào giờ BACKUP_AT, xóa bản cũ hơn BACKUP_KEEP_DAYS ngày (NFR-06).
-# Mỗi lần tạo hai tệp cùng mốc thời gian: aar-<thời gian>.dump (database)
-# và aar-<thời gian>-uploads.tar.gz (ảnh, phiếu khám trong /uploads).
+
+
+
+
 set -eu
 BACKUP_AT="${BACKUP_AT:-02:00}"
 KEEP="${BACKUP_KEEP_DAYS:-7}"

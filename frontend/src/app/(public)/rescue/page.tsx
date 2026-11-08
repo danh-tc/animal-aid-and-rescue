@@ -122,7 +122,7 @@ export default function RescuePage() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // trình duyệt chặn clipboard, người dùng vẫn đọc được mã
+
     }
   }
 

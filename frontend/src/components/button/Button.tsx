@@ -28,7 +28,7 @@ export function buttonClass({ variant = "primary", size = "md", block, className
 }
 
 interface ButtonProps extends Common, Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children"> {
-  /** Đang gọi API: khóa nút và hiện vòng quay (loading-buttons). */
+
   loading?: boolean;
 }
 

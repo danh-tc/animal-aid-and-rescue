@@ -22,7 +22,6 @@ const OPTIONS: { value: Filter; label: string }[] = [
   { value: "CANCELLED", label: "Đã hủy" },
 ];
 
-/** S06: Danh sách yêu cầu thú y */
 export default function VetRequestsPage() {
   const [status, setStatus] = useUrlState<Filter>("status", "ALL");
   const [page, setPage] = usePageParam();

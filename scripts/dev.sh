@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# Khởi động lại toàn bộ môi trường dev bằng một lệnh: Postgres (Docker), backend, frontend.
-#
-#   ./scripts/dev.sh          tắt bản đang chạy (nếu có), bật lại cả 3, hiện log. Ctrl+C để tắt hết.
-#   ./scripts/dev.sh --bg     như trên nhưng chạy nền, trả lại terminal. Log ở .dev-logs/
-#   ./scripts/dev.sh stop     tắt backend và frontend (Postgres vẫn chạy để giữ dữ liệu)
-#
-# Yêu cầu: Docker, Java 21, Maven, Node 20+.
 set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -25,7 +18,7 @@ port_pids() {
   fi
 }
 
-stop_one() { # $1 = backend|frontend, $2 = cổng
+stop_one() {
   local pidfile="$LOGS/$1.pid"
   if [ -f "$pidfile" ]; then
     local pid; pid="$(cat "$pidfile")"
@@ -37,7 +30,6 @@ stop_one() { # $1 = backend|frontend, $2 = cổng
     fi
     rm -f "$pidfile"
   fi
-  # Còn tiến trình khác giữ cổng (ví dụ chạy tay ở terminal khác) thì tắt nốt
   local left; left="$(port_pids "$2" | tr '\n' ' ')"
   if [ -n "${left// /}" ]; then
     log "Cổng $2 đang bị chiếm (PID $left), tắt để chạy lại $1"
@@ -47,7 +39,7 @@ stop_one() { # $1 = backend|frontend, $2 = cổng
 
 stop_all() { stop_one frontend "$FE_PORT"; stop_one backend "$BE_PORT"; }
 
-wait_http() { # $1 = tên, $2 = url, $3 = pid, $4 = số giây tối đa
+wait_http() {
   local i
   for i in $(seq 1 "$4"); do
     if curl -fsS -o /dev/null "$2" 2>/dev/null; then return 0; fi
@@ -107,16 +99,35 @@ start_frontend() {
   ok "Frontend sẵn sàng: http://localhost:$FE_PORT"
 }
 
-case "${1:-}" in
-  stop) stop_all; ok "Đã tắt backend và frontend. Tắt cả Postgres: docker compose stop"; exit 0 ;;
-  ""|--bg) ;;
-  *) fail "Không hiểu tham số '$1'. Dùng: dev.sh [--bg|stop]" ;;
-esac
+action=run
+background=false
+fresh=false
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    stop) action=stop ;;
+    --bg) background=true ;;
+    --fresh) fresh=true ;;
+    *) fail "Unknown argument '$1'. Usage: dev.sh [--bg] [--fresh] | stop" ;;
+  esac
+  shift
+done
+
+if [ "$action" = stop ]; then
+  [ "$background" = false ] && [ "$fresh" = false ] || fail "The stop action cannot be combined with other options."
+  stop_all
+  ok "Backend and frontend stopped. To stop PostgreSQL too: docker compose stop"
+  exit 0
+fi
 
 check_tools
-# Ctrl+C lúc đang khởi động cũng tắt sạch, không để tiến trình chạy ngầm
 trap 'echo; stop_all; exit 130' INT TERM
 stop_all
+if [ "$fresh" = true ]; then
+  log "Resetting PostgreSQL and demo data"
+  (cd "$ROOT" && docker compose down --volumes --remove-orphans >/dev/null) \
+    || fail "Could not reset the PostgreSQL data volume."
+  ok "PostgreSQL data was reset"
+fi
 start_db
 start_backend
 start_frontend
@@ -124,7 +135,7 @@ start_frontend
 echo
 ok "Xong. Mở http://localhost:$FE_PORT  · tài khoản mẫu: manager@aar.local / staff1@aar.local, mật khẩu Password@123"
 
-if [ "${1:-}" = "--bg" ]; then
+if [ "$background" = true ]; then
   log "Đang chạy nền. Xem log: tail -f .dev-logs/backend.log .dev-logs/frontend.log  · Tắt: ./scripts/dev.sh stop"
   exit 0
 fi
@@ -133,7 +144,6 @@ log "Đang hiện log của cả hai. Ctrl+C để tắt backend và frontend."
 trap 'echo; stop_all; ok "Đã tắt."; exit 0' INT TERM
 tail -n 0 -F "$LOGS/backend.log" "$LOGS/frontend.log" &
 TAIL=$!
-# Thoát khi một trong hai tự dừng (ví dụ lỗi), để không treo màn hình log
 while kill -0 "$(cat "$LOGS/backend.pid" 2>/dev/null)" 2>/dev/null \
    && kill -0 "$(cat "$LOGS/frontend.pid" 2>/dev/null)" 2>/dev/null; do
   sleep 2

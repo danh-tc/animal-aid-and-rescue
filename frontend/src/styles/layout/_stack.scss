@@ -1,6 +1,5 @@
 @use "abstracts" as *;
 
-// Xếp chồng theo chiều dọc với khoảng cách đều, dùng cho nội dung trang.
 .stack {
   display: flex;
   flex-direction: column;

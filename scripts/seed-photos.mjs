@@ -1,12 +1,10 @@
 #!/usr/bin/env node
-// Gắn ảnh chó mèo thật cho mọi hồ sơ thú chưa có ảnh, qua chính API tải ảnh của hệ thống.
-// Chạy lại nhiều lần không bị trùng: thú đã có ảnh thì bỏ qua.
+
 //
-//   node scripts/seed-photos.mjs                 # lấy ảnh có sẵn trong backend/src/main/resources/dev-photos
-//   node scripts/seed-photos.mjs --online        # lấy ảnh ngẫu nhiên từ Dog CEO và The Cat API (cần Internet)
+
 //   node scripts/seed-photos.mjs --per-pet 3 --api http://localhost:8080 --email manager@aar.local
 //
-// Cần Node 18 trở lên (có sẵn fetch, FormData, Blob).
+
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,7 +36,6 @@ async function api(path, { token, method = "GET", body } = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-/** Ảnh ngẫu nhiên trên mạng. Lọc chỉ lấy JPG, PNG dưới 5MB như giới hạn của backend. */
 async function onlinePhoto(species) {
   for (let attempt = 0; attempt < 5; attempt++) {
     const url =
@@ -88,7 +85,7 @@ async function main() {
       photos = [];
       for (let i = 0; i < PER_PET; i++) photos.push(await onlinePhoto(pet.species));
     } else {
-      // Chọn cố định theo id để chạy lại vẫn ra cùng ảnh, các thú khác nhau lệch nhau trong kho
+
       const pool = manifest.pool[pet.species];
       photos = await Promise.all(
         Array.from({ length: Math.min(PER_PET, pool.length) }, (_, i) => localPhoto(pool[(pet.id * 3 + i) % pool.length])),

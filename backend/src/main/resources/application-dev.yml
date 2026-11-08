@@ -1,4 +1,3 @@
-# Profile dev: nạp thêm dữ liệu mẫu và dùng khóa JWT cố định cho máy cá nhân
 spring:
   flyway:
     locations: classpath:db/migration,classpath:db/seed

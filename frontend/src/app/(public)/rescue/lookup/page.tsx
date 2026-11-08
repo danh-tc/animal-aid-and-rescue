@@ -23,7 +23,6 @@ const STATUS_TEXT: Record<ReportLookup["status"], string> = {
   INVALID: "Báo cáo không đủ thông tin hoặc không cần cứu hộ. Liên hệ trung tâm nếu bạn cần trao đổi thêm.",
 };
 
-/** Ca thành công: cho người báo biết con vật mình đã báo hiện ra sao, chỉ ở mức công khai. */
 function PetStageNote({ pet }: { pet: PetProgress }) {
   const stage = PET_STAGE[pet.stage];
   const name = pet.petName ? `Bé ${pet.petName}` : "Bé";

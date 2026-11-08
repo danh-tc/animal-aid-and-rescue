@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/** S02 (báo cáo cứu hộ) và S03 (ca cứu hộ). */
 @RestController
 @RequestMapping("/api/staff")
 public class StaffRescueController {
@@ -60,7 +59,6 @@ public class StaffRescueController {
         return reports.createCases(id, req, me);
     }
 
-    /** Ngoại lệ 2a của UC-07: gộp báo cáo trùng vào ca đang mở. */
     @PostMapping("/rescue-reports/{id}/merge")
     public ReportSummary merge(@PathVariable Long id, @Valid @RequestBody MergeRequest req, @CurrentUser AuthUser me) {
         return reports.merge(id, req.caseId(), me.id());
@@ -84,28 +82,26 @@ public class StaffRescueController {
         return cases.detail(id);
     }
 
-    /** Chỉ Quản lý (kiểm tra ở SecurityConfig và trong service). */
     @PostMapping("/rescue-cases/{id}/assign")
     public CaseSummary assign(@PathVariable Long id, @Valid @RequestBody AssignRequest req, @CurrentUser AuthUser me) {
         return cases.assign(id, req.staffId(), me);
     }
 
-    /** S-1 của UC-07 kèm ảnh: phần "data" là JSON hồ sơ thú và lượt tiếp nhận, phần "photos" là ảnh thú. */
     @PostMapping(value = "/rescue-cases/{id}/succeed", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public SucceedResult succeedWithPhotos(@PathVariable Long id, @Valid @RequestPart("data") SucceedRequest req,
                                            @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
                                            @CurrentUser AuthUser me) {
-        return cases.succeed(id, req, photos, me.id());
+        return cases.succeed(id, req, photos, me);
     }
 
     @PostMapping(value = "/rescue-cases/{id}/succeed", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SucceedResult succeed(@PathVariable Long id, @Valid @RequestBody SucceedRequest req,
                                  @CurrentUser AuthUser me) {
-        return cases.succeed(id, req, me.id());
+        return cases.succeed(id, req, me);
     }
 
     @PostMapping("/rescue-cases/{id}/fail")
     public CaseSummary fail(@PathVariable Long id, @Valid @RequestBody ReasonRequest req, @CurrentUser AuthUser me) {
-        return cases.fail(id, req.reason(), me.id());
+        return cases.fail(id, req.reason(), me);
     }
 }

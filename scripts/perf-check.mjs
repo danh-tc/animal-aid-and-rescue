@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// Đo NFR-04 ("thao tác thường phản hồi trong khoảng 2 giây với dữ liệu demo"): gọi lặp các API
-// chính và in thời gian phản hồi p50, p95, lớn nhất (ms). Cần backend đang chạy với dữ liệu demo.
+
 //
-//   node scripts/perf-check.mjs                    # mặc định 30 lần mỗi thao tác
+
 //   node scripts/perf-check.mjs --runs 50 --api http://localhost:8080
 const args = process.argv.slice(2);
 const opt = (name, fallback) => {
@@ -38,7 +37,7 @@ function pct(sorted, p) {
 }
 
 async function measure(label, fn) {
-  await fn(); // làm nóng: lần đầu JVM còn biên dịch
+  await fn();
   const times = [];
   for (let i = 0; i < RUNS; i++) {
     const t = performance.now();

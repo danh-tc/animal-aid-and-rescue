@@ -29,7 +29,7 @@ function ApplyForm() {
   const toast = useToast();
   const mutate = useMutation();
   const { data: pet, error: loadError, loading } = useApi<PublicPet>(`/api/public/pets/${id}`);
-  // Nhân viên cần liên hệ khi xét duyệt, hậu kiểm: tài khoản thiếu số điện thoại hoặc địa chỉ thì hỏi bổ sung
+
   const { data: me } = useApi<MeView>("/api/me");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");

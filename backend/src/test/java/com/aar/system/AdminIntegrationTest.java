@@ -6,7 +6,6 @@ import com.aar.support.IntegrationTestBase;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 
-/** M02, M03, M04: chỉ Quản lý. */
 class AdminIntegrationTest extends IntegrationTestBase {
 
     @Test

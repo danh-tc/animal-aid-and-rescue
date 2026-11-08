@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Sao lưu ngay database dev và thư mục tệp đính kèm ra backups/ (NFR-06).
-# UPLOADS_DIR mặc định backend/data/uploads, khớp STORAGE_DIR khi chạy backend trong thư mục backend.
+
+
 set -euo pipefail
 cd "$(dirname "$0")/.."
 UPLOADS_DIR="${UPLOADS_DIR:-backend/data/uploads}"

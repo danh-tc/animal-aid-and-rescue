@@ -13,10 +13,6 @@ import jakarta.persistence.Version;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/**
- * Hồ sơ thú duy nhất, giữ trạng thái hiện tại (báo cáo mục 4.1).
- * Trạng thái chỉ đổi qua StateTransitionService, không có setter công khai cho status.
- */
 @Entity
 @Table(name = "pets")
 public class Pet {
@@ -103,12 +99,10 @@ public class Pet {
         }
     }
 
-    /** Chỉ gọi với trạng thái đích do StateTransitionService trả về. */
     public void changeStatus(PetStatus newStatus) {
         this.status = newStatus;
     }
 
-    /** Thông tin mô tả (S05). Loài không đổi sau khi tạo hồ sơ. */
     public void updateInfo(String name, Sex sex, LocalDate estimatedBirthDate, String color, String description) {
         this.name = name;
         this.sex = sex;
@@ -125,7 +119,6 @@ public class Pet {
         this.currentLocation = currentLocation;
     }
 
-    /** Các mục checklist do nhân viên đánh dấu (QĐ-07). Các mục còn lại tính từ dữ liệu khác. */
     public void updateChecklist(boolean vaccinated, boolean dewormed, boolean sterilized, boolean temperamentOk) {
         this.vaccinated = vaccinated;
         this.dewormed = dewormed;

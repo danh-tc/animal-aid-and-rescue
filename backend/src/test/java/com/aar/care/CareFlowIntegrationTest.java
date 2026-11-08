@@ -9,13 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** UC-09: chăm sóc, yêu cầu thú y, checklist (người B, báo cáo mục 2.1.3). */
 class CareFlowIntegrationTest extends IntegrationTestBase {
 
     private static final Object CHECKLIST_ALL = map("vaccinated", true, "dewormed", true, "sterilized", true,
         "temperamentOk", true);
 
-    /** QĐ-05, QĐ-07: chưa qua thú y và chưa hết cách ly thì không lên Sẵn sàng, báo các mục còn thiếu. */
     @Test
     void checklistReportsMissingItemsAndKeepsPetInCare() throws Exception {
         long petId = rescuedPet("DOG", LocalDate.now().minusDays(400));
@@ -25,7 +23,6 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
             "Sức khỏe ổn định", "Hết cách ly, tính cách không hung dữ");
     }
 
-    /** QĐ-06: mở yêu cầu thú y => Đang điều trị, lưu trú đổi nơi ở; đóng yêu cầu cuối cùng => Đang chăm sóc. */
     @Test
     void vetRequestsDriveTreatmentStatus() throws Exception {
         long petId = rescuedPet("CAT", LocalDate.now().minusDays(300));
@@ -43,7 +40,7 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         long secondId = second.get("request").get("id").asLong();
 
         postJson("/api/staff/vet-requests/" + firstId + "/start", STAFF, null, 200);
-        // Hoàn tất phải có chi phí (RB-07)
+
         postJson("/api/staff/vet-requests/" + firstId + "/complete", STAFF, map("diagnosisSummary", "Ổn"), 400);
         JsonNode done = postJson("/api/staff/vet-requests/" + firstId + "/complete", STAFF,
             map("diagnosisSummary", "Viêm kết mạc", "totalCost", 750000, "aftercareInstructions", "Nhỏ mắt", "healthOk", true), 200);
@@ -54,13 +51,12 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         JsonNode cancelled = postJson("/api/staff/vet-requests/" + secondId + "/cancel", STAFF,
             map("reason", "Phòng khám dừng điều trị", "incurredCost", 150000), 200);
         assertThat(cancelled.get("petStatus").asText()).isEqualTo("IN_CARE");
-        // QĐ-14: chi phí đã phát sinh của yêu cầu hủy được tính vào tổng chi phí điều trị
+
         assertThat(cancelled.get("request").get("totalCost").asLong()).isEqualTo(150000L);
         assertThat(getJson("/api/staff/pets/" + petId + "/costs", STAFF, 200).get("totalTreatmentCost").asLong())
             .isEqualTo(900000L);
         assertThat(getJson("/api/staff/pets/" + petId, STAFF, 200).get("currentLocation").asText()).isEqualTo("Trung tâm");
 
-        // Yêu cầu đã đóng không đổi được nữa
         postJson("/api/staff/vet-requests/" + firstId + "/cancel", STAFF, map("reason", "x"), 409);
         assertThat(getJson("/api/staff/pets/" + petId + "/vet-requests", STAFF, 200)).hasSize(2);
     }
@@ -75,7 +71,6 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         assertThat(error.get("code").asText()).isEqualTo("INVALID_CLINIC");
     }
 
-    /** RB-13: đủ 6 mục thì chuyển Sẵn sàng, tự chuyển khu chung, ghi người đánh giá. */
     @Test
     void fullChecklistMovesPetToAvailable() throws Exception {
         long petId = availablePet(false);
@@ -86,11 +81,9 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         assertThat(pet.get("checklist").get("allPassed").asBoolean()).isTrue();
         assertThat(getJson("/api/public/pets/" + petId, null, 200).get("sterilized").asBoolean()).isTrue();
 
-        // Thú Sẵn sàng không sửa checklist trực tiếp, phải đánh dấu không đủ điều kiện
         putJson("/api/staff/pets/" + petId + "/eligibility", STAFF, CHECKLIST_ALL, 409);
     }
 
-    /** Thú đủ tuổi triệt sản nhưng chưa triệt sản thì không đạt mục 5. */
     @Test
     void adultUnsterilizedPetFailsSterilizationItem() throws Exception {
         long petId = rescuedPet("DOG", LocalDate.now().minusDays(400));
@@ -105,7 +98,6 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         assertThat(texts(result.get("missing"))).containsExactly("Triệt sản hoặc chưa đủ tuổi triệt sản");
     }
 
-    /** QĐ-10: không đủ điều kiện khi Sẵn sàng => Đang chăm sóc, hủy đơn đang chờ. */
     @Test
     void markingIneligibleCancelsPendingApplications() throws Exception {
         long petId = availablePet(false);
@@ -118,11 +110,10 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         assertThat(applicationStatus(app1)).isEqualTo("CANCELLED");
         assertThat(applicationStatus(app2)).isEqualTo("CANCELLED");
         getJson("/api/public/pets/" + petId, null, 404);
-        // Đang chăm sóc thì không đánh dấu không đủ điều kiện nữa
+
         postJson("/api/staff/pets/" + petId + "/ineligible", STAFF, map("reason", "x"), 409);
     }
 
-    /** Ngoại lệ 3a của UC-09: thú Sẵn sàng bị bệnh => Đang điều trị, đơn đang chờ bị hủy. */
     @Test
     void sickAvailablePetGoesToTreatmentAndCancelsApplications() throws Exception {
         long petId = availablePet(false);
@@ -144,7 +135,7 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         JsonNode updated = patchJson("/api/staff/pets/" + petId, STAFF,
             map("area", "GENERAL", "color", "Vàng nhạt", "status", "AVAILABLE"), 200);
         assertThat(updated.get("area").asText()).isEqualTo("GENERAL");
-        // Không có cách đổi trạng thái qua PATCH (RB-12)
+
         assertThat(updated.get("status").asText()).isEqualTo("IN_CARE");
 
         JsonNode logs = getJson("/api/staff/pets/" + petId + "/care-logs", STAFF, 200);
@@ -172,13 +163,12 @@ class CareFlowIntegrationTest extends IntegrationTestBase {
         return out;
     }
 
-    /** Checklist mục 1: lần khám hoàn tất gần nhất phải kết luận sức khỏe ổn. */
     @Test
     void healthItemFollowsLatestExamConclusion() throws Exception {
         long petId = rescuedPet("CAT", LocalDate.now().minusDays(300));
         long first = postJson("/api/staff/pets/" + petId + "/vet-requests", STAFF,
             map("clinicId", 1, "reason", "Khám", "priority", "STABLE", "careMode", "OUTPATIENT"), 201).get("request").get("id").asLong();
-        // Thiếu kết luận thì không hoàn tất được
+
         postJson("/api/staff/vet-requests/" + first + "/complete", STAFF, map("totalCost", 100000), 400);
         JsonNode notOk = postJson("/api/staff/vet-requests/" + first + "/complete", STAFF,
             map("totalCost", 100000, "healthOk", false, "diagnosisSummary", "Viêm phổi nhẹ"), 200);

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** M01: báo cáo thống kê, chỉ Quản lý (/api/admin/**). Kỳ mặc định 12 tháng gần nhất. */
 @RestController
 @RequestMapping("/api/admin/reports")
 public class AdminReportController {

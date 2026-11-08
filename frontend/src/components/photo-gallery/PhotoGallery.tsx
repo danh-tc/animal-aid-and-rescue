@@ -31,7 +31,7 @@ export function PhotoGallery({ petId, photoIds, species, name }: PhotoGalleryPro
   return (
     <div className="photo-gallery">
       <div className="photo-gallery__main">
-        {/* eslint-disable-next-line @next/next/no-img-element -- ảnh từ API Spring, kích thước giữ bằng aspect-ratio */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={publicPhotoUrl(petId, photoIds[index])}
           alt={`Ảnh ${index + 1} của ${name}`}
@@ -51,7 +51,7 @@ export function PhotoGallery({ petId, photoIds, species, name }: PhotoGalleryPro
               aria-label={`Xem ảnh ${i + 1}`}
               onClick={() => setIndex(i)}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- ảnh thu nhỏ từ API Spring */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={publicPhotoUrl(petId, id)} alt="" width={80} height={80} loading="lazy" />
             </button>
           ))}

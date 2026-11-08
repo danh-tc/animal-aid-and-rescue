@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
 
-/** Mục 5.1: /api/public/** có giới hạn tần suất theo IP, đăng nhập và tra cứu có ngưỡng riêng. */
 @TestPropertySource(properties = {"app.rate-limit.auth-per-minute=3", "app.rate-limit.lookup-per-minute=2"})
 class RateLimitIntegrationTest extends IntegrationTestBase {
 
@@ -32,7 +31,6 @@ class RateLimitIntegrationTest extends IntegrationTestBase {
         JsonNode error = json.readTree(last.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
         assertThat(error.get("code").asText()).isEqualTo("RATE_LIMITED");
 
-        // IP khác không bị ảnh hưởng
         int other = mvc.perform(post("/api/public/auth/login").with(r -> { r.setRemoteAddr("10.0.0.8"); return r; })
             .contentType(MediaType.APPLICATION_JSON).content(body)).andReturn().getResponse().getStatus();
         assertThat(other).isEqualTo(401);

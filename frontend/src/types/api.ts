@@ -1,13 +1,7 @@
-// Kiểu dữ liệu khớp DTO của API Spring (backend/src/main/java/com/aar/**/*Dtos.java).
-// Sau này có thể thay bằng client sinh từ springdoc-openapi.
+
 
 import type { components } from "./openapi";
 
-/**
- * Kiểu enum lấy thẳng từ hợp đồng API do springdoc sinh ra (npm run gen:api => openapi.ts),
- * nên đổi enum ở backend thì frontend báo lỗi biên dịch ngay. Kiểu view bên dưới viết tay để
- * ghi rõ trường nào có thể null (springdoc không biết), và được đối chiếu với openapi.ts trong contract.ts.
- */
 type Schemas = components["schemas"];
 type EnumOf<T> = NonNullable<T>;
 
@@ -51,8 +45,6 @@ export interface AttachmentView {
   uploadedAt: string;
 }
 
-/* ---------- Xác thực ---------- */
-
 export interface UserView {
   id: number;
   email: string;
@@ -60,7 +52,6 @@ export interface UserView {
   role: Role;
 }
 
-/** GET /api/me: thêm số điện thoại, địa chỉ để form nộp đơn biết cần hỏi bổ sung không. */
 export interface MeView extends UserView {
   phone: string | null;
   address: string | null;
@@ -72,8 +63,6 @@ export interface AuthResponse {
   user: UserView;
 }
 
-/* ---------- Công khai ---------- */
-
 export interface PublicPet {
   id: number;
   code: string;
@@ -83,9 +72,9 @@ export interface PublicPet {
   estimatedBirthDate: string | null;
   color: string | null;
   description: string | null;
-  /** false: đơn nhận nuôi phải kèm cam kết triệt sản */
+
   sterilized: boolean;
-  /** Ảnh: GET /api/public/pets/{id}/photos/{photoId} */
+
   photoIds: number[];
 }
 
@@ -103,8 +92,6 @@ export interface ReportReceipt {
   status: ReportStatus;
   createdAt: string;
 }
-
-/* ---------- Cứu hộ ---------- */
 
 export interface ReportSummary {
   id: number;
@@ -139,7 +126,7 @@ export interface ReportDetail extends ReportSummary {
 
 export interface OpenCase {
   rescueCase: CaseSummary;
-  /** null khi báo cáo hoặc ca không có tọa độ */
+
   distanceKm: number | null;
   reportCodes: string[];
 }
@@ -155,7 +142,7 @@ export interface ReportLookup {
 export interface CaseProgress {
   status: CaseStatus;
   closedAt: string | null;
-  /** Có khi ca Thành công: giai đoạn công khai của thú được cứu */
+
   pet: PetProgress | null;
 }
 
@@ -164,7 +151,7 @@ export type PetStage = EnumOf<Schemas["PetProgress"]["stage"]>;
 export interface PetProgress {
   stage: PetStage;
   petName: string | null;
-  /** Chỉ có khi thú đang tìm nhà, để mở trang hồ sơ công khai */
+
   petId: number | null;
 }
 
@@ -175,7 +162,6 @@ export interface CaseDetail extends CaseSummary {
   petCode: string | null;
 }
 
-/** S-1 của UC-07. Nhánh S-1b: thú thất lạc của trung tâm thì gửi lostPetId thay cho pet. */
 export interface SucceedRequest {
   lostPetId?: number | null;
   pet?: {
@@ -201,8 +187,6 @@ export interface SucceedResult {
   urgentVetRequestSuggested: boolean;
 }
 
-/* ---------- Chăm sóc, thú y ---------- */
-
 export interface PetSummary {
   id: number;
   code: string;
@@ -210,7 +194,7 @@ export interface PetSummary {
   species: Species;
   sex: Sex;
   status: PetStatus;
-  /** null khi thú đã có chủ hoặc ở trạng thái kết thúc */
+
   area: PetArea | null;
   currentLocation: string | null;
   createdAt: string;
@@ -252,7 +236,7 @@ export interface VetRequestView {
   treatmentSummary: string | null;
   totalCost: number | null;
   aftercareInstructions: string | null;
-  /** Kết luận sức khỏe của lần khám (checklist mục 1), có khi đã hoàn tất */
+
   healthOk: boolean | null;
   cancelReason: string | null;
   requestedAt: string;
@@ -269,7 +253,7 @@ export interface PetDetail {
   color: string | null;
   description: string | null;
   status: PetStatus;
-  /** null khi thú đã có chủ hoặc ở trạng thái kết thúc */
+
   area: PetArea | null;
   currentLocation: string | null;
   vaccinated: boolean;
@@ -331,14 +315,12 @@ export interface HistoryView {
   changedAt: string;
 }
 
-/* ---------- Nhận nuôi ---------- */
-
 export interface SubmitApplicationRequest {
   petId: number;
   housingType: HousingType;
   hasPetExperience: boolean;
   motivation?: string | null;
-  /** Bắt buộc nếu tài khoản chưa có, được lưu vào tài khoản */
+
   phone?: string | null;
   address?: string | null;
 }
@@ -353,13 +335,12 @@ export interface ApplicationView {
   status: ApplicationStatus;
   reviewNote: string | null;
   reviewedAt: string | null;
-  /** Ngày hẹn bàn giao (yyyy-mm-dd) của đơn đã duyệt */
+
   handoverDate: string | null;
   cancelReason: string | null;
   submittedAt: string;
 }
 
-/** Lịch sử nhận nuôi của người nộp đơn để cảnh báo khi xét duyệt. */
 export interface ApplicantFlag {
   kind: "RECALLED" | "RETURNED";
   petId: number;
@@ -376,8 +357,6 @@ export interface ApplicationDetail {
   applicantHistory: ApplicantFlag[];
 }
 
-/* ---------- Bàn giao, hậu kiểm ---------- */
-
 export interface FollowUpView {
   id: number;
   handoverId: number;
@@ -386,7 +365,7 @@ export interface FollowUpView {
   dueDate: string;
   status: FollowUpStatus;
   result: FollowUpResult | null;
-  /** Hình thức liên hệ, có khi lần hậu kiểm đã thực hiện */
+
   contactMethod: ContactMethod | null;
   healthOk: boolean | null;
   housingOk: boolean | null;
@@ -449,8 +428,6 @@ export interface ReturnResult {
   cancelledFollowUps: number;
 }
 
-/* ---------- Sự kiện kết thúc, chi phí (đợt 2) ---------- */
-
 export interface EndEventView {
   id: number;
   eventType: EndEventType;
@@ -480,8 +457,6 @@ export interface PetCosts {
   totalDonated: number;
   outstanding: number;
 }
-
-/* ---------- Báo cáo thống kê M01 (đợt 2) ---------- */
 
 export interface Period {
   from: string;
@@ -531,13 +506,13 @@ export interface ExceptionReport {
     ownerName: string;
     ownerPhone: string | null;
     handedOverAt: string;
-    /** Thời điểm ghi hậu kiểm Không đạt */
+
     failedAt: string | null;
-    /** Từ thời điểm này Quản lý được đóng thu hồi (QĐ-18) */
+
     closableFrom: string | null;
   }[];
   caseUnassignedAlertHours: number;
-  /** Ca chưa phân công quá hạn (QĐ-17) */
+
   unassignedCases: {
     caseId: number;
     locationText: string;
@@ -563,15 +538,13 @@ export interface CostReport {
   }[];
 }
 
-/* ---------- Bảng công việc, tra cứu ---------- */
-
 export interface Dashboard {
   newReports: number;
   openCases: number;
   pendingApplications: number;
   followUpsDueThisWeek: number;
   openVetRequests: number;
-  /** Ca chưa phân công quá hạn (QĐ-17) */
+
   overdueUnassignedCases: number;
   recallPending: number;
 }
@@ -589,8 +562,6 @@ export interface ClinicView {
   phone: string | null;
   active: boolean;
 }
-
-/* ---------- Quản trị ---------- */
 
 export interface UserAdminView {
   id: number;

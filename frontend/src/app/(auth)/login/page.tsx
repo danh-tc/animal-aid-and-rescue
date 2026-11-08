@@ -22,7 +22,6 @@ function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const next = params.get("next");
 
-  // Đã đăng nhập thì chuyển thẳng tới trang đích
   useEffect(() => {
     if (ready && user) router.replace(safeNext(next, user.role));
   }, [ready, user, next, router]);

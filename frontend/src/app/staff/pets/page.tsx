@@ -26,7 +26,6 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "DECEASED", label: "Qua đời" },
 ];
 
-/** S04: Danh sách thú, lọc theo trạng thái, loài, tìm theo tên hoặc mã */
 export default function PetsPage() {
   const [status, setStatus] = useUrlState<StatusFilter>("status", "ALL");
   const [species, setSpecies] = useUrlState<Species | "">("species", "");
@@ -34,7 +33,6 @@ export default function PetsPage() {
   const [page, setPage] = usePageParam();
   const [text, setText] = useState(q);
 
-  // Gõ xong 350ms mới tìm để không gọi API mỗi phím
   useEffect(() => {
     const t = window.setTimeout(() => text.trim() !== q && setQ(text.trim()), 350);
     return () => window.clearTimeout(t);

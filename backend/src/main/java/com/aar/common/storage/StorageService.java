@@ -21,10 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Lưu tệp đính kèm trên ổ đĩa của server (báo cáo mục 5.1), metadata ở bảng attachments.
- * Tên tệp trên đĩa là UUID nên không lộ tên gốc và không bị ghi đè.
- */
 @Service
 public class StorageService {
 

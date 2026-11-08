@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** UC-11: bàn giao (S08), hậu kiểm (S09), tiếp nhận trả lại (S10), thú đã nhận của Người nhận nuôi (A03). */
 @Service
 @Transactional
 public class HandoverService {
@@ -73,7 +72,6 @@ public class HandoverService {
         this.params = params;
     }
 
-    /** Bước 3, 4 của UC-11: đơn => HANDED_OVER, thú => ADOPTED, tạo bàn giao và 2 lịch hậu kiểm. */
     public HandoverView handover(Long applicationId, HandoverRequest req, Long by) {
         Long petId = applications.findPetIdById(applicationId)
             .orElseThrow(() -> BusinessException.notFound("Không tìm thấy đơn nhận nuôi"));
@@ -121,15 +119,10 @@ public class HandoverService {
         }).toList();
     }
 
-    /**
-     * S-1 của UC-11. Cần theo dõi: thêm một lần hậu kiểm bổ sung. Không đạt: chờ thu hồi, hủy lịch còn lại.
-     * Đạt và không còn lịch nào: kết thúc hậu kiểm.
-     */
     public FollowUpOutcome recordResult(Long followUpId, FollowUpResultRequest req, Long by) {
         return recordResult(followUpId, req, List.of(), by);
     }
 
-    /** Bản multipart theo mục 5.2: 5 tiêu chí, kết quả, lý do và ảnh trong cùng một giao dịch. */
     public FollowUpOutcome recordResult(Long followUpId, FollowUpResultRequest req, List<MultipartFile> photos, Long by) {
         FollowUp followUp = followUps.findById(followUpId)
             .orElseThrow(() -> BusinessException.notFound("Không tìm thấy lịch hậu kiểm"));
@@ -145,8 +138,7 @@ public class HandoverService {
         if (req.result() != FollowUpResult.PASS && reason == null) {
             throw BusinessException.badRequest("REASON_REQUIRED", "Kết quả Cần theo dõi hoặc Không đạt phải ghi lý do");
         }
-        // Mục 2.1.5: nhân viên tự chọn kết quả, hệ thống không tự tính từ 5 tiêu chí mà chỉ kiểm ràng buộc.
-        // QĐ-12, RB-23: lần bổ sung chỉ được Đạt hoặc Không đạt, nên mỗi lần hậu kiểm có tối đa một lần bổ sung.
+
         if (followUp.isAdditional() && req.result() == FollowUpResult.WATCH) {
             throw BusinessException.badRequest("ADDITIONAL_RESULT_INVALID",
                 "Lần hậu kiểm bổ sung chỉ được chọn Đạt hoặc Không đạt");
@@ -178,10 +170,6 @@ public class HandoverService {
             additional == null ? null : FollowUpView.of(additional));
     }
 
-    /**
-     * Ngoại lệ 5b1 của UC-11, QĐ-18: sau RECALL_CLOSE_AFTER_DAYS ngày ở Chờ thu hồi mà vẫn không thu hồi được,
-     * Quản lý đóng thu hồi và ghi lý do. Bàn giao chuyển Đã đóng, thú giữ Đã nhận nuôi.
-     */
     public HandoverView closeRecall(Long handoverId, String reason, AuthUser by) {
         if (by.role() != Role.MANAGER) {
             throw BusinessException.forbidden("CLOSE_RECALL_MANAGER_ONLY", "Chỉ Quản lý được đóng thu hồi");
@@ -207,7 +195,6 @@ public class HandoverService {
         return view(handover);
     }
 
-    /** S-2 của UC-11: trả lại hoặc thu hồi, chấp nhận bất kỳ lúc nào (QĐ-13). */
     public ReturnResult returnPet(Long petId, ReturnRequest req, Long by) {
         Pet pet = petLifecycle.lock(petId);
         if (pet.getStatus() != PetStatus.ADOPTED) {
@@ -230,7 +217,6 @@ public class HandoverService {
         return handovers.findByPetIdOrderByHandedOverAtDesc(petId).stream().map(this::view).toList();
     }
 
-    /** A03: thú đã nhận và lịch hậu kiểm của chính Người nhận nuôi. */
     @Transactional(readOnly = true)
     public List<HandoverView> forApplicant(Long applicantId) {
         return handovers.findByApplicant(applicantId).stream().map(this::view).toList();

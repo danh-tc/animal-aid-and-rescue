@@ -22,7 +22,6 @@ import { CARE_MODE, PET_STATUS, PRIORITY, VET_STATUS } from "@/lib/labels";
 import type { AttachmentView, VetRequestResult, VetRequestView } from "@/types/api";
 import "../../detail-page.scss";
 
-/** S06: Chi tiết yêu cầu thú y: bắt đầu điều trị, ghi kết quả, hủy, đính kèm phiếu khám */
 export default function VetRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: v, error, loading, reload } = useApi<VetRequestView>(`/api/staff/vet-requests/${id}`);
@@ -64,7 +63,7 @@ export default function VetRequestDetailPage() {
     if (done.cost === "" || !(cost >= 0) || !Number.isInteger(cost)) throw new Error("Tổng chi phí phải là số nguyên không âm (VND).");
     if (!healthOk) throw new Error("Chọn kết luận sức khỏe sau lần khám.");
     if (!filesValid(completeFiles)) throw new Error("Có tệp lớn hơn 5MB.");
-    // Mục 5.2: multipart gồm phần "data" (JSON kết quả) và "files" (phiếu khám) trong cùng một yêu cầu
+
     const data = new FormData();
     const result = {
       diagnosisSummary: done.diagnosis.trim() || null,

@@ -19,12 +19,10 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     Optional<Pet> findByIdAndStatus(Long id, PetStatus status);
 
-    /** SELECT ... FOR UPDATE: tuần tự hóa các thao tác đổi trạng thái trên cùng một thú (RB-14). */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Pet p where p.id = :id")
     Optional<Pet> findByIdForUpdate(@Param("id") Long id);
 
-    /** Danh sách cho nhân viên (S04). pattern dạng %từ khóa% đã viết thường, "%" nếu không lọc. */
     @Query("""
         select p from Pet p
         where (:status is null or p.status = :status)

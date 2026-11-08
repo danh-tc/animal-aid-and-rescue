@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** Tham số hệ thống (báo cáo mục 4.2), Quản lý chỉnh ở màn hình M04. */
 @Entity
 @Table(name = "system_parameters")
 public class SystemParameter {

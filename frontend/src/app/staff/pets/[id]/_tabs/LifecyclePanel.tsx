@@ -16,7 +16,6 @@ import type { EndEventResult, EndEventType, EndEventView, FoundResult, PetDetail
 
 const AT_CENTER = ["IN_CARE", "IN_TREATMENT", "AVAILABLE", "PENDING_HANDOVER"];
 
-/** Nút ghi sự kiện kết thúc (mục 2.1.6) và tìm lại thú thất lạc, đặt ở đầu hồ sơ thú. */
 export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged: () => void }) {
   const mutate = useMutation();
   const toast = useToast();
@@ -25,7 +24,7 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
   const [form, setForm] = useState({ occurredAt: "", detail: "" });
   const [found, setFound] = useState({ reason: "", priority: "NEED_CHECK" as Priority, assessment: "" });
   const adopted = pet.status === "ADOPTED";
-  // QĐ-14, QĐ-15: yêu cầu thú y đang mở sẽ bị hủy, nhân viên nhập chi phí đã phát sinh của từng yêu cầu
+
   const openVet = pet.vetRequests.filter((v) => v.status === "PENDING" || v.status === "IN_TREATMENT");
   const [costs, setCosts] = useState<Record<number, string>>({});
   const canEnd = AT_CENTER.includes(pet.status) || adopted;
@@ -171,7 +170,6 @@ export function LifecycleActions({ pet, onChanged }: { pet: PetDetail; onChanged
   );
 }
 
-/** Thông báo đầu hồ sơ khi thú ở trạng thái kết thúc hoặc thất lạc. */
 export function EndEventNotice({ pet, events }: { pet: PetDetail; events: EndEventView[] | null }) {
   if (!["DECEASED", "LOST"].includes(pet.status)) return null;
   const last = events?.[0];

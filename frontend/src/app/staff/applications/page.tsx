@@ -22,7 +22,6 @@ const OPTIONS: { value: Filter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
 ];
 
-/** S07: Danh sách đơn nhận nuôi */
 export default function ApplicationsPage() {
   const [status, setStatus] = useUrlState<Filter>("status", "PENDING");
   const [page, setPage] = usePageParam();

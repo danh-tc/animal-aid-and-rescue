@@ -8,11 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * Bảng chuyển trạng thái, cài đặt đúng theo báo cáo mục 3.4.
- * Mọi chuyển trạng thái không có trong bảng đều bị từ chối (RB-12).
- * Điều kiện nghiệp vụ (đủ checklist, không còn yêu cầu thú y mở...) do service gọi kiểm tra trước.
- */
 public final class TransitionTable {
 
     private static final List<Transition> ALL;
@@ -38,7 +33,7 @@ public final class TransitionTable {
             add(t, p, active, "DECEASED", "DECEASED");
             add(t, p, active, "LOST", "LOST");
         }
-        // Thú đã nhận nuôi: chỉ ghi nhận khi còn trong thời gian hậu kiểm (service kiểm tra)
+
         add(t, p, "ADOPTED", "DECEASED", "DECEASED");
         add(t, p, "ADOPTED", "LOST", "LOST");
 
@@ -67,7 +62,7 @@ public final class TransitionTable {
         add(t, h, "RECALL_PENDING", "RETURNED", "RETURNED");
         add(t, h, "IN_PROGRESS", "CLOSED", "CLOSED");
         add(t, h, "RECALL_PENDING", "CLOSED", "CLOSED");
-        // QĐ-18: Quản lý đóng thu hồi sau RECALL_CLOSE_AFTER_DAYS ngày, thú giữ ADOPTED
+
         add(t, h, "RECALL_PENDING", "RECALL_CLOSED", "CLOSED");
 
         EntityType r = EntityType.RESCUE_REPORT;
@@ -79,6 +74,7 @@ public final class TransitionTable {
         EntityType c = EntityType.RESCUE_CASE;
         add(t, c, null, "CREATED", "NEW");
         add(t, c, "NEW", "ASSIGNED", "IN_PROGRESS");
+        add(t, c, "IN_PROGRESS", "ASSIGNED", "IN_PROGRESS");
         add(t, c, "IN_PROGRESS", "SUCCEEDED", "SUCCEEDED");
         add(t, c, "IN_PROGRESS", "FAILED", "FAILED");
 
@@ -101,7 +97,6 @@ public final class TransitionTable {
         return entity + "|" + Objects.toString(from, "") + "|" + event;
     }
 
-    /** Trạng thái đích nếu chuyển hợp lệ. */
     public static Optional<String> target(EntityType entity, String from, String event) {
         return Optional.ofNullable(INDEX.get(key(entity, from, event)));
     }

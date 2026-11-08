@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** M02, M03: tài khoản và danh mục cơ sở thú y. Không xóa cứng, chỉ khóa tài khoản hoặc ngừng hợp tác. */
 @Service
 @Transactional
 public class AdminService {
@@ -37,7 +36,6 @@ public class AdminService {
         return PageResponse.of(result, UserAdminView::of);
     }
 
-    /** Quản lý tạo tài khoản nhân sự. Người nhận nuôi tự đăng ký ở P05. */
     public UserAdminView createUser(CreateUserRequest req) {
         if (req.role() == Role.ADOPTER) {
             throw BusinessException.badRequest("INVALID_ROLE", "Người nhận nuôi tự đăng ký tài khoản, Quản lý chỉ tạo được tài khoản Nhân viên hoặc Quản lý");

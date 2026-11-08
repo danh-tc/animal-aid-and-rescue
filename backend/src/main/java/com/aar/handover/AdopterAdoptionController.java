@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** A03: thú đã nhận và lịch hậu kiểm. */
 @RestController
 public class AdopterAdoptionController {
 

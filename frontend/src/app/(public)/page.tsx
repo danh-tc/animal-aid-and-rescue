@@ -8,7 +8,6 @@ import { apiFetch, errorMessage } from "@/lib/api";
 import type { PageResponse, PublicPet, Species } from "@/types/api";
 import "./home.scss";
 
-// Danh sách thay đổi liên tục, luôn lấy dữ liệu mới khi có request (màn hình P01)
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 12;

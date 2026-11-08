@@ -3,7 +3,6 @@ package com.aar.common;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-/** Chuẩn hóa tham số phân trang từ query string. */
 public final class Pages {
 
     public static final int MAX_SIZE = 100;

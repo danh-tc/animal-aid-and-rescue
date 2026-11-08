@@ -7,7 +7,6 @@ import com.aar.system.AuthDtos.MeView;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Thông tin tài khoản đang đăng nhập, dùng cho frontend sau khi tải lại trang. */
 @RestController
 public class MeController {
 

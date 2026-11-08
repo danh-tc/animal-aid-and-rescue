@@ -30,7 +30,6 @@ import "./pet-record.scss";
 type Tab = "info" | "intakes" | "care" | "vet" | "checklist" | "history" | "handovers";
 const AT_CENTER = ["IN_CARE", "IN_TREATMENT", "AVAILABLE", "PENDING_HANDOVER"];
 
-/** S05: Hồ sơ thú. S10 (nhận lại) nằm ở tab Bàn giao. */
 export default function PetRecordPage() {
   const { id } = useParams<{ id: string }>();
   const [tab, setTab] = useUrlState<Tab>("tab", "info");

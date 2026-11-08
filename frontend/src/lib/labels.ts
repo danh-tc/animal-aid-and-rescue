@@ -1,4 +1,4 @@
-// Nhãn tiếng Việt và sắc thái hiển thị cho các giá trị enum từ API.
+
 import type {
   ApplicationStatus,
   CareActivity,
@@ -22,7 +22,6 @@ import type {
   VetRequestStatus,
 } from "@/types/api";
 
-/** Sắc thái của badge: luôn đi kèm chữ, không dùng màu làm tín hiệu duy nhất. */
 export type Tone = "neutral" | "info" | "success" | "warning" | "danger" | "primary" | "accent";
 
 export interface Labeled {
@@ -126,7 +125,6 @@ export const FOLLOW_UP_RESULT: Record<FollowUpResult, Labeled> = {
   FAIL: { label: "Không đạt", tone: "danger" },
 };
 
-/** Sự kiện đổi trạng thái thú (TransitionTable). Không có trong bảng thì hiện mã gốc. */
 export const PET_EVENT: Record<string, string> = {
   RESCUE_SUCCEEDED: "Tiếp nhận từ ca cứu hộ",
   VET_REQUEST_OPENED: "Mở yêu cầu thú y",
@@ -146,10 +144,6 @@ export function labelOf<K extends string>(map: Record<K, string>, key: K | null 
   return key ? (map[key] ?? key) : "—";
 }
 
-/**
- * Giai đoạn công khai của thú cho người báo cứu hộ (trang tra cứu). Lời lẽ nhẹ nhàng,
- * không nêu chi tiết điều trị hay người nhận nuôi.
- */
 export const PET_STAGE: Record<PetStage, Labeled & { text: (name: string) => string }> = {
   IN_CARE: {
     label: "Đang được chăm sóc",

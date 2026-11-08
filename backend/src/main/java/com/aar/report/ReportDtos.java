@@ -6,7 +6,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
-/** M01: ba báo cáo đầu ra ở mục 5.3. Kỳ báo cáo tính theo ngày, gồm cả hai đầu. */
 public final class ReportDtos {
 
     private ReportDtos() {
@@ -15,7 +14,6 @@ public final class ReportDtos {
     public record Period(LocalDate from, LocalDate to) {
     }
 
-    /** Báo cáo tổng hợp: số ca cứu hộ, số thú nhận nuôi và trả lại theo kỳ. */
     public record SummaryReport(Period period, long reportsReceived, long casesCreated, long casesSucceeded,
                                 long casesFailed, long adoptions, long returns, Map<String, Long> endEvents,
                                 Map<String, Long> petsByStatus, List<MonthlySummary> months) {
@@ -24,13 +22,11 @@ public final class ReportDtos {
     public record MonthlySummary(String month, long casesSucceeded, long adoptions, long returns) {
     }
 
-    /** Báo cáo ngoại lệ: thú quá hạn hậu kiểm, đơn chờ xét quá lâu, bàn giao đang chờ thu hồi. */
     public record ExceptionReport(int applicationAlertDays, List<OverdueFollowUp> overdueFollowUps,
                                   List<StaleApplication> staleApplications, List<RecallPending> recallPending,
                                   int caseUnassignedAlertHours, List<UnassignedCase> unassignedCases) {
     }
 
-    /** QĐ-17: ca ở Mới quá CASE_UNASSIGNED_ALERT_HOURS giờ, nhắc Quản lý phân công. */
     public record UnassignedCase(Long caseId, String locationText, OffsetDateTime createdAt, long hoursWaiting) {
     }
 
@@ -42,13 +38,11 @@ public final class ReportDtos {
                                    String applicantName, OffsetDateTime submittedAt, long daysWaiting) {
     }
 
-    /** failedAt: thời điểm ghi hậu kiểm Không đạt. closableFrom: từ ngày này Quản lý được đóng thu hồi (QĐ-18). */
     public record RecallPending(Long handoverId, Long petId, String petCode, String petName, String ownerName,
                                 String ownerPhone, OffsetDateTime handedOverAt, OffsetDateTime failedAt,
                                 OffsetDateTime closableFrom) {
     }
 
-    /** Báo cáo chi phí và ủng hộ (QĐ-14). */
     public record CostReport(Period period, BigDecimal periodTreatmentCost, BigDecimal periodDonations,
                              List<MonthlyCost> months, List<ClinicCost> byClinic, List<PetCost> byPet) {
     }
@@ -59,7 +53,6 @@ public final class ReportDtos {
     public record ClinicCost(Long clinicId, String clinicName, long completedRequests, BigDecimal treatmentCost) {
     }
 
-    /** Theo từng thú, cộng dồn cả vòng đời như 3 con số khi bàn giao. */
     public record PetCost(Long petId, String petCode, String petName, String petStatus, BigDecimal treatmentCost,
                           BigDecimal donated, BigDecimal outstanding) {
     }

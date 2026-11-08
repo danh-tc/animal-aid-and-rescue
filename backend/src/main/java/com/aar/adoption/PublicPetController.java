@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Màn hình P01, P02: chỉ công khai thú đang Sẵn sàng nhận nuôi. */
 @RestController
 @RequestMapping("/api/public/pets")
 @Transactional(readOnly = true)
@@ -45,7 +44,6 @@ public class PublicPetController {
         return PublicPet.of(p, photoIds);
     }
 
-    /** photoIds: tải ảnh qua /api/public/pets/{id}/photos/{photoId}. sterilized để A01 biết có cần cam kết triệt sản. */
     public record PublicPet(Long id, String code, String name, Species species, Sex sex,
                             LocalDate estimatedBirthDate, String color, String description, boolean sterilized,
                             List<Long> photoIds) {

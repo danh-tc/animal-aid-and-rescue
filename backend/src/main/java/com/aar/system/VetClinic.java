@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** Danh mục cơ sở thú y đối tác (thực thể ngoài), Quản lý quản lý ở M03. Không xóa, chỉ ngừng hợp tác. */
 @Entity
 @Table(name = "vet_clinics")
 public class VetClinic {

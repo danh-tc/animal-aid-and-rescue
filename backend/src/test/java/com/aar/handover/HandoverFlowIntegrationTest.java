@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
-/** UC-11: bàn giao, hậu kiểm và trả lại (người C, báo cáo mục 2.1.5). */
 class HandoverFlowIntegrationTest extends IntegrationTestBase {
 
     private static final Object PASS = criteria("PASS", null);
@@ -28,7 +27,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         assertThat(petStatus(petId)).isEqualTo("ADOPTED");
         assertThat(applicationStatus(appId)).isEqualTo("HANDED_OVER");
 
-        // RB-06: một đơn tối đa một bàn giao
         postJson("/api/staff/applications/" + appId + "/handover", STAFF, null, 409);
 
         JsonNode adoptions = getJson("/api/adopter/adoptions", ADOPTER1, 200);
@@ -36,7 +34,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         getJson("/api/adopter/adoptions", STAFF, 403);
     }
 
-    /** QĐ-12: Cần theo dõi thì thêm một lần bổ sung, đạt hết thì kết thúc hậu kiểm. */
     @Test
     void watchAddsExtraFollowUpThenAllPassCompletes() throws Exception {
         JsonNode handover = handedOver(ADOPTER2);
@@ -53,7 +50,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         assertThat(extra.get("sequenceNo").asInt()).isEqualTo(3);
         assertThat(extra.get("additional").asBoolean()).isTrue();
 
-        // Lần đã ghi không ghi lại
         postJson("/api/staff/follow-ups/" + first + "/result", STAFF, PASS, 409);
 
         assertThat(postJson("/api/staff/follow-ups/" + extra.get("id").asLong() + "/result", STAFF, PASS, 200)
@@ -62,7 +58,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
             .get("handoverStatus").asText()).isEqualTo("COMPLETED");
     }
 
-    /** QĐ-12: Không đạt => chờ thu hồi, hủy lịch còn lại. Khi thú về thì tạo lượt tiếp nhận RETURN. */
     @Test
     void failedFollowUpLeadsToRecallAndReturn() throws Exception {
         JsonNode handover = handedOver(ADOPTER3);
@@ -87,7 +82,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         assertThat(handovers.get(0).get("status").asText()).isEqualTo("RETURNED");
     }
 
-    /** QĐ-13: trả lại được chấp nhận cả sau khi hậu kiểm đã kết thúc. Thú chưa nhận nuôi thì không trả lại được. */
     @Test
     void returnAcceptedAfterFollowUpsCompleted() throws Exception {
         JsonNode handover = handedOver(ADOPTER1);
@@ -116,7 +110,7 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
         }
         assertThat(mine).isNotNull();
         assertThat(mine.get("ownerName").asText()).isEqualTo("Võ Quốc Bảo");
-        // Lần 2 (sau 60 ngày) chưa đến hạn trong 20 ngày tới
+
         assertThat(due.findValuesAsText("id")).doesNotContain(handover.get("followUps").get(1).get("id").asText());
     }
 
@@ -126,7 +120,6 @@ class HandoverFlowIntegrationTest extends IntegrationTestBase {
             "petPresent", true, "ownerReachable", true, "reason", reason);
     }
 
-    /** Mục 2.1.5: mỗi lần hậu kiểm ghi hình thức liên hệ (gọi điện, thăm nhà, gọi video). */
     @Test
     void followUpRecordsContactMethod() throws Exception {
         JsonNode handover = handedOver(ADOPTER3);

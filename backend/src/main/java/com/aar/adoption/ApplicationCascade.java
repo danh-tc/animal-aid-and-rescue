@@ -9,10 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Hủy hàng loạt các đơn đang mở của một thú khi trạng thái thú thay đổi (QĐ-09, QĐ-10, QĐ-15).
- * Người gọi phải đang giữ khóa dòng thú.
- */
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
 public class ApplicationCascade {
@@ -27,7 +23,6 @@ public class ApplicationCascade {
         this.state = state;
     }
 
-    /** Trả về số đơn đã hủy. */
     public int cancelOpen(Long petId, Set<ApplicationStatus> statuses, String reason, Long by) {
         List<AdoptionApplication> open = applications.findByPetIdAndStatusIn(petId, statuses);
         open.forEach(app -> cancel(app, reason, by));

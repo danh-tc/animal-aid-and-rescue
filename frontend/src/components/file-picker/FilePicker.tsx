@@ -15,7 +15,6 @@ interface FilePickerProps {
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
-/** Chọn tối đa `max` tệp, mỗi tệp tối đa 5MB, khớp giới hạn ở backend. */
 export function FilePicker({
   label,
   files,

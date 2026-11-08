@@ -5,7 +5,6 @@ import { LinkButton } from "@/components/button/Button";
 import { isStaff, useAuth } from "@/lib/auth-context";
 import "./adopt-cta.scss";
 
-/** Nút nộp đơn ở P02, đổi theo trạng thái đăng nhập. */
 export function AdoptCta({ petId, petName }: { petId: number; petName: string }) {
   const { user, ready } = useAuth();
   const applyHref = `/pets/${petId}/apply`;

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/** P03: báo cứu hộ. Gửi multipart (phần "report" là JSON, phần "photos" là ảnh) hoặc JSON thuần nếu không có ảnh. */
 @RestController
 @RequestMapping("/api/public/rescue-reports")
 public class PublicRescueReportController {
@@ -41,7 +40,6 @@ public class PublicRescueReportController {
         return service.submit(report, List.of());
     }
 
-    /** P04: tra cứu tiến độ bằng mã báo cáo và số điện thoại đã khai (RB-15). */
     @GetMapping("/lookup")
     public ReportLookup lookup(@RequestParam String code, @RequestParam String phone) {
         return service.lookup(code, phone);

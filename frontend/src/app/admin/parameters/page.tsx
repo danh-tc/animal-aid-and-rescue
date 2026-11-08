@@ -13,7 +13,6 @@ import { errorMessage } from "@/lib/api";
 import type { ParameterView } from "@/types/api";
 import "./parameter-list.scss";
 
-/** M04: Tham số hệ thống */
 export default function ParametersPage() {
   const { data, error, loading, reload } = useApi<ParameterView[]>("/api/admin/system-parameters");
 

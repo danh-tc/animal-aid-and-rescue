@@ -84,7 +84,6 @@
     color: $color-text;
     text-decoration: none;
 
-    // Cả thẻ bấm được
     &::after {
       content: "";
       position: absolute;

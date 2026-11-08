@@ -130,7 +130,6 @@ public class StaffCareController {
         return vet.start(id, me.id());
     }
 
-    /** Mục 5.2: multipart, phần "data" là JSON kết quả, phần "files" là phiếu khám (ảnh hoặc PDF). */
     @PostMapping(value = "/vet-requests/{id}/complete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public VetRequestResult completeWithFiles(@PathVariable Long id, @Valid @RequestPart("data") VetRequestComplete req,
                                               @RequestPart(value = "files", required = false) List<MultipartFile> files,

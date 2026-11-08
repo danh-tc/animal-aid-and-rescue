@@ -45,7 +45,6 @@ public final class CareDtos {
         }
     }
 
-    /** S05: hồ sơ thú kèm lượt tiếp nhận, checklist tính ra, yêu cầu thú y và ảnh. */
     public record PetDetail(Long id, String code, String name, Species species, Sex sex,
                             LocalDate estimatedBirthDate, String color, String description, PetStatus status,
                             PetArea area, String currentLocation, boolean vaccinated, boolean dewormed,
@@ -55,7 +54,6 @@ public final class CareDtos {
                             List<AttachmentView> photos) {
     }
 
-    /** Trường null nghĩa là giữ nguyên. Không có trường trạng thái (RB-12). */
     public record UpdatePetRequest(
         @Size(max = 100) String name,
         Sex sex,
@@ -88,7 +86,6 @@ public final class CareDtos {
         @NotNull Boolean temperamentOk) {
     }
 
-    /** Đủ 6 mục thì thú đã sang AVAILABLE, thiếu thì missing liệt kê các mục còn thiếu. */
     public record EligibilityResult(PetStatus status, Checklist checklist, List<String> missing) {
     }
 
@@ -110,11 +107,10 @@ public final class CareDtos {
         @Size(max = 2000) String treatmentSummary,
         @NotNull @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal totalCost,
         @Size(max = 2000) String aftercareInstructions,
-        /** Kết luận sức khỏe ổn hay chưa (checklist mục 1). */
+
         @NotNull Boolean healthOk) {
     }
 
-    /** Ngoại lệ S-2a của UC-09: hủy yêu cầu, ghi lý do và chi phí đã phát sinh (QĐ-14, mặc định 0). */
     public record VetRequestCancel(
         @NotBlank @Size(max = 1000) String reason,
         @DecimalMin("0") @Digits(integer = 12, fraction = 0) BigDecimal incurredCost) {
@@ -128,7 +124,6 @@ public final class CareDtos {
                                  OffsetDateTime completedAt) {
     }
 
-    /** Kết quả thao tác trên yêu cầu thú y kèm trạng thái mới của thú (QĐ-06). */
     public record VetRequestResult(VetRequestView request, PetStatus petStatus, int cancelledApplications) {
     }
 

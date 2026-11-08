@@ -2,7 +2,6 @@ import { CheckCircle2, CircleDashed } from "lucide-react";
 import type { ChecklistItem } from "@/types/api";
 import "./checklist.scss";
 
-/** Hiển thị 6 mục điều kiện nhận nuôi, mục chưa đạt kèm lý do từ backend. */
 export function Checklist({ items }: { items: ChecklistItem[] }) {
   return (
     <ul className="checklist">

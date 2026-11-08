@@ -32,7 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** UC nộp đơn (A01, A02) và xét duyệt đơn (S07, UC-10). */
 @Service
 @Transactional
 public class ApplicationService {
@@ -61,7 +60,6 @@ public class ApplicationService {
         this.cascade = cascade;
     }
 
-    /** QĐ-08, RB-02, RB-14: chỉ thú Sẵn sàng nhận đơn, kiểm tra trong cùng giao dịch có khóa dòng thú. */
     public ApplicationView submit(Long applicantId, SubmitRequest req) {
         Pet pet = petLifecycle.lock(req.petId());
         if (pet.getStatus() != PetStatus.AVAILABLE) {
@@ -75,7 +73,7 @@ public class ApplicationService {
             throw BusinessException.conflict("TOO_MANY_PENDING",
                 "Bạn đã có " + maxPending + " đơn đang chờ xét duyệt. Hãy chờ kết quả hoặc hủy bớt đơn trước khi nộp thêm");
         }
-        // Nhân viên cần liên hệ khi xét duyệt và hậu kiểm: tài khoản phải có số điện thoại và địa chỉ
+
         User applicant = users.findById(applicantId).orElseThrow(this::notFound);
         String phone = blankToNull(req.phone()) != null ? req.phone().trim() : blankToNull(applicant.getPhone());
         String address = blankToNull(req.address()) != null ? req.address().trim() : blankToNull(applicant.getAddress());
@@ -98,7 +96,6 @@ public class ApplicationService {
         return views(applications.findByApplicantIdOrderBySubmittedAtDesc(applicantId));
     }
 
-    /** A02: Người nhận nuôi hủy đơn. Hủy đơn đã duyệt thì thú về Sẵn sàng (QĐ-11). */
     public ApplicationView cancelMine(Long applicationId, Long applicantId, String reason) {
         Long petId = applications.findPetIdById(applicationId).orElseThrow(this::notFound);
         Pet pet = petLifecycle.lock(petId);
@@ -135,10 +132,6 @@ public class ApplicationService {
             pet.getStatus().name(), views(others), applicantHistory(app.getApplicantId()));
     }
 
-    /**
-     * Cảnh báo cho nhân viên (UC-10 bước 2): người nộp từng có hậu kiểm Không đạt hoặc từng trả lại thú.
-     * Hệ thống không chặn duyệt, nhân viên dựa vào cảnh báo để đánh giá theo tiêu chí thẩm định (mục 2.1.4).
-     */
     private List<ApplicantFlag> applicantHistory(Long applicantId) {
         return jdbc.query("""
             SELECT p.id pet_id, p.code, p.name, h.handed_over_at,
@@ -170,10 +163,6 @@ public class ApplicationService {
         };
     }
 
-    /**
-     * QĐ-11, ngoại lệ 3a của UC-11: người nhận không đến bàn giao theo hẹn và không liên lạc được,
-     * nhân viên hủy đơn đã duyệt và ghi lý do. Thú về Sẵn sàng, các đơn đã đóng không mở lại.
-     */
     public ApplicationView cancelByStaff(Long applicationId, String reason, Long by) {
         Long petId = applications.findPetIdById(applicationId).orElseThrow(this::notFound);
         Pet pet = petLifecycle.lock(petId);
@@ -189,11 +178,6 @@ public class ApplicationService {
         return view(app, pet, users.findById(app.getApplicantId()).orElse(null));
     }
 
-    /**
-     * S-1 của UC-10, xử lý đồng thời theo báo cáo mục 4.4:
-     * khóa dòng thú, kiểm tra thú còn Sẵn sàng và đơn còn Chờ, duyệt, tự đóng các đơn chờ khác.
-     * Partial unique index RB-01 là lớp bảo vệ cuối nếu có thao tác song song lọt qua.
-     */
     public ApplicationView approve(Long id, String note, Long by) {
         return approve(id, note, null, by);
     }
@@ -202,7 +186,7 @@ public class ApplicationService {
         Long petId = applications.findPetIdById(id).orElseThrow(this::notFound);
         Pet pet = petLifecycle.lock(petId);
         AdoptionApplication app = applications.findById(id).orElseThrow(this::notFound);
-        // Kiểm tra thú trước: người duyệt sau trong tình huống tranh chấp nhận đúng thông báo (UC-10 S-1a)
+
         if (pet.getStatus() == PetStatus.PENDING_HANDOVER || pet.getStatus() == PetStatus.ADOPTED) {
             throw alreadyApproved();
         }
@@ -226,7 +210,6 @@ public class ApplicationService {
         return view(app, pet, users.findById(app.getApplicantId()).orElse(null));
     }
 
-    /** Đổi ngày hẹn bàn giao của đơn đã duyệt (mục 2.1.4 bước 3). */
     public ApplicationView scheduleHandover(Long id, LocalDate date) {
         AdoptionApplication app = applications.findById(id).orElseThrow(this::notFound);
         if (app.getStatus() != ApplicationStatus.APPROVED) {
@@ -236,7 +219,6 @@ public class ApplicationService {
         return view(app, pets.findById(app.getPetId()).orElseThrow(), users.findById(app.getApplicantId()).orElse(null));
     }
 
-    /** S-2 của UC-10: bắt buộc nhận xét (RB-08). */
     public ApplicationView reject(Long id, String note, Long by) {
         AdoptionApplication app = applications.findById(id).orElseThrow(this::notFound);
         app.recordReview(note.trim(), by);

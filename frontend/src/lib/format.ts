@@ -24,7 +24,6 @@ export function formatMoney(value: number | null | undefined): string {
   return value === null || value === undefined ? "—" : moneyFmt.format(value);
 }
 
-/** "Khoảng 3 tháng tuổi" từ ngày sinh ước tính. */
 export function ageLabel(birthDate: string | null | undefined): string | null {
   if (!birthDate) return null;
   const months = Math.floor((Date.now() - Date.parse(birthDate)) / (1000 * 60 * 60 * 24 * 30.4));
@@ -33,7 +32,6 @@ export function ageLabel(birthDate: string | null | undefined): string | null {
   return `Khoảng ${Math.floor(months / 12)} tuổi`;
 }
 
-/** Số ngày từ hôm nay tới ngày đến hạn, âm là quá hạn. */
 export function daysUntil(date: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -55,7 +53,6 @@ export function petName(name: string | null | undefined, code?: string): string 
 
 const compactFmt = new Intl.NumberFormat("vi-VN", { notation: "compact", maximumFractionDigits: 1 });
 
-/** Số gọn cho trục biểu đồ: 1,2 Tr, 500 N */
 export function formatCompact(value: number): string {
   return compactFmt.format(value);
 }

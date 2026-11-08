@@ -2,7 +2,6 @@ package com.aar.common.state;
 
 public class InvalidTransitionException extends RuntimeException {
 
-    /** Chi tiết kỹ thuật để ghi log, không trả cho người dùng. */
     private final String detail;
 
     public InvalidTransitionException(EntityType entity, String from, String event) {

@@ -10,7 +10,6 @@ import "./attachment-list.scss";
 
 const IMAGE_EXT = /\.(jpe?g|png|webp)$/i;
 
-/** Ảnh và phiếu khám nội bộ: tải bằng JWT rồi hiển thị qua object URL. */
 export function AttachmentList({ items }: { items: AttachmentView[] }) {
   if (items.length === 0) return <p className="attachment-list__empty">Chưa có tệp đính kèm.</p>;
   return (
@@ -48,7 +47,7 @@ function AttachmentItem({ item }: { item: AttachmentView }) {
     <>
       <span className="attachment-list__thumb">
         {isImage && url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- ảnh blob nội bộ, không qua next/image
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={item.originalName} width={96} height={96} />
         ) : (
           <FileText aria-hidden="true" />

@@ -6,7 +6,6 @@ import { formatMoney } from "@/lib/format";
 import type { PetCosts } from "@/types/api";
 import "./cost-summary.scss";
 
-/** QĐ-14: 3 con số chi phí của thú. Dùng ở hồ sơ thú và hộp thoại bàn giao (bước 2 của UC-11). */
 export function CostSummary({ petId }: { petId: number }) {
   const { data, error } = useApi<PetCosts>(`/api/staff/pets/${petId}/costs`);
   if (error) return <p className="cost-summary__error">{error}</p>;

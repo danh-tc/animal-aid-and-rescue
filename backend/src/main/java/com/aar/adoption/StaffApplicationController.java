@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** S07: xét duyệt đơn. */
 @RestController
 @RequestMapping("/api/staff/applications")
 public class StaffApplicationController {
@@ -48,7 +47,6 @@ public class StaffApplicationController {
         return service.approve(id, req == null ? null : req.note(), req == null ? null : req.handoverDate(), me.id());
     }
 
-    /** Hẹn hoặc đổi ngày bàn giao cho đơn đã duyệt (mục 2.1.4 bước 3). */
     @PostMapping("/{id}/handover-date")
     public ApplicationView handoverDate(@PathVariable Long id, @Valid @RequestBody HandoverDateRequest req) {
         return service.scheduleHandover(id, req.handoverDate());
@@ -60,7 +58,6 @@ public class StaffApplicationController {
         return service.reject(id, req.note(), me.id());
     }
 
-    /** QĐ-11: người nhận không đến bàn giao theo hẹn, nhân viên hủy đơn đã duyệt và ghi lý do. */
     @PostMapping("/{id}/cancel")
     public ApplicationView cancel(@PathVariable Long id, @Valid @RequestBody StaffCancelRequest req,
                                   @CurrentUser AuthUser me) {

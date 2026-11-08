@@ -11,10 +11,6 @@ interface ApiQuery<T> {
   reload: () => void;
 }
 
-/**
- * Đọc dữ liệu từ API kèm JWT hiện tại. path = null thì chưa gọi.
- * Giữ dữ liệu cũ khi tải lại để tránh nhảy bố cục.
- */
 export function useApi<T>(path: string | null, query?: ApiOptions["query"]): ApiQuery<T> {
   const { token, ready } = useAuth();
   const [data, setData] = useState<T | null>(null);
@@ -47,7 +43,6 @@ export function useApi<T>(path: string | null, query?: ApiOptions["query"]): Api
   return { data, error, loading, reload };
 }
 
-/** Gọi API thay đổi dữ liệu, trả về hàm gọi có JWT sẵn. */
 export function useMutation() {
   const { token } = useAuth();
   return useCallback(

@@ -23,7 +23,6 @@ import "./report-page.scss";
 type Tab = "summary" | "exceptions" | "costs";
 const count = (n: number) => n.toLocaleString("vi-VN");
 
-/** M01: Báo cáo thống kê (mục 5.3): tổng hợp, ngoại lệ, chi phí và ủng hộ. */
 export default function ReportsPage() {
   const [tab, setTab] = useUrlState<Tab>("tab", "summary");
   const [from, setFrom] = useUrlState<string>("from", "");

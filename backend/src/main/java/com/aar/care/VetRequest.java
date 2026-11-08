@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/** Yêu cầu thú y gửi cơ sở thú y (thực thể ngoài). Nhân viên nhập hộ kết quả. */
 @Entity
 @Table(name = "vet_requests")
 public class VetRequest {
@@ -54,7 +53,6 @@ public class VetRequest {
     @Column(name = "aftercare_instructions")
     private String aftercareInstructions;
 
-    /** Kết luận lần khám: sức khỏe ổn (checklist mục 1 dựa vào lần hoàn tất gần nhất). */
     @Column(name = "health_ok")
     private Boolean healthOk;
 
@@ -87,7 +85,7 @@ public class VetRequest {
 
     public void changeStatus(VetRequestStatus status) {
         this.status = status;
-        // completed_at là thời điểm đóng yêu cầu, dùng để tính chi phí theo tháng (gồm cả chi phí của yêu cầu hủy)
+
         if (status == VetRequestStatus.COMPLETED || status == VetRequestStatus.CANCELLED) {
             this.completedAt = OffsetDateTime.now();
         }
@@ -101,7 +99,6 @@ public class VetRequest {
         this.aftercareInstructions = aftercare;
     }
 
-    /** QĐ-14: hủy vẫn ghi chi phí đã phát sinh (mặc định 0), tính vào tổng chi phí điều trị. */
     public void recordCancel(String reason, BigDecimal incurredCost) {
         this.cancelReason = reason;
         this.totalCost = incurredCost == null ? BigDecimal.ZERO : incurredCost;

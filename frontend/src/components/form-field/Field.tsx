@@ -3,12 +3,12 @@ import "./form-field.scss";
 
 interface FieldProps {
   label: string;
-  /** Gợi ý luôn hiển thị dưới ô nhập, không thay cho nhãn. */
+
   hint?: ReactNode;
   error?: string | null;
   required?: boolean;
   className?: string;
-  /** Một ô nhập duy nhất, Field tự gắn id, aria-describedby, aria-invalid. */
+
   children: ReactElement<Record<string, unknown>>;
 }
 
@@ -59,7 +59,6 @@ interface CheckProps {
   name?: string;
 }
 
-/** Ô đánh dấu có vùng bấm lớn (cả dòng), dùng cho checklist và cam kết. */
 export function CheckField({ label, checked, onChange, hint, disabled, name }: CheckProps) {
   const id = useId();
   return (

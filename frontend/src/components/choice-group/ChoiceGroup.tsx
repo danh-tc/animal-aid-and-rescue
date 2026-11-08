@@ -19,7 +19,6 @@ interface ChoiceGroupProps<V extends string> {
   columns?: 2 | 3;
 }
 
-/** Nhóm lựa chọn dạng thẻ (radio), vùng bấm lớn, dùng phím mũi tên như radio gốc. */
 export function ChoiceGroup<V extends string>({
   legend,
   choices,

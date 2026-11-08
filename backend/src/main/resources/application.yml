@@ -29,16 +29,13 @@ management:
 
 app:
   jwt:
-    # Base64, tối thiểu 32 byte. Bắt buộc đặt qua biến môi trường JWT_SECRET khi chạy ngoài dev
     secret: ${JWT_SECRET:}
     expiration-minutes: 480
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   storage:
-    # Thư mục lưu tệp đính kèm. Không commit thư mục này
     dir: ${STORAGE_DIR:./data/uploads}
     max-files-per-request: 5
-  # Giới hạn tần suất /api/public/** theo IP, mỗi phút
   rate-limit:
     auth-per-minute: 10
     lookup-per-minute: 20

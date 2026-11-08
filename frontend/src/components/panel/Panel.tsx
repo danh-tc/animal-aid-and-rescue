@@ -6,7 +6,7 @@ interface PanelProps {
   description?: ReactNode;
   actions?: ReactNode;
   children: ReactNode;
-  /** flush: nội dung tràn sát mép (bảng). */
+
   flush?: boolean;
   as?: "section" | "div" | "article";
 }

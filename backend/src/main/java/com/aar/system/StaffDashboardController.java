@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Màn hình S01: bảng công việc của Nhân viên (Quản lý cũng dùng được nhờ RoleHierarchy). */
 @RestController
 public class StaffDashboardController {
 
@@ -14,7 +13,6 @@ public class StaffDashboardController {
         this.jdbc = jdbc;
     }
 
-    /** overdueUnassignedCases: ca ở Mới quá CASE_UNASSIGNED_ALERT_HOURS giờ (QĐ-17). recallPending: bàn giao chờ thu hồi. */
     public record Dashboard(long newReports, long openCases, long pendingApplications,
                             long followUpsDueThisWeek, long openVetRequests, long overdueUnassignedCases,
                             long recallPending) {

@@ -25,7 +25,6 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    /** Đăng ký công khai luôn tạo tài khoản Người nhận nuôi. Tài khoản nhân viên do Quản lý tạo. */
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         if (users.existsByEmailIgnoreCase(req.email())) {

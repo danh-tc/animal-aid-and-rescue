@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-/** Một lần hậu kiểm theo 5 tiêu chí (QĐ-12). */
 @Entity
 @Table(name = "follow_ups")
 public class FollowUp {

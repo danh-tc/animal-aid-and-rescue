@@ -1,6 +1,5 @@
 @use "abstracts" as *;
 
-// Bố cục trang chi tiết: nội dung chính và cột phụ từ 1024px.
 .detail-page {
   display: grid;
   gap: $space-5;

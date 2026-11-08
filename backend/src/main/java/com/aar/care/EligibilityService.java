@@ -11,10 +11,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Checklist 6 mục đủ điều kiện nhận nuôi (báo cáo 2.1.3, QĐ-07, RB-13).
- * Mục 2, 3 và tính cách do nhân viên đánh dấu. Mục 1, 4, 5, 6 tính từ dữ liệu.
- */
 @Service
 @Transactional(readOnly = true)
 public class EligibilityService {
@@ -44,8 +40,7 @@ public class EligibilityService {
         long open = vetRequests.countByPetIdAndStatusIn(pet.getId(), VetRequestStatus.OPEN);
         OffsetDateTime lastIntake = intakes.findFirstByPetIdOrderByIntakeAtDesc(pet.getId())
             .map(Intake::getIntakeAt).orElse(null);
-        // Checklist mục 1 (QĐ-05): không còn yêu cầu mở và lần khám gần nhất TRONG lượt tiếp nhận hiện tại kết luận ổn.
-        // Thú bị trả lại hoặc tìm lại phải khám lại, kết quả khám của lượt trước không được tính.
+
         var lastExam = vetRequests.findFirstByPetIdAndStatusOrderByCompletedAtDesc(pet.getId(), VetRequestStatus.COMPLETED)
             .filter(v -> lastIntake == null || (v.getCompletedAt() != null && v.getCompletedAt().isAfter(lastIntake)));
         boolean lastOk = lastExam.map(v -> Boolean.TRUE.equals(v.getHealthOk())).orElse(false);

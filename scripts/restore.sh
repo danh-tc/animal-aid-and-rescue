@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Khôi phục database dev và tệp đính kèm từ một bản sao lưu (NFR-06). Dữ liệu hiện tại sẽ bị thay thế.
+
 #   scripts/restore.sh backups/aar-20260101-020000.dump
-# Nếu có aar-20260101-020000-uploads.tar.gz cùng mốc thời gian thì khôi phục luôn ảnh vào UPLOADS_DIR.
-# Thư mục ảnh cũ được đổi tên thành <UPLOADS_DIR>.truoc-khoi-phuc-<thời gian>, không xóa.
+
+
 set -euo pipefail
 cd "$(dirname "$0")/.."
 file="${1:?Cần đường dẫn tệp .dump}"

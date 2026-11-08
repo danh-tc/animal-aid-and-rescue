@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-/** Bàn giao. Không xóa (RB-11). Mỗi đơn tối đa một bàn giao (RB-06). */
 @Entity
 @Table(name = "handovers")
 public class Handover {

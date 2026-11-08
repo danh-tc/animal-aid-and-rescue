@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/** UC nộp đơn và UC-10 xét duyệt đơn (người C, báo cáo mục 2.1.4 và 4.4). */
 class AdoptionFlowIntegrationTest extends IntegrationTestBase {
 
     @Autowired
@@ -30,16 +29,14 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         assertThat(mine.findValuesAsText("id")).contains(Long.toString(appId));
         assertThat(applicationStatus(appId)).isEqualTo("PENDING");
 
-        // RB-02: không nộp hai đơn đang chờ cho cùng thú
         JsonNode dup = postJson("/api/adopter/applications", ADOPTER1, map("petId", petId, "housingType", "HOUSE",
             "hasPetExperience", true), 409);
         assertThat(dup.get("code").asText()).isEqualTo("DUPLICATE_APPLICATION");
-        // Nhân viên không nộp đơn
+
         postJson("/api/adopter/applications", STAFF, map("petId", petId, "housingType", "HOUSE",
             "hasPetExperience", true), 403);
     }
 
-    /** QĐ-08: chỉ thú Sẵn sàng nhận đơn. */
     @Test
     void cannotApplyForPetThatIsNotAvailable() throws Exception {
         JsonNode error = postJson("/api/adopter/applications", ADOPTER1, map("petId", 1, "housingType", "HOUSE",
@@ -47,7 +44,6 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         assertThat(error.get("code").asText()).isEqualTo("PET_NOT_AVAILABLE");
     }
 
-    /** Checklist mục 5: thú chưa đủ tuổi triệt sản vẫn Sẵn sàng, nộp đơn không cần cam kết triệt sản. */
     @Test
     void youngUnsterilizedPetAcceptsApplicationWithoutPledge() throws Exception {
         long petId = availablePet(true);
@@ -55,7 +51,6 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         assertThat(applicationStatus(appId)).isEqualTo("PENDING");
     }
 
-    /** QĐ-09: duyệt một đơn thì thú Chờ bàn giao, các đơn chờ khác tự đóng. */
     @Test
     void approvingClosesOtherPendingApplications() throws Exception {
         long petId = availablePet(false);
@@ -88,7 +83,6 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         assertThat(petStatus(petId)).isEqualTo("AVAILABLE");
     }
 
-    /** QĐ-11: hủy đơn đã duyệt trước bàn giao => thú về Sẵn sàng, đơn cũ đã đóng không mở lại. */
     @Test
     void adopterCancelsApprovedApplicationBeforeHandover() throws Exception {
         long petId = availablePet(false);
@@ -96,7 +90,6 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         long app2 = submitApplication(petId, ADOPTER2);
         postJson("/api/staff/applications/" + app1 + "/approve", STAFF, null, 200);
 
-        // Người khác không hủy được đơn của mình
         postJson("/api/adopter/applications/" + app1 + "/cancel", ADOPTER2, map("reason", "x"), 404);
         JsonNode cancelled = postJson("/api/adopter/applications/" + app1 + "/cancel", ADOPTER1,
             map("reason", "Chuyển nhà"), 200);
@@ -106,10 +99,6 @@ class AdoptionFlowIntegrationTest extends IntegrationTestBase {
         postJson("/api/adopter/applications/" + app1 + "/cancel", ADOPTER1, null, 409);
     }
 
-    /**
-     * RB-01, RB-14, NFR-02: hai nhân viên duyệt hai đơn của cùng một thú cùng lúc.
-     * Chỉ một thao tác thành công, thao tác còn lại nhận PET_ALREADY_APPROVED.
-     */
     @Test
     void concurrentApprovalsLetOnlyOneSucceed() throws Exception {
         for (int round = 0; round < 3; round++) {

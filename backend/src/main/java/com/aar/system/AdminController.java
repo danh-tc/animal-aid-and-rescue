@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Màn hình M02, M03, M04 (chỉ Quản lý). */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {

@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-// Chuyển hướng sớm theo vai trò trước khi tải trang. Cookie aar_role chỉ để điều hướng,
-// quyền thật vẫn do backend kiểm tra qua JWT trên từng API.
 const RULES: { test: (path: string) => boolean; roles: string[] }[] = [
   { test: (p) => p.startsWith("/admin"), roles: ["MANAGER"] },
   { test: (p) => p.startsWith("/staff"), roles: ["STAFF", "MANAGER"] },

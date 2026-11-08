@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-/** Ca cứu hộ (S03): phân công, thành công (tạo thú + lượt tiếp nhận), thất bại. */
 @Service
 @Transactional
 public class RescueCaseService {
@@ -81,7 +80,6 @@ public class RescueCaseService {
             pet == null ? null : pet.getId(), pet == null ? null : pet.getCode());
     }
 
-    /** Chỉ Quản lý được phân công ca cứu hộ (UC-07 bước 3, ma trận phân quyền mục 5.2). */
     public static void requireManager(Role role) {
         if (role != Role.MANAGER) {
             throw BusinessException.forbidden("ASSIGN_MANAGER_ONLY", "Chỉ Quản lý được phân công ca cứu hộ");
@@ -103,37 +101,32 @@ public class RescueCaseService {
         rescueCase.assignTo(staffId);
     }
 
-    /** S-1 của UC-07. Ràng buộc RB-03 (mỗi ca tối đa một lượt tiếp nhận) được database bảo đảm thêm. */
-    public SucceedResult succeed(Long caseId, SucceedRequest req, Long by) {
+    public SucceedResult succeed(Long caseId, SucceedRequest req, AuthUser by) {
         return succeed(caseId, req, List.of(), by);
     }
 
-    /** Bản multipart: ảnh thú (S-1 của UC-07 "loài, đặc điểm, ảnh") lưu cùng giao dịch với hồ sơ. */
-    public SucceedResult succeed(Long caseId, SucceedRequest req, List<MultipartFile> photos, Long by) {
+    public SucceedResult succeed(Long caseId, SucceedRequest req, List<MultipartFile> photos, AuthUser by) {
+        RescueCase rescueCase = find(caseId);
+        requireAssigneeOrManager(rescueCase, by);
         if ((req.pet() == null) == (req.lostPetId() == null)) {
             throw BusinessException.badRequest("PET_OR_LOST_PET_REQUIRED",
                 "Nhập thông tin thú mới, hoặc chọn thú thất lạc của trung tâm nếu đã xác nhận đúng con");
         }
-        RescueCase rescueCase = find(caseId);
         if (req.lostPetId() != null) {
-            return succeedAsFound(rescueCase, req, photos, by);
+            return succeedAsFound(rescueCase, req, photos, by.id());
         }
-        transition(rescueCase, "SUCCEEDED", by, null);
+        transition(rescueCase, "SUCCEEDED", by.id(), null);
         var p = req.pet();
         Pet pet = petLifecycle.createFromRescue(blankToNull(p.name()), p.species(), p.sex(),
-            p.estimatedBirthDate(), blankToNull(p.color()), blankToNull(p.description()), by);
+            p.estimatedBirthDate(), blankToNull(p.color()), blankToNull(p.description()), by.id());
         var i = req.intake();
         storage.store(AttachmentOwner.PET, pet.getId(), photos);
         Intake intake = intakes.save(Intake.fromRescue(pet.getId(), rescueCase.getId(), blankToNull(i.reason()),
-            i.priority(), blankToNull(i.initialAssessment()), by));
+            i.priority(), blankToNull(i.initialAssessment()), by.id()));
         return new SucceedResult(CaseSummary.of(rescueCase), pet.getId(), pet.getCode(), intake.getId(),
             i.priority() == Priority.URGENT);
     }
 
-    /**
-     * Nhánh S-1b của UC-07 (QĐ-16): thú cứu được là thú thất lạc của trung tâm. Không tạo hồ sơ mới,
-     * thú từ Thất lạc về Đang chăm sóc với lượt tiếp nhận tìm lại gắn với ca cứu hộ (RB-03 vẫn giữ một ca một lượt).
-     */
     private SucceedResult succeedAsFound(RescueCase rescueCase, SucceedRequest req, List<MultipartFile> photos, Long by) {
         Pet pet = petLifecycle.lock(req.lostPetId());
         if (pet.getStatus() != PetStatus.LOST) {
@@ -152,12 +145,19 @@ public class RescueCaseService {
             i.priority() == Priority.URGENT);
     }
 
-    /** S-2 của UC-07: không tạo hồ sơ thú (QĐ-02). */
-    public CaseSummary fail(Long caseId, String reason, Long by) {
+    public CaseSummary fail(Long caseId, String reason, AuthUser by) {
         RescueCase rescueCase = find(caseId);
+        requireAssigneeOrManager(rescueCase, by);
         rescueCase.recordFailure(reason.trim());
-        transition(rescueCase, "FAILED", by, reason);
+        transition(rescueCase, "FAILED", by.id(), reason);
         return CaseSummary.of(rescueCase);
+    }
+
+    private static void requireAssigneeOrManager(RescueCase rescueCase, AuthUser user) {
+        if (user.role() != Role.MANAGER && !user.id().equals(rescueCase.getAssignedStaffId())) {
+            throw BusinessException.forbidden("CASE_ASSIGNEE_ONLY",
+                "Chỉ nhân viên được phân công hoặc Quản lý được cập nhật kết quả ca cứu hộ");
+        }
     }
 
     private void transition(RescueCase rescueCase, String event, Long by, String note) {

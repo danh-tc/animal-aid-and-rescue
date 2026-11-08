@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { Providers } from "@/components/providers/Providers";
 import "@/styles/main.scss";
 
-// Be Vietnam Pro: sans-serif hiện đại, thiết kế cho tiếng Việt nên dấu hiển thị chuẩn ở mọi cỡ chữ.
 const sans = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],

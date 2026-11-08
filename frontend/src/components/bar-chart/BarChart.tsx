@@ -11,14 +11,14 @@ export interface BarSeries {
 
 interface BarChartProps {
   title: string;
-  /** Câu tóm tắt cho trình đọc màn hình. */
+
   summary: string;
   categories: string[];
   series: BarSeries[];
-  /** values[i][s]: giá trị của series s ở category i */
+
   values: number[][];
   format: (v: number) => string;
-  /** Định dạng ngắn cho trục y, ví dụ 1,2 tr */
+
   formatAxis?: (v: number) => string;
   categoryLabel?: (c: string) => string;
 }
@@ -27,7 +27,6 @@ const HEIGHT = 220;
 const PAD = { top: 12, right: 8, bottom: 28, left: 56 };
 const GAP = 2;
 
-/** Bậc chia trục y "đẹp": 1, 2, 5 × 10^n */
 function niceMax(max: number): { top: number; step: number } {
   if (max <= 0) return { top: 4, step: 1 };
   const raw = max / 4;
@@ -36,17 +35,12 @@ function niceMax(max: number): { top: number; step: number } {
   return { top: step * 4, step };
 }
 
-/** Tooltip bám theo cột, đổi phía ở hai mép để không bị cắt. */
 function tooltipPosition(x: number, width: number): CSSProperties {
   if (x > width * 0.7) return { right: `${width - x + 8}px` };
   if (x < width * 0.3) return { left: `${x + 8}px` };
   return { left: `${x}px`, transform: "translateX(-50%)" };
 }
 
-/**
- * Biểu đồ cột nhóm, một trục, tối đa 3 chuỗi theo bảng màu đã kiểm tra (dataviz).
- * Có chú thích, tooltip khi rê hoặc focus bằng phím, và bảng số liệu thay thế.
- */
 export function BarChart({ title, summary, categories, series, values, format, formatAxis, categoryLabel }: BarChartProps) {
   const id = useId();
   const [active, setActive] = useState<number | null>(null);
@@ -54,7 +48,6 @@ export function BarChart({ title, summary, categories, series, values, format, f
   const plotRef = useRef<HTMLDivElement>(null);
   const [measured, setMeasured] = useState(0);
 
-  // Vẽ theo đúng bề rộng khung để chữ không bị phóng to hay thu nhỏ
   useEffect(() => {
     const el = plotRef.current;
     if (!el) return;
@@ -63,7 +56,6 @@ export function BarChart({ title, summary, categories, series, values, format, f
     return () => observer.disconnect();
   }, [showTable]);
 
-  // Màn hình hẹp: khung cuộn ngang, mở sẵn ở các kỳ gần nhất
   useEffect(() => {
     const el = plotRef.current;
     if (el) el.scrollLeft = el.scrollWidth;
@@ -166,7 +158,7 @@ export function BarChart({ title, summary, categories, series, values, format, f
                   tabIndex={0}
                   aria-label={`${label(c)}: ${series.map((s, j) => `${s.label} ${format(values[i][j])}`).join(", ")}`}
                 >
-                  {/* vùng rê chuột lớn hơn cột */}
+                  {}
                   <rect className="bar-chart__hit" x={PAD.left + i * band} y={PAD.top} width={band} height={plotH} />
                   {series.map((s, j) => {
                     const v = values[i][j];
@@ -174,7 +166,7 @@ export function BarChart({ title, summary, categories, series, values, format, f
                     const r = Math.min(4, h / 2, barW / 2);
                     const x = x0 + j * (barW + GAP);
                     const yy = y(v);
-                    // Bo 4px ở đầu cột, chân cột vuông, bám đường gốc
+
                     const d = h <= 0 ? "" : `M${x},${y(0)} V${yy + r} Q${x},${yy} ${x + r},${yy} H${x + barW - r} Q${x + barW},${yy} ${x + barW},${yy + r} V${y(0)} Z`;
                     return d ? <path key={s.key} d={d} className={`bar-chart__bar bar-chart__bar--${j + 1}`} /> : null;
                   })}

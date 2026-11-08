@@ -51,7 +51,6 @@ function dueBadge(date: string) {
   return <Badge tone="info">Còn {d} ngày</Badge>;
 }
 
-/** S09: Hậu kiểm */
 export default function FollowUpsPage() {
   const { user } = useAuth();
   const isManager = user?.role === "MANAGER";
@@ -72,14 +71,13 @@ export default function FollowUpsPage() {
   function openFor(item: ScheduledFollowUp) {
     setTarget(item);
     setResult(null);
-    // Mục 2.1.5: lần 1 gọi điện, lần 2 trở đi thăm nhà hoặc gọi video
+
     setMethod(item.followUp.sequenceNo === 1 ? "PHONE" : "HOME_VISIT");
     setCriteria(ALL_OK);
     setReason("");
     setFiles([]);
   }
 
-  // QĐ-12: nhân viên tự chọn kết quả. Lần bổ sung chỉ được Đạt hoặc Không đạt, thay cho kết quả của lần gốc.
   const isAdditional = target?.followUp.additional ?? false;
   const resultChoices: { value: FollowUpResult; label: string; hint?: string }[] = [
     { value: "PASS", label: "Đạt", hint: "Bé ổn, không cần theo dõi thêm" },
@@ -94,7 +92,7 @@ export default function FollowUpsPage() {
     if (result !== "PASS" && !reason.trim()) throw new Error("Chọn Cần theo dõi hoặc Không đạt thì phải ghi nhận xét.");
     if (!filesValid(files)) throw new Error("Có tệp lớn hơn 5MB.");
     const id = target.followUp.id;
-    // Mục 5.2: multipart gồm phần "data" (5 tiêu chí, kết quả, lý do) và "photos" (ảnh hậu kiểm)
+
     const data = new FormData();
     data.append("data", new Blob([JSON.stringify({ result, contactMethod: method, ...criteria, reason: reason.trim() || null })], {
       type: "application/json",
@@ -230,10 +228,6 @@ export default function FollowUpsPage() {
 
 type RecallRow = ExceptionReport["recallPending"][number];
 
-/**
- * S09, QĐ-18: bàn giao đang chờ thu hồi. Quá thời gian chờ (RECALL_CLOSE_AFTER_DAYS) mà vẫn không thu hồi được
- * thì Quản lý đóng thu hồi, ghi lý do. Thú giữ trạng thái Đã nhận nuôi.
- */
 function RecallPanel() {
   const { data, error, reload } = useApi<ExceptionReport>("/api/admin/reports/exceptions");
   const mutate = useMutation();

@@ -28,7 +28,6 @@ public interface AdoptionApplicationRepository extends JpaRepository<AdoptionApp
     Page<AdoptionApplication> search(@Param("status") ApplicationStatus status, @Param("petId") Long petId,
                                      Pageable pageable);
 
-    /** Chỉ đọc pet_id, không nạp entity vào persistence context trước khi khóa dòng thú. */
     @Query("select a.petId from AdoptionApplication a where a.id = :id")
     Optional<Long> findPetIdById(@Param("id") Long id);
 }

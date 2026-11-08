@@ -27,7 +27,6 @@ function formatDistance(km: number): string {
 }
 import "../../detail-page.scss";
 
-/** S02: Chi tiết báo cáo, tạo ca, đánh dấu không hợp lệ */
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: r, error, loading, reload } = useApi<ReportDetail>(`/api/staff/rescue-reports/${id}`);

@@ -29,7 +29,6 @@ public final class AdminDtos {
         @NotNull Role role) {
     }
 
-    /** Trường null nghĩa là giữ nguyên. */
     public record UpdateUserRequest(
         @Size(max = 150) String fullName,
         @Pattern(regexp = "^[0-9+]{9,15}$", message = "Số điện thoại không hợp lệ") String phone,

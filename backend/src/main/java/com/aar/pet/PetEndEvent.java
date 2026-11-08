@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
-/** Bảng pet_end_events: hai sự kiện kết thúc vòng đời là qua đời và thất lạc (mục 2.1.6). */
 @Entity
 @Table(name = "pet_end_events")
 public class PetEndEvent {

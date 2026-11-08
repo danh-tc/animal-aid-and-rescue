@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
-/** Quy tắc bổ sung sau rà soát báo cáo: liên hệ bắt buộc, tối đa đơn chờ, ngày hẹn bàn giao, cảnh báo người nộp. */
 class ApplicationRulesIntegrationTest extends IntegrationTestBase {
 
     private static Object application(long petId, String phone, String address) {
@@ -29,7 +28,6 @@ class ApplicationRulesIntegrationTest extends IntegrationTestBase {
         assertThat(me.get("phone").asText()).isEqualTo("0909123456");
         assertThat(me.get("address").asText()).isEqualTo("1 Lê Lợi, Quận 1");
 
-        // Lần sau tài khoản đã có, không phải nhập lại
         postJson("/api/adopter/applications", adopter, application(availablePet(false), null, null), 201);
     }
 
@@ -78,7 +76,7 @@ class ApplicationRulesIntegrationTest extends IntegrationTestBase {
 
     @Test
     void reviewerSeesApplicantRecallAndReturnHistory() throws Exception {
-        // Người A bị thu hồi: hậu kiểm Không đạt rồi thú về trung tâm
+
         String recalled = newAdopter("0909000222");
         long pet1 = availablePet(false);
         long app1 = postJson("/api/adopter/applications", recalled, application(pet1, null, "Quận 5"), 201).get("id").asLong();
@@ -96,12 +94,10 @@ class ApplicationRulesIntegrationTest extends IntegrationTestBase {
         assertThat(history.get(0).get("kind").asText()).isEqualTo("RECALLED");
         assertThat(history.get(0).get("note").asText()).contains("thu hồi");
 
-        // Người nhận nuôi trong dữ liệu mẫu (Phạm Thu Hà) từng tự trả lại Lu
         long app3 = submitApplication(availablePet(false), ADOPTER1);
         JsonNode seedHistory = getJson("/api/staff/applications/" + app3, STAFF, 200).get("applicantHistory");
         assertThat(seedHistory.findValuesAsText("kind")).contains("RETURNED");
 
-        // Người chưa từng nhận nuôi không có cảnh báo
         String fresh = newAdopter("0909000333");
         long app4 = postJson("/api/adopter/applications", fresh, application(availablePet(false), null, "Quận 7"), 201)
             .get("id").asLong();

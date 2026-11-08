@@ -30,14 +30,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Nền chung cho test luồng nghiệp vụ. Các lớp con dùng chung một PostgreSQL và một Spring context
- * (khác container của ApplicationIntegrationTest nên không ảnh hưởng số liệu mẫu ở đó).
- * Mỗi test tự tạo dữ liệu riêng qua API thay vì sửa dữ liệu mẫu.
- */
 @SpringBootTest
-// Mọi test chạy từ cùng một IP, nới giới hạn tần suất để không ảnh hưởng nhau.
-// RateLimitIntegrationTest khai báo @TestPropertySource riêng để ghi đè.
+
 @TestPropertySource(properties = {
     "app.rate-limit.auth-per-minute=100000",
     "app.rate-limit.lookup-per-minute=100000",
@@ -76,10 +70,6 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected JdbcTemplate jdbc;
 
-    /**
-     * Các test dùng chung vài tài khoản người nhận nuôi trên cùng database, nên nới giới hạn đơn chờ (QĐ-08).
-     * ApplicationRulesIntegrationTest tự đặt lại giới hạn khi cần kiểm tra.
-     */
     @org.junit.jupiter.api.BeforeEach
     void relaxPendingLimit() {
         jdbc.update("UPDATE system_parameters SET param_value = '1000' WHERE param_key = 'MAX_PENDING_APPLICATIONS'");
@@ -100,7 +90,6 @@ public abstract class IntegrationTestBase {
         return token;
     }
 
-    /** Thực hiện request, kiểm tra mã HTTP, trả về JSON (null nếu body rỗng). */
     protected JsonNode call(MockHttpServletRequestBuilder req, String as, int expectedStatus) throws Exception {
         if (as != null) {
             req.header("Authorization", "Bearer " + token(as));
@@ -136,7 +125,6 @@ public abstract class IntegrationTestBase {
         return call(get(url), as, expectedStatus);
     }
 
-    /** Map giữ thứ tự, cho phép giá trị null (Map.of không cho). */
     protected static Map<String, Object> map(Object... kv) {
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < kv.length; i += 2) {
@@ -159,7 +147,6 @@ public abstract class IntegrationTestBase {
         return jdbc.queryForObject("SELECT id FROM rescue_reports WHERE code = ?", Long.class, code);
     }
 
-    /** Báo cáo => 1 ca đã phân công => ca thành công. Trả về id thú mới (IN_CARE, khu cách ly). */
     protected long rescuedPet(String species, LocalDate birth) throws Exception {
         long reportId = reportId(submitReport());
         JsonNode cases = postJson("/api/staff/rescue-reports/" + reportId + "/cases", MANAGER,
@@ -171,10 +158,6 @@ public abstract class IntegrationTestBase {
         return result.get("petId").asLong();
     }
 
-    /**
-     * Thú đã qua thú y, hết cách ly, đủ checklist => AVAILABLE.
-     * young = true: thú chưa đủ tuổi triệt sản (khoảng 14 tuần) và chưa triệt sản, checklist mục 5 vẫn đạt.
-     */
     protected long availablePet(boolean young) throws Exception {
         LocalDate birth = LocalDate.now().minusDays(young ? 100 : 400);
         long petId = rescuedPet("DOG", birth);
@@ -208,7 +191,6 @@ public abstract class IntegrationTestBase {
             "hasPetExperience", true, "motivation", "Yêu chó"), 201).get("id").asLong();
     }
 
-    /** Thú Sẵn sàng => đơn của adopter => đã duyệt. Trả về id đơn. */
     protected long approvedApplication(String adopter) throws Exception {
         long petId = availablePet(false);
         long appId = submitApplication(petId, adopter);
@@ -216,7 +198,6 @@ public abstract class IntegrationTestBase {
         return appId;
     }
 
-    /** Đã bàn giao, đang hậu kiểm (IN_PROGRESS). Trả về HandoverView. */
     protected JsonNode handedOver(String adopter) throws Exception {
         return postJson("/api/staff/applications/" + approvedApplication(adopter) + "/handover", STAFF, null, 201);
     }
@@ -225,7 +206,6 @@ public abstract class IntegrationTestBase {
         return jdbc.queryForObject("SELECT pet_id FROM adoption_applications WHERE id = ?", Long.class, applicationId);
     }
 
-    /** Đăng ký người nhận nuôi mới (có hoặc không có số điện thoại), trả về email. */
     protected String newAdopter(String phone) throws Exception {
         String email = "adopter-" + UUID.randomUUID() + "@test.local";
         postJson("/api/public/auth/register", null,
