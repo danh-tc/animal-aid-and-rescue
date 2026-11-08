@@ -93,11 +93,17 @@ public class RescueCaseService {
         return CaseSummary.of(rescueCase);
     }
 
+    /** Assigns a new case or reassigns an in-progress case to a different staff member. */
     void assign(RescueCase rescueCase, Long staffId, Long by) {
         User staff = users.findById(staffId)
             .filter(u -> u.isActive() && u.isStaffOrManager())
             .orElseThrow(() -> BusinessException.badRequest("INVALID_STAFF", "Người được phân công phải là nhân viên đang hoạt động"));
-        transition(rescueCase, "ASSIGNED", by, "Phân công " + staff.getFullName());
+        boolean reassign = rescueCase.getStatus() == CaseStatus.IN_PROGRESS;
+        if (reassign && staffId.equals(rescueCase.getAssignedStaffId())) {
+            throw BusinessException.badRequest("SAME_ASSIGNEE", "Ca này đang do người này phụ trách");
+        }
+        transition(rescueCase, reassign ? "REASSIGNED" : "ASSIGNED", by,
+            (reassign ? "Phân công lại cho " : "Phân công ") + staff.getFullName());
         rescueCase.assignTo(staffId);
     }
 
