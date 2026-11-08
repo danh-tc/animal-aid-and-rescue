@@ -53,6 +53,8 @@ export default function CaseDetailPage() {
 
   if (loading && !c) return <Skeleton card lines={6} />;
   if (!c) return <Notice tone="error">{error}</Notice>;
+  // QĐ-17: chỉ người được phân công hoặc Quản lý ghi kết quả ca
+  const canClose = isManager || (user != null && c.assignedStaffId === user.id);
 
   async function assign() {
     if (!assignee) throw new Error("Chọn nhân viên phụ trách.");
@@ -118,12 +120,19 @@ export default function CaseDetailPage() {
         }
         actions={
           <>
-            {c.status === "NEW" && isManager && (
-              <Button icon={<UserCheck aria-hidden="true" />} onClick={() => setDialog("assign")}>
-                Phân công
+            {(c.status === "NEW" || c.status === "IN_PROGRESS") && isManager && (
+              <Button
+                variant={c.status === "NEW" ? undefined : "ghost"}
+                icon={<UserCheck aria-hidden="true" />}
+                onClick={() => {
+                  setAssignee("");
+                  setDialog("assign");
+                }}
+              >
+                {c.status === "NEW" ? "Phân công" : "Phân công lại"}
               </Button>
             )}
-            {c.status === "IN_PROGRESS" && (
+            {c.status === "IN_PROGRESS" && canClose && (
               <>
                 <Button variant="ghost" icon={<XCircle aria-hidden="true" />} onClick={() => setDialog("fail")}>
                   Thất bại
@@ -142,6 +151,11 @@ export default function CaseDetailPage() {
           {c.status === "NEW" && !isManager && (
             <Notice tone="info" title="Chờ Quản lý phân công">
               Chỉ Quản lý được phân công người đi cứu. Sau khi phân công, nhân viên phụ trách cập nhật kết quả ca.
+            </Notice>
+          )}
+          {c.status === "IN_PROGRESS" && !canClose && (
+            <Notice tone="info" title={`Ca do ${nameOf(c.assignedStaffId)} phụ trách`}>
+              Chỉ người được phân công hoặc Quản lý mới ghi được kết quả ca này. Bạn vẫn xem được thông tin ca.
             </Notice>
           )}
           {result?.urgentVetRequestSuggested && (
@@ -189,7 +203,7 @@ export default function CaseDetailPage() {
         </aside>
       </div>
 
-      <Dialog open={dialog === "assign"} onClose={() => setDialog(null)} title="Phân công ca cứu hộ" submitLabel="Phân công" onSubmit={assign}>
+      <Dialog open={dialog === "assign"} onClose={() => setDialog(null)} title={c.status === "NEW" ? "Phân công ca cứu hộ" : "Phân công lại ca cứu hộ"} submitLabel={c.status === "NEW" ? "Phân công" : "Phân công lại"} onSubmit={assign}>
         <Field label="Nhân viên phụ trách" required>
           <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
             <option value="">Chọn nhân viên</option>

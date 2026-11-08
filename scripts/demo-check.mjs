@@ -89,6 +89,8 @@ async function main() {
   const two = await expect("Quản lý tách BC-7K2M9Q thành 2 ca và phân công (QĐ-01)", "POST", "/api/staff/rescue-reports/1/cases",
     { as: "manager", body: { numberOfAnimals: 2, assignedStaffId: 2 } }, 201);
   check("Tạo đủ 2 ca, đã phân công", two?.length === 2 && two.every((c) => c.status === "IN_PROGRESS"));
+  await expect("Nhân viên không phụ trách không đóng được ca #14 (QĐ-17)", "POST", "/api/staff/rescue-cases/14/fail",
+    { as: "staff2", body: { reason: "Thử đóng ca của người khác" } }, 403);
   await expect("Gửi cả thú mới và thú thất lạc bị từ chối", "POST", "/api/staff/rescue-cases/14/succeed",
     { as: "staff", body: { pet: { species: "DOG" }, lostPetId: 10, intake: { priority: "STABLE" } } }, 400);
   const found = await expect("Ca #14 thành công với thú thất lạc Ki (S-1b)", "POST", "/api/staff/rescue-cases/14/succeed",

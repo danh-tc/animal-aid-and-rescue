@@ -107,6 +107,19 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
         JsonNode assigned = postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", 3), 200);
         assertThat(assigned.get("status").asText()).isEqualTo("IN_PROGRESS");
 
+        // QĐ-17: nhân viên khác xem được ca nhưng không ghi kết quả được
+        getJson("/api/staff/rescue-cases/" + caseId, STAFF, 200);
+        JsonNode notMine = postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, succeedBody("URGENT"), 403);
+        assertThat(notMine.get("code").asText()).isEqualTo("CASE_NOT_ASSIGNEE");
+        postJson("/api/staff/rescue-cases/" + caseId + "/fail", STAFF, map("reason", "Không thấy"), 403);
+
+        // Quản lý phân công lại, ca vẫn Đang xử lý, người cũ hết quyền ghi kết quả
+        postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", 3), 400);
+        JsonNode reassigned = postJson("/api/staff/rescue-cases/" + caseId + "/assign", MANAGER, map("staffId", STAFF_ID), 200);
+        assertThat(reassigned.get("status").asText()).isEqualTo("IN_PROGRESS");
+        assertThat(reassigned.get("assignedStaffId").asLong()).isEqualTo(STAFF_ID);
+        postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF2, succeedBody("URGENT"), 403);
+
         JsonNode result = postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, succeedBody("URGENT"), 200);
         assertThat(result.get("rescueCase").get("status").asText()).isEqualTo("SUCCEEDED");
         assertThat(result.get("petCode").asText()).matches("TH-\\d{4}-\\d{4,}");
@@ -128,6 +141,21 @@ class RescueFlowIntegrationTest extends IntegrationTestBase {
         assertThat(caseDetail.get("petId").asLong()).isEqualTo(petId);
         // Ca đã đóng không ghi kết quả lần hai (RB-03)
         postJson("/api/staff/rescue-cases/" + caseId + "/succeed", STAFF, succeedBody("STABLE"), 409);
+    }
+
+    /** QĐ-17: Quản lý được ghi kết quả thay người phụ trách. */
+    @Test
+    void managerCanCloseCaseOnBehalfOfAssignee() throws Exception {
+        long reportId = reportId(submitReport());
+        long caseId = postJson("/api/staff/rescue-reports/" + reportId + "/cases", MANAGER,
+            map("numberOfAnimals", 1, "assignedStaffId", STAFF_ID), 201).get(0).get("id").asLong();
+        JsonNode failed = postJson("/api/staff/rescue-cases/" + caseId + "/fail", MANAGER,
+            map("reason", "Người phụ trách báo qua điện thoại: không tìm thấy"), 200);
+        assertThat(failed.get("status").asText()).isEqualTo("FAILED");
+        String events = jdbc.queryForObject(
+            "SELECT string_agg(event, ',' ORDER BY id) FROM status_histories WHERE entity_type = 'RESCUE_CASE' AND entity_id = ?",
+            String.class, caseId);
+        assertThat(events).isEqualTo("CREATED,ASSIGNED,FAILED");
     }
 
     /** S-2 của UC-07: thất bại bắt buộc lý do, không tạo hồ sơ thú (QĐ-02). */

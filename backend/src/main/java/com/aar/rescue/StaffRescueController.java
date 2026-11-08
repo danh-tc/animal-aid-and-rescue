@@ -84,7 +84,7 @@ public class StaffRescueController {
         return cases.detail(id);
     }
 
-    /** Chỉ Quản lý (kiểm tra ở SecurityConfig và trong service). */
+    /** Chỉ Quản lý (kiểm tra ở SecurityConfig và trong service). Ca đang xử lý thì là phân công lại. */
     @PostMapping("/rescue-cases/{id}/assign")
     public CaseSummary assign(@PathVariable Long id, @Valid @RequestBody AssignRequest req, @CurrentUser AuthUser me) {
         return cases.assign(id, req.staffId(), me);
@@ -95,17 +95,17 @@ public class StaffRescueController {
     public SucceedResult succeedWithPhotos(@PathVariable Long id, @Valid @RequestPart("data") SucceedRequest req,
                                            @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
                                            @CurrentUser AuthUser me) {
-        return cases.succeed(id, req, photos, me.id());
+        return cases.succeed(id, req, photos, me);
     }
 
     @PostMapping(value = "/rescue-cases/{id}/succeed", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SucceedResult succeed(@PathVariable Long id, @Valid @RequestBody SucceedRequest req,
                                  @CurrentUser AuthUser me) {
-        return cases.succeed(id, req, me.id());
+        return cases.succeed(id, req, me);
     }
 
     @PostMapping("/rescue-cases/{id}/fail")
     public CaseSummary fail(@PathVariable Long id, @Valid @RequestBody ReasonRequest req, @CurrentUser AuthUser me) {
-        return cases.fail(id, req.reason(), me.id());
+        return cases.fail(id, req.reason(), me);
     }
 }

@@ -79,6 +79,8 @@ public final class TransitionTable {
         EntityType c = EntityType.RESCUE_CASE;
         add(t, c, null, "CREATED", "NEW");
         add(t, c, "NEW", "ASSIGNED", "IN_PROGRESS");
+        // QĐ-17: Quản lý phân công lại người phụ trách khi ca đang xử lý
+        add(t, c, "IN_PROGRESS", "REASSIGNED", "IN_PROGRESS");
         add(t, c, "IN_PROGRESS", "SUCCEEDED", "SUCCEEDED");
         add(t, c, "IN_PROGRESS", "FAILED", "FAILED");
 

@@ -67,7 +67,7 @@ Mật khẩu chung: `Password@123`. Đăng nhập tại `http://localhost:3000/l
 4. Mở `BC-H4T8WX`, **Tạo ca cứu hộ**: Nhân viên không có ô phân công. Mở ca vừa tạo: thông báo "Chờ Quản lý phân công", không có nút Phân công.
 5. Đăng nhập `manager@aar.local`. Mở `BC-7K2M9Q`, tạo **2 ca** và phân công luôn (báo cáo nhiều thú tách thành nhiều ca, QĐ-01). Mở ca #11, **Phân công**: cảnh báo trên bảng công việc biến mất.
 6. Đăng nhập `staff2@aar.local`, mở ca #4 → **Cứu thành công** → **Thú mới**: loài Chó, chọn ảnh, mức ưu tiên **Khẩn cấp**. Hệ thống tạo hồ sơ TH-… ở khu cách ly và nhắc tạo yêu cầu thú y (S-1a).
-7. Đăng nhập `staff1@aar.local`, mở ca #14 (Bến Bạch Đằng) → **Cứu thành công** → **Thú thất lạc của trung tâm**, chọn **Ki**: không tạo hồ sơ mới, Ki từ Thất lạc về Đang chăm sóc, tab **Lượt tiếp nhận** có lượt "Tìm lại" gắn với ca #14 (S-1b, QĐ-16).
+7. Đăng nhập `staff2@aar.local`, mở ca #14 (do Trần Thị Lan phụ trách): xem được ca nhưng không có nút ghi kết quả, chỉ hiện thông báo ca do người khác phụ trách (QĐ-17). Đăng xuất, đăng nhập `staff1@aar.local`, mở ca #14 (Bến Bạch Đằng) → **Cứu thành công** → **Thú thất lạc của trung tâm**, chọn **Ki**: không tạo hồ sơ mới, Ki từ Thất lạc về Đang chăm sóc, tab **Lượt tiếp nhận** có lượt "Tìm lại" gắn với ca #14 (S-1b, QĐ-16).
 8. Muốn demo cứu thất bại: mở một ca đã phân công, bấm **Thất bại**: bắt buộc ghi lý do, không tạo hồ sơ (QĐ-02).
 
 ## Kịch bản 2. Chăm sóc, thú y (UC-09)
