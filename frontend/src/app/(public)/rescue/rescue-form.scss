@@ -1,0 +1,104 @@
+@use "abstracts" as *;
+
+.rescue-form {
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  &__legend {
+    margin-bottom: $space-3;
+    padding: 0;
+    font-family: $font-family-heading;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+  }
+
+  &__row {
+    display: grid;
+    gap: $space-4;
+
+    @include from-sm {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &__locate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__coords {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__receipt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-6;
+    border-radius: $radius-lg;
+    background: $color-primary-soft;
+    text-align: center;
+  }
+
+  &__receipt-label {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__receipt-code {
+    font-family: $font-family-heading;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.04em;
+    color: $color-primary-text;
+  }
+
+  &__receipt-time {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__note {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+
+  &__pet {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-2;
+    font-size: $font-size-sm;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__result {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-top: $space-4;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-3;
+  }
+}

@@ -1,0 +1,41 @@
+@use "abstracts" as *;
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-10 $space-4;
+  text-align: center;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: $space-2;
+    border-radius: 50%;
+    background: $color-primary-soft;
+    color: $color-primary-text;
+
+    svg {
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  &__title {
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-md;
+  }
+
+  &__description {
+    max-width: 48ch;
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__action {
+    margin-top: $space-3;
+  }
+}

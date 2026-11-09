@@ -1,0 +1,36 @@
+@use "abstracts" as *;
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+
+  &__option {
+    min-height: $control-height-sm;
+    padding: $space-1 $space-4;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-pill;
+    background: $color-surface;
+    color: $color-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    transition:
+      background-color $duration-fast $ease-out,
+      border-color $duration-fast $ease-out,
+      color $duration-fast $ease-out;
+
+    &:hover {
+      border-color: $color-primary;
+    }
+
+    &--active {
+      border-color: $color-primary;
+      background: $color-primary;
+      color: $color-on-primary;
+
+      &:hover {
+        background: $color-primary-hover;
+      }
+    }
+  }
+}

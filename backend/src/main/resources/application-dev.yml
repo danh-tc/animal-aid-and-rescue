@@ -1,0 +1,7 @@
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed
+
+app:
+  jwt:
+    secret: imM7kieUsPB6yM3qvcEU1IKcwd2QrIOT4LAaWmJwsSDwKZI9QL5Nk1Q+gOGjvb4q

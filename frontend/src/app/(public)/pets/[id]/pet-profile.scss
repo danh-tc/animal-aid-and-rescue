@@ -1,0 +1,97 @@
+@use "abstracts" as *;
+
+.pet-profile {
+  padding-top: $space-8;
+
+  &__layout {
+    display: grid;
+    gap: $space-8;
+
+    @include from-lg {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+  }
+
+  &__facts {
+    display: grid;
+    gap: $space-3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__fact {
+    @include surface($radius-md);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: $space-3;
+    padding: $space-3 $space-4;
+
+    svg {
+      grid-row: span 2;
+      width: 22px;
+      height: 22px;
+      align-self: center;
+      color: $color-primary-text;
+    }
+  }
+
+  &__fact-label {
+    color: $color-muted;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__fact-value {
+    font-weight: $font-weight-semibold;
+    overflow-wrap: anywhere;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: $font-size-lg;
+  }
+
+  &__description {
+    max-width: 65ch;
+    white-space: pre-line;
+  }
+
+  &__health {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: $space-2;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: $color-success;
+    }
+  }
+}

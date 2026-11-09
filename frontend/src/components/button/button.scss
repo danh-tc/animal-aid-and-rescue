@@ -1,0 +1,105 @@
+@use "abstracts" as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  min-height: $control-height;
+  padding: $space-2 $space-5;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color $duration-base $ease-out,
+    border-color $duration-base $ease-out,
+    color $duration-base $ease-out,
+    box-shadow $duration-base $ease-out;
+
+  svg {
+    width: 1.125em;
+    height: 1.125em;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: $color-on-primary;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-hover;
+    }
+  }
+
+  &--accent {
+    background: $color-accent;
+    color: $color-on-accent;
+
+    &:hover:not(:disabled) {
+      background: $color-accent-hover;
+    }
+  }
+
+  &--secondary {
+    background: $color-primary-soft;
+    color: $color-primary-text;
+
+    &:hover:not(:disabled) {
+      border-color: $color-primary;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    border-color: $color-border-strong;
+    color: $color-text;
+
+    &:hover:not(:disabled) {
+      background: $color-surface-2;
+    }
+  }
+
+  &--danger {
+    background: $color-danger;
+    color: $color-on-danger;
+
+    &:hover:not(:disabled) {
+      background: $color-danger-hover;
+    }
+  }
+
+  &--sm {
+    min-height: $control-height-sm;
+    padding: $space-1 $space-4;
+    font-size: $font-size-sm;
+  }
+
+  &--lg {
+    min-height: 52px;
+    padding: $space-3 $space-8;
+    font-size: $font-size-md;
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

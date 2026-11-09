@@ -1,0 +1,90 @@
+@use "abstracts" as *;
+
+.toast {
+  position: fixed;
+  right: $space-4;
+  bottom: $space-4;
+  left: $space-4;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $space-2;
+  pointer-events: none;
+
+  @include from-md {
+    left: auto;
+    width: 380px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-3;
+    width: 100%;
+    padding: $space-3 $space-3 $space-3 $space-4;
+    border: 1px solid $color-border;
+    border-left: 4px solid;
+    border-radius: $radius-md;
+    background: $color-surface;
+    box-shadow: $shadow-lg;
+    pointer-events: auto;
+    animation: toast-in $duration-slow $ease-out;
+
+    &--success {
+      border-left-color: $color-success;
+    }
+
+    &--error {
+      border-left-color: $color-danger;
+    }
+  }
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__item--success &__icon {
+    color: $color-success;
+  }
+
+  &__item--error &__icon {
+    color: $color-danger;
+  }
+
+  &__message {
+    flex: 1;
+    font-size: $font-size-sm;
+  }
+
+  &__close {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: $color-muted;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: $color-surface-2;
+    }
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

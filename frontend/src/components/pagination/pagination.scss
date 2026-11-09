@@ -1,0 +1,47 @@
+@use "abstracts" as *;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-3 $space-4;
+  border-top: 1px solid $color-border;
+
+  &__info {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__controls {
+    display: flex;
+    gap: $space-2;
+  }
+
+  &__button {
+    display: grid;
+    place-items: center;
+    width: $control-height;
+    height: $control-height;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-md;
+    background: $color-surface;
+    color: $color-text;
+    transition: background-color $duration-fast $ease-out;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover:not(:disabled) {
+      background: $color-surface-2;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}

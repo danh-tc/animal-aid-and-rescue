@@ -1,0 +1,117 @@
+@use "abstracts" as *;
+
+.file-picker {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  &__label {
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+  }
+
+  &__drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    min-height: 72px;
+    padding: $space-4;
+    border: 2px dashed $color-border-strong;
+    border-radius: $radius-md;
+    background: $color-surface-2;
+    color: $color-primary-text;
+    font-weight: $font-weight-semibold;
+    transition:
+      border-color $duration-fast $ease-out,
+      background-color $duration-fast $ease-out;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover {
+      border-color: $color-primary;
+      background: $color-primary-soft;
+    }
+
+    &:has(:focus-visible) {
+      @include focus-ring;
+    }
+
+    &--full {
+      color: $color-muted;
+      cursor: not-allowed;
+    }
+  }
+
+  &__hint {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-1 $space-1 $space-1 $space-3;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+
+    &--invalid {
+      border-color: $color-danger;
+      color: $color-danger;
+    }
+  }
+
+  &__file-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__file-size {
+    color: $color-muted;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__remove {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: $color-muted;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: $color-danger-soft;
+      color: $color-danger;
+    }
+  }
+
+  &__error {
+    color: $color-danger;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+  }
+}

@@ -1,0 +1,86 @@
+@use "abstracts" as *;
+
+.stat-card {
+  @include surface;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-4 $space-5;
+  color: $color-text;
+  text-decoration: none;
+  transition:
+    border-color $duration-base $ease-out,
+    box-shadow $duration-base $ease-out;
+
+  &:hover {
+    border-color: $color-primary;
+    box-shadow: $shadow-md;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: $space-2;
+    border-radius: $radius-md;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &--primary &__icon {
+    background: $color-primary-soft;
+    color: $color-primary-text;
+  }
+
+  &--accent &__icon {
+    background: $color-accent-soft;
+    color: $color-accent-text;
+  }
+
+  &--warning &__icon {
+    background: $color-warning-soft;
+    color: $color-warning;
+  }
+
+  &--info &__icon {
+    background: $color-info-soft;
+    color: $color-info;
+  }
+
+  &__value {
+    font-family: $font-family-heading;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+
+  &__label {
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+  }
+
+  &__hint {
+    color: $color-muted;
+    font-size: $font-size-xs;
+  }
+
+  &__arrow {
+    position: absolute;
+    top: $space-4;
+    right: $space-4;
+    width: 18px;
+    height: 18px;
+    color: $color-muted;
+    transition: color $duration-base $ease-out;
+  }
+
+  &:hover &__arrow {
+    color: $color-primary-text;
+  }
+}

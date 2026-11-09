@@ -1,0 +1,30 @@
+# Backend
+backend/target/
+*.class
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
+.env
+.env.local
+frontend/.env.local
+
+# IDE và hệ điều hành
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# File tải lên khi chạy dev
+backend/uploads/
+backend/data/
+backups/
+
+# Log và PID của scripts/dev.sh
+.dev-logs/

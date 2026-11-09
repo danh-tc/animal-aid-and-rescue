@@ -1,0 +1,20 @@
+@use "abstracts" as *;
+
+.list-view {
+  @include surface;
+  overflow: hidden;
+
+  &__notice {
+    padding: $space-4;
+  }
+
+  &__retry {
+    min-height: 36px;
+    padding: 0 $space-3;
+    border: 1px solid currentColor;
+    border-radius: $radius-pill;
+    background: transparent;
+    color: inherit;
+    font-weight: $font-weight-semibold;
+  }
+}

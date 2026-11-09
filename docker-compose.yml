@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aar-postgres
+    environment:
+      POSTGRES_DB: aar
+      POSTGRES_USER: aar
+      POSTGRES_PASSWORD: aar
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5432:5432"
+    volumes:
+      - aar-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aar -d aar"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/aar
+      DB_USERNAME: aar
+      DB_PASSWORD: aar
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      STORAGE_DIR: /app/data/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${UPLOADS_DIR:-./backend/data/uploads}:/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    environment:
+      API_INTERNAL_BASE_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  backup:
+    image: postgres:16-alpine
+    container_name: aar-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: aar
+      PGUSER: aar
+      PGPASSWORD: aar
+      TZ: Asia/Ho_Chi_Minh
+      BACKUP_AT: "02:00"
+      BACKUP_KEEP_DAYS: "7"
+    volumes:
+      - ./backups:/backups
+      - ${UPLOADS_DIR:-./backend/data/uploads}:/uploads:ro
+      - ./scripts/backup-loop.sh:/backup-loop.sh:ro
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
+
+volumes:
+  aar-pgdata:

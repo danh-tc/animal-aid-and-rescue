@@ -1,0 +1,33 @@
+@use "abstracts" as *;
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  margin-bottom: $space-4;
+
+  &__start,
+  &__end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-3;
+    min-width: 0;
+  }
+
+  &__end {
+    flex: 1;
+    justify-content: flex-end;
+
+    @media (max-width: ($breakpoint-md - 1px)) {
+      flex-basis: 100%;
+      justify-content: stretch;
+
+      > * {
+        flex: 1;
+      }
+    }
+  }
+}

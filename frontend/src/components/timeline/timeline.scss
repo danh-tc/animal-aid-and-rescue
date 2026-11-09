@@ -1,0 +1,69 @@
+@use "abstracts" as *;
+
+.timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    position: relative;
+    display: flex;
+    gap: $space-4;
+    padding-bottom: $space-5;
+
+    &:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      top: 18px;
+      bottom: 0;
+      left: 6px;
+      width: 2px;
+      background: $color-border;
+    }
+  }
+
+  &__marker {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    margin-top: 5px;
+    border: 3px solid $color-primary;
+    border-radius: 50%;
+    background: $color-surface;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $space-1 $space-3;
+  }
+
+  &__title {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__time {
+    color: $color-muted;
+    font-size: $font-size-sm;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__body {
+    margin-top: $space-1;
+    color: $color-muted;
+    font-size: $font-size-sm;
+    white-space: pre-line;
+  }
+}

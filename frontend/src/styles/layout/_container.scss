@@ -1,0 +1,16 @@
+@use "abstracts" as *;
+
+.container {
+  width: 100%;
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $space-4;
+
+  @include from-md {
+    padding: 0 $space-6;
+  }
+
+  &--narrow {
+    max-width: 720px;
+  }
+}

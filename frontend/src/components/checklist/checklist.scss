@@ -1,0 +1,63 @@
+@use "abstracts" as *;
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+
+    &--passed {
+      background: $color-success-soft;
+      border-color: transparent;
+    }
+  }
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__item--passed &__icon,
+  &__item--passed &__state {
+    color: $color-success;
+  }
+
+  &__item--missing &__icon,
+  &__item--missing &__state {
+    color: $color-warning;
+  }
+
+  &__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__label {
+    font-weight: $font-weight-semibold;
+  }
+
+  &__detail {
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__state {
+    flex-shrink: 0;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+}

@@ -1,0 +1,32 @@
+@use "abstracts" as *;
+
+.pet-search {
+  position: relative;
+  display: flex;
+  gap: $space-2;
+  width: 100%;
+  max-width: 440px;
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    left: $space-3;
+    width: 18px;
+    height: 18px;
+    color: $color-muted;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  &__input {
+    @include control;
+    flex: 1;
+    min-width: 0;
+    padding-left: $space-10;
+  }
+
+  &__select {
+    @include control;
+    width: auto;
+  }
+}

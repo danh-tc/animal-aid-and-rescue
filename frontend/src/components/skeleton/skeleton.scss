@@ -1,0 +1,35 @@
+@use "abstracts" as *;
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-4;
+
+  &--card {
+    @include surface;
+  }
+
+  &__line {
+    display: block;
+    height: 14px;
+    border-radius: $radius-pill;
+    background: $color-surface-2;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+
+    &:first-child {
+      width: 40%;
+      height: 18px;
+    }
+
+    &:last-child:not(:first-child) {
+      width: 70%;
+    }
+  }
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}

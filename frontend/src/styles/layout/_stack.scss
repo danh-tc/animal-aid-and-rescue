@@ -1,0 +1,15 @@
+@use "abstracts" as *;
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &--lg {
+    gap: $space-6;
+  }
+
+  &--sm {
+    gap: $space-2;
+  }
+}

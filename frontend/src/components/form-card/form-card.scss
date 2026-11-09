@@ -1,0 +1,64 @@
+@use "abstracts" as *;
+
+.form-card {
+  @include surface;
+  width: 100%;
+  max-width: 440px;
+  margin: $space-8 auto 0;
+  padding: $space-6 $space-5;
+  box-shadow: $shadow-md;
+
+  @include from-md {
+    margin-top: $space-12;
+    padding: $space-8;
+  }
+
+  &--wide {
+    max-width: 680px;
+  }
+
+  &__header {
+    margin-bottom: $space-6;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: $space-4;
+    border-radius: $radius-md;
+    background: $color-primary-soft;
+    color: $color-primary-text;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+  }
+
+  &__description {
+    margin-top: $space-2;
+    color: $color-muted;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__footer {
+    margin-top: $space-6;
+    padding-top: $space-5;
+    border-top: 1px solid $color-border;
+    color: $color-muted;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+}
