@@ -21,7 +21,7 @@ export function CostSummary({ petId }: { petId: number }) {
         <dd>{formatMoney(data.totalDonated)}</dd>
       </div>
       <div className="cost-summary__item cost-summary__item--strong">
-        <dt>Còn chưa bù đắp</dt>
+        <dt>Còn thiếu</dt>
         <dd>{formatMoney(data.outstanding)}</dd>
       </div>
     </dl>

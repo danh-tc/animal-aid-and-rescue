@@ -67,7 +67,7 @@ public class EligibilityService {
         boolean quarantineOver = lastIntake != null && !lastIntake.plusDays(quarantineDays).isAfter(OffsetDateTime.now());
         boolean observationOk = quarantineOver && pet.isTemperamentOk();
         String observationDetail = !quarantineOver
-            ? "Chưa hết " + quarantineDays + " ngày cách ly sau lượt tiếp nhận gần nhất"
+            ? "Chưa hết " + quarantineDays + " ngày cách ly kể từ lần gần nhất thú được đưa về trung tâm"
             : pet.isTemperamentOk() ? null : "Chưa xác nhận tính cách không hung dữ";
 
         List<Item> items = List.of(

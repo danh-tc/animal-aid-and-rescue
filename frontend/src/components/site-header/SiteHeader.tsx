@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, Heart, LayoutDashboard, LogOut, Menu, PawPrint, Siren, X } from "lucide-react";
+import { ClipboardList, Heart, LayoutDashboard, LogOut, Menu, PawPrint, Search, Siren, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,6 +27,7 @@ export function SiteHeader() {
     links.push({ href: "/me/adoptions", label: "Thú đã nhận", icon: PawPrint });
   }
   if (isStaff(user?.role)) links.push({ href: "/staff", label: "Khu làm việc", icon: LayoutDashboard });
+  else links.push({ href: "/rescue/lookup", label: "Tra cứu báo cáo", icon: Search });
 
   function isActive(href: string) {
     return href === "/" ? pathname === "/" || pathname.startsWith("/pets") : pathname.startsWith(href);

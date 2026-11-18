@@ -7,7 +7,10 @@ import com.aar.rescue.RescueDtos.PetStage;
 import com.aar.pet.IntakeRepository;
 import com.aar.pet.Pet;
 import com.aar.pet.PetRepository;
+import com.aar.rescue.RescueDtos.MapPoint;
+import com.aar.rescue.RescueDtos.MapPointKind;
 import com.aar.rescue.RescueDtos.OpenCase;
+import com.aar.rescue.RescueDtos.RescueMap;
 import com.aar.rescue.RescueDtos.ReportLookup;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -141,6 +144,34 @@ public class RescueReportService {
         double a = Math.pow(Math.sin(dLat / 2), 2)
             + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.pow(Math.sin(dLon / 2), 2);
         return 6371.0 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    /** Cases have no coordinates of their own, so each uses its lowest-id report that has them. */
+    @Transactional(readOnly = true)
+    public RescueMap map() {
+        List<MapPoint> points = new ArrayList<>();
+        int missing = 0;
+        for (RescueReport r : reports.findByStatusOrderByCreatedAtDesc(ReportStatus.NEW)) {
+            if (r.getLatitude() == null || r.getLongitude() == null) {
+                missing++;
+                continue;
+            }
+            points.add(new MapPoint(MapPointKind.REPORT, r.getId(), r.getCode(), r.getLocationText(),
+                r.getStatus().name(), null, r.getCreatedAt(), r.getLatitude(), r.getLongitude()));
+        }
+        for (RescueCase c : cases.findByStatusInOrderByCreatedAtDesc(OPEN_CASES)) {
+            var located = c.getReports().stream()
+                .filter(r -> r.getLatitude() != null && r.getLongitude() != null)
+                .min(Comparator.comparing(RescueReport::getId));
+            if (located.isEmpty()) {
+                missing++;
+                continue;
+            }
+            points.add(new MapPoint(MapPointKind.CASE, c.getId(), "Ca #" + c.getId(), c.getLocationText(),
+                c.getStatus().name(), c.getAssignedStaffId(), c.getCreatedAt(),
+                located.get().getLatitude(), located.get().getLongitude()));
+        }
+        return new RescueMap(points, missing);
     }
 
     public ReportSummary merge(Long reportId, Long caseId, Long by) {

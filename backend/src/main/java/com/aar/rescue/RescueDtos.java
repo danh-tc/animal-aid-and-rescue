@@ -69,6 +69,16 @@ public final class RescueDtos {
 
     public enum PetStage { IN_CARE, LOOKING_FOR_HOME, ADOPTED, DECEASED, LOST }
 
+    public enum MapPointKind { REPORT, CASE }
+
+    /** {@code status} holds a ReportStatus or CaseStatus name, depending on {@code kind}. */
+    public record MapPoint(MapPointKind kind, Long id, String label, String locationText, String status,
+                           Long assignedStaffId, OffsetDateTime createdAt, BigDecimal latitude, BigDecimal longitude) {
+    }
+
+    public record RescueMap(List<MapPoint> points, int withoutCoordinates) {
+    }
+
     public record CreateCasesRequest(
         @NotNull @Min(1) @Max(20) Integer numberOfAnimals,
         Long assignedStaffId) {

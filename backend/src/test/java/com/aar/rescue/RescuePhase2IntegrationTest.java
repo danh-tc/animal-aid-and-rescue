@@ -73,6 +73,45 @@ class RescuePhase2IntegrationTest extends IntegrationTestBase {
         postJson("/api/staff/rescue-reports/" + dupId + "/merge", ADOPTER1, map("caseId", caseId), 403);
     }
 
+    @Test
+    void rescueMapShowsNewReportsAndOpenCasesWithCoordinates() throws Exception {
+        int missingBefore = getJson("/api/staff/rescue-map", STAFF, 200).get("withoutCoordinates").asInt();
+
+        String reportCode = reportAt(10.7621, 106.6602);
+        long reportId = reportId(reportCode);
+        long openCase = caseAt(10.7712, 106.7043);
+        long closedCase = caseAt(10.7801, 106.6955);
+        postJson("/api/staff/rescue-cases/" + closedCase + "/fail", STAFF, map("reason", "Không tìm thấy"), 200);
+        submitReport();
+
+        JsonNode res = getJson("/api/staff/rescue-map", STAFF, 200);
+        JsonNode report = point(res, "REPORT", reportId);
+        assertThat(report).isNotNull();
+        assertThat(report.get("label").asText()).isEqualTo(reportCode);
+        assertThat(report.get("status").asText()).isEqualTo("NEW");
+        assertThat(report.get("latitude").asDouble()).isEqualTo(10.7621);
+
+        JsonNode rescueCase = point(res, "CASE", openCase);
+        assertThat(rescueCase).isNotNull();
+        assertThat(rescueCase.get("status").asText()).isEqualTo("IN_PROGRESS");
+        assertThat(rescueCase.get("assignedStaffId").asLong()).isEqualTo(STAFF_ID);
+        assertThat(rescueCase.get("longitude").asDouble()).isEqualTo(106.7043);
+
+        assertThat(point(res, "CASE", closedCase)).isNull();
+        assertThat(point(res, "REPORT", reportId(getJson("/api/staff/rescue-cases/" + openCase, STAFF, 200)
+            .get("reports").get(0).get("code").asText()))).isNull();
+        assertThat(res.get("withoutCoordinates").asInt()).isEqualTo(missingBefore + 1);
+
+        getJson("/api/staff/rescue-map", ADOPTER1, 403);
+    }
+
+    private static JsonNode point(JsonNode map, String kind, long id) {
+        for (JsonNode p : map.get("points")) {
+            if (p.get("kind").asText().equals(kind) && p.get("id").asLong() == id) return p;
+        }
+        return null;
+    }
+
     private String reportAt(double lat, double lon) throws Exception {
         return postJson("/api/public/rescue-reports", null, map("reporterName", "Người báo", "reporterPhone", randomPhone(),
             "locationText", "Có tọa độ", "latitude", lat, "longitude", lon, "description", "Chó bị thương"), 201)

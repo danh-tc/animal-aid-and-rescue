@@ -20,6 +20,23 @@ export function formatDateTime(value: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? value : dateTimeFmt.format(d);
 }
 
+const relativeFmt = new Intl.RelativeTimeFormat("vi-VN", { numeric: "auto" });
+
+/** Falls back to an absolute date after 30 days. */
+export function formatRelative(value: string | null | undefined, now = Date.now()): string {
+  if (!value) return "—";
+  const t = new Date(value).getTime();
+  if (Number.isNaN(t)) return value;
+  const minutes = Math.round((t - now) / 60_000);
+  if (Math.abs(minutes) < 1) return "vừa xong";
+  if (Math.abs(minutes) < 60) return relativeFmt.format(minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return relativeFmt.format(hours, "hour");
+  const days = Math.round(hours / 24);
+  if (Math.abs(days) <= 30) return relativeFmt.format(days, "day");
+  return formatDate(value);
+}
+
 export function formatMoney(value: number | null | undefined): string {
   return value === null || value === undefined ? "—" : moneyFmt.format(value);
 }

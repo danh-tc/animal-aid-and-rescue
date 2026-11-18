@@ -131,6 +131,25 @@ export interface OpenCase {
   reportCodes: string[];
 }
 
+export type MapPoint =
+  | (MapPointBase & { kind: "REPORT"; status: ReportStatus })
+  | (MapPointBase & { kind: "CASE"; status: CaseStatus });
+
+interface MapPointBase {
+  id: number;
+  label: string;
+  locationText: string;
+  assignedStaffId: number | null;
+  createdAt: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface RescueMapData {
+  points: MapPoint[];
+  withoutCoordinates: number;
+}
+
 export interface ReportLookup {
   code: string;
   status: ReportStatus;

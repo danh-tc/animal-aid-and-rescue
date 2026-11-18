@@ -284,7 +284,7 @@ function CostsTab({ period }: { period: { from?: string; to?: string } }) {
         <Tile label="Chi phí điều trị trong kỳ" value={formatMoney(data.periodTreatmentCost)} />
         <Tile label="Ủng hộ nhận trong kỳ" value={formatMoney(data.periodDonations)} />
         <Tile
-          label={gap >= 0 ? "Chênh lệch chưa bù đắp" : "Ủng hộ vượt chi phí"}
+          label={gap >= 0 ? "Chi phí còn thiếu" : "Ủng hộ vượt chi phí"}
           value={formatMoney(Math.abs(gap))}
         />
       </div>
@@ -333,7 +333,7 @@ function CostsTab({ period }: { period: { from?: string; to?: string } }) {
               { key: "status", header: "Trạng thái", render: (r) => <StatusBadge map={PET_STATUS} value={r.petStatus} />, hideOnMobile: true },
               { key: "cost", header: "Chi phí", numeric: true, render: (r) => formatMoney(r.treatmentCost) },
               { key: "donated", header: "Đã ủng hộ", numeric: true, render: (r) => formatMoney(r.donated) },
-              { key: "out", header: "Chưa bù đắp", numeric: true, render: (r) => formatMoney(r.outstanding) },
+              { key: "out", header: "Còn thiếu", numeric: true, render: (r) => formatMoney(r.outstanding) },
             ]}
           />
         )}

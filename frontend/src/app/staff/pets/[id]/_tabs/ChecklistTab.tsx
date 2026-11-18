@@ -81,7 +81,7 @@ export function ChecklistTab({ pet, onChanged }: { pet: PetDetail; onChanged: ()
               onChange={(v) => setForm({ ...form, sterilized: v })}
             />
             <CheckField label="Tính cách không hung dữ" checked={form.temperamentOk} disabled={!editable} onChange={(v) => setForm({ ...form, temperamentOk: v })} />
-            <p className="form-field__hint">Sức khỏe, tuổi và thời gian cách ly do hệ thống tự tính.</p>
+            <p className="form-field__hint">Sức khỏe lấy từ kết luận của lần khám thú y gần nhất. Tuổi và thời gian cách ly do hệ thống tự tính.</p>
             <Button block loading={saving} disabled={!editable} onClick={save}>
               Lưu và kiểm tra
             </Button>

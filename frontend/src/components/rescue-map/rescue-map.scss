@@ -1,0 +1,443 @@
+@use "sass:map";
+@use "abstracts" as *;
+
+$kinds: (
+  report: $color-accent,
+  case-new: $color-warning,
+  case-active: $color-info,
+);
+$kinds-soft: (
+  report: $color-accent-soft,
+  case-new: $color-warning-soft,
+  case-active: $color-info-soft,
+);
+
+.rescue-map-layout {
+  display: grid;
+  gap: $space-4;
+
+  @include from-lg {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: stretch;
+  }
+
+  &__map {
+    position: relative;
+    min-width: 0;
+  }
+}
+
+.rescue-map {
+  height: min(72vh, 680px);
+  min-height: 380px;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: $color-surface-2;
+  box-shadow: $shadow-md;
+  font-family: $font-family-base;
+  isolation: isolate; // keep Leaflet pane z-indexes below the AppShell mobile drawer
+
+  &--loading {
+    background: linear-gradient(100deg, $color-surface-2 30%, $color-surface 50%, $color-surface-2 70%);
+    background-size: 300% 100%;
+    animation: rescue-map-shimmer 1.4s ease-in-out infinite;
+
+    @include reduced-motion {
+      animation: none;
+    }
+  }
+
+  .leaflet-bar {
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    overflow: hidden;
+    box-shadow: $shadow-md;
+
+    a,
+    a:hover {
+      width: 36px;
+      height: 36px;
+      line-height: 34px;
+      border-color: $color-border;
+      background: $color-surface;
+      color: $color-text;
+      font-size: 18px;
+    }
+
+    a:hover {
+      background: $color-surface-2;
+    }
+  }
+
+  &__fit {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface;
+    color: $color-text;
+    box-shadow: $shadow-md;
+    cursor: pointer;
+
+    &:hover {
+      background: $color-surface-2;
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .leaflet-control-attribution {
+    border-top-left-radius: $radius-sm;
+    background: color-mix(in srgb, $color-surface 80%, transparent);
+    color: $color-muted;
+    font-size: 10px;
+
+    a {
+      color: inherit;
+    }
+  }
+
+  .rescue-map__popup {
+    .leaflet-popup-content-wrapper {
+      padding: 0;
+      border: 1px solid $color-border;
+      border-radius: $radius-lg;
+      background: $color-surface;
+      color: $color-text;
+      box-shadow: $shadow-lg;
+    }
+
+    .leaflet-popup-content {
+      margin: 0;
+      font-size: $font-size-sm;
+      line-height: 1.45;
+    }
+
+    .leaflet-popup-tip {
+      background: $color-surface;
+      box-shadow: none;
+    }
+  }
+
+  .rescue-map__tooltip {
+    padding: 2px $space-2;
+    border: 0;
+    border-radius: $radius-pill;
+    background: $color-text;
+    color: $color-surface;
+    font-weight: $font-weight-semibold;
+    box-shadow: $shadow-md;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.rescue-popup {
+  display: grid;
+  gap: $space-1;
+  padding: $space-3 $space-4 $space-4;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2;
+    margin-bottom: $space-1;
+  }
+
+  &__chip {
+    padding: 2px $space-2;
+    border-radius: $radius-pill;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    @each $kind, $color in $kinds {
+      &--#{$kind} {
+        background: map.get($kinds-soft, $kind);
+        color: $color;
+      }
+    }
+  }
+
+  &__time {
+    color: $color-muted;
+    font-size: $font-size-xs;
+    white-space: nowrap;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+  }
+
+  // Two classes to beat `.leaflet-popup-content p` without !important.
+  & &__location {
+    margin: 0;
+    color: $color-muted;
+  }
+
+  &__action {
+    margin-top: $space-2;
+    min-height: $control-height-sm;
+    padding: 0 $space-3;
+    border: 0;
+    border-radius: $radius-md;
+    background: $color-primary;
+    color: $color-on-primary;
+    font: inherit;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: background $duration-fast $ease-out;
+
+    &:hover {
+      background: $color-primary-hover;
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+}
+
+.rescue-pin-anchor {
+  background: none;
+  border: 0;
+}
+
+.rescue-pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 3px solid $color-surface;
+  border-radius: 50%;
+  color: $color-surface;
+  box-shadow: $shadow-md;
+  transform-origin: 50% 116%;
+  transition: transform $duration-base $ease-out;
+
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: inherit;
+    border-right: 3px solid $color-surface;
+    border-bottom: 3px solid $color-surface;
+    transform: translateX(-50%) rotate(45deg);
+    z-index: -1;
+  }
+
+  @each $kind, $color in $kinds {
+    &--#{$kind} {
+      background: $color;
+    }
+  }
+
+  &--report::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid $color-accent;
+    animation: rescue-pin-pulse 2s $ease-out infinite;
+
+    @include reduced-motion {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
+  &--selected,
+  .leaflet-marker-icon:hover > & {
+    transform: scale(1.2);
+  }
+
+  &--selected {
+    box-shadow: 0 0 0 4px color-mix(in srgb, $color-text 18%, transparent), $shadow-lg;
+  }
+}
+
+@keyframes rescue-pin-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes rescue-map-shimmer {
+  to {
+    background-position: -150% 0;
+  }
+}
+
+.rescue-map-legend {
+  position: absolute;
+  top: $space-3;
+  left: $space-3;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1 $space-3;
+  max-width: calc(100% - #{$space-6});
+  margin: 0;
+  padding: $space-2 $space-3;
+  list-style: none;
+  border: 1px solid $color-border;
+  border-radius: $radius-pill;
+  background: color-mix(in srgb, $color-surface 85%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: $shadow-md;
+  color: $color-text;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    @each $kind, $color in $kinds {
+      &--#{$kind} {
+        background: $color;
+        box-shadow: 0 0 0 3px map.get($kinds-soft, $kind);
+      }
+    }
+  }
+}
+
+.rescue-map-list {
+  @include surface;
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  @include from-lg {
+    max-height: min(72vh, 680px);
+  }
+
+  &__title {
+    margin: 0;
+    padding: $space-3 $space-4;
+    border-bottom: 1px solid $color-border;
+    color: $color-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+
+  ul {
+    flex: 1;
+    margin: 0;
+    padding: $space-2;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    width: 100%;
+    padding: $space-3;
+    border: 1px solid transparent;
+    border-radius: $radius-md;
+    background: none;
+    color: $color-text;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background $duration-fast $ease-out, border-color $duration-fast $ease-out;
+
+    &:hover {
+      background: $color-surface-2;
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &--active {
+      border-color: $color-border-strong;
+      background: $color-surface-2;
+    }
+  }
+
+  &__text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    font-weight: $font-weight-semibold;
+  }
+
+  &__location {
+    overflow: hidden;
+    color: $color-muted;
+    font-size: $font-size-sm;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__time {
+    flex: none;
+    color: $color-muted;
+    font-size: $font-size-xs;
+  }
+
+  &__empty {
+    display: grid;
+    justify-items: center;
+    gap: $space-2;
+    padding: $space-8 $space-4;
+    color: $color-muted;
+    text-align: center;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  &__missing {
+    margin: 0;
+    padding: $space-3 $space-4;
+    border-top: 1px solid $color-border;
+    color: $color-muted;
+    font-size: $font-size-sm;
+  }
+}

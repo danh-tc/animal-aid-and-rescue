@@ -223,3 +223,25 @@ PERFORM setval('handovers_id_seq',             (SELECT max(id) FROM handovers));
 PERFORM setval('pet_code_seq',                 10);
 END
 $seed$;
+
+-- Outside the guarded block so already-seeded dev databases get coordinates too.
+-- Matches on id and code and only fills empty coordinates, so real input is never overwritten.
+UPDATE rescue_reports r SET latitude = v.lat, longitude = v.lng
+FROM (VALUES
+  (1,  'BC-7K2M9Q', 10.772500, 106.698000),
+  (2,  'BC-H4T8WX', 10.812700, 106.677600),
+  (3,  'BC-3PZR6N', 10.756000, 106.675000),
+  (4,  'BC-9VDL2F', 10.787000, 106.749000),
+  (6,  'BC-Q2W7EC', 10.724000, 106.718000),
+  (7,  'BC-R8N4KD', 10.815000, 106.711000),
+  (8,  'BC-T5J9PB', 10.776000, 106.690000),
+  (9,  'BC-W3C7LV', 10.816000, 106.618000),
+  (10, 'BC-Y6F2HR', 10.801000, 106.699000),
+  (11, 'BC-Z9G5MT', 10.837000, 106.719000),
+  (12, 'BC-B4X8QN', 10.766000, 106.660000),
+  (13, 'BC-K7P3DS', 10.801000, 106.711000),
+  (14, 'BC-N2V6QE', 10.729000, 106.707000),
+  (15, 'BC-P8L4WZ', 10.774000, 106.704000),
+  (16, 'BC-S5D9TM', 10.775000, 106.707000)
+) AS v(id, code, lat, lng)
+WHERE r.id = v.id AND r.code = v.code AND r.latitude IS NULL;

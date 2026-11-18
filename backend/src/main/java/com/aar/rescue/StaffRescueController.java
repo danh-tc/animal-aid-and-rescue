@@ -11,6 +11,7 @@ import com.aar.rescue.RescueDtos.MergeRequest;
 import com.aar.rescue.RescueDtos.ReasonRequest;
 import com.aar.rescue.RescueDtos.ReportDetail;
 import com.aar.rescue.RescueDtos.ReportSummary;
+import com.aar.rescue.RescueDtos.RescueMap;
 import com.aar.rescue.RescueDtos.SucceedRequest;
 import com.aar.rescue.RescueDtos.SucceedResult;
 import jakarta.validation.Valid;
@@ -45,6 +46,11 @@ public class StaffRescueController {
                                                    @RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "20") int size) {
         return reports.list(status, page, size);
+    }
+
+    @GetMapping("/rescue-map")
+    public RescueMap rescueMap() {
+        return reports.map();
     }
 
     @GetMapping("/rescue-reports/{id}")

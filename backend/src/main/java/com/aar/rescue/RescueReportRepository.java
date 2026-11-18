@@ -14,4 +14,6 @@ public interface RescueReportRepository extends JpaRepository<RescueReport, Long
     long countByReporterPhoneAndCreatedAtAfter(String phone, OffsetDateTime after);
 
     Page<RescueReport> findByStatus(ReportStatus status, Pageable pageable);
+
+    java.util.List<RescueReport> findByStatusOrderByCreatedAtDesc(ReportStatus status);
 }

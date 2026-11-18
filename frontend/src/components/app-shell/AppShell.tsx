@@ -10,6 +10,7 @@ import {
   Hospital,
   LayoutDashboard,
   LogOut,
+  Map as MapIcon,
   Menu,
   PawPrint,
   Settings2,
@@ -44,6 +45,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/staff/reports", label: "Báo cáo cứu hộ", icon: FileText },
       { href: "/staff/cases", label: "Ca cứu hộ", icon: Ambulance },
+      { href: "/staff/map", label: "Bản đồ cứu hộ", icon: MapIcon },
     ],
   },
   {
